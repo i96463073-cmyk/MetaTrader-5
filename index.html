@@ -26,6 +26,7 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
 .mbtn{width:100%;padding:16px;border:none;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer;color:#fff;margin-top:8px;letter-spacing:.5px}
 .mbtn.buy{background:#2962ff}
 .mbtn.sell{background:#e53935}
+.mbtn.set{background:#2a2a2a;font-size:14px;padding:12px;margin-top:0}
 /* SIDEBAR */
 #sidebar{position:absolute;top:0;left:-85%;width:85%;height:100%;background:#000;z-index:100;transition:left .25s;border-right:1px solid #2a2a2a;overflow-y:auto}
 #sidebar.on{left:0}
@@ -136,6 +137,7 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
 <div id="app">
   <div id="overlay" onclick="App.Nav.toggle()"></div>
 
+  <!-- ORDER TICKET MODAL -->
   <div id="order-modal" class="modal">
     <div class="mh"><h3 id="om-title">New Order</h3><span class="mc" onclick="App.Modal.close()">&times;</span></div>
     <div class="mr"><span>Symbol</span><strong id="om-sym">XAUUSD</strong></div>
@@ -147,6 +149,7 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
     <button id="om-btn" class="mbtn buy" onclick="App.Modal.execute()">BUY</button>
   </div>
 
+  <!-- SIDEBAR -->
   <div id="sidebar">
     <div class="sh">
       <div class="sa"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
@@ -166,6 +169,7 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
     </ul>
   </div>
 
+  <!-- TOP BAR -->
   <header id="top">
     <div class="tl">
       <svg onclick="App.Nav.toggle()" style="cursor:pointer" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
@@ -175,6 +179,7 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
   </header>
 
   <main id="main">
+    <!-- CHARTS VIEW -->
     <div id="view-charts" class="view on">
       <div class="ch-head">
         <div class="ch-sell" onclick="App.Modal.open('SELL')"><span>SELL</span><span id="px-sell">0.00</span></div>
@@ -192,12 +197,14 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
         <div class="yax" id="yax"></div>
         <div class="px-line" id="px-line"></div>
         <div class="px-tag" id="px-tag">0.00</div>
-        <div class="ci" id="chart-info">loading…</div>
+        <div class="ci" id="chart-info">XAUUSD · H1 · 60 bars</div>
       </div>
     </div>
 
+    <!-- QUOTES VIEW -->
     <div id="view-quotes" class="view"><div id="quotes-list"></div></div>
 
+    <!-- TRADE VIEW -->
     <div id="view-trade" class="view">
       <div class="ti">
         <div class="tr2"><span>Balance:</span><span class="td"></span><span class="tval" id="acc-bal">10000.00</span></div>
@@ -209,6 +216,7 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
       <div class="plist" id="pos-list"></div>
     </div>
 
+    <!-- HISTORY VIEW -->
     <div id="view-history" class="view">
       <div class="ht">
         <span class="on" onclick="App.History.setTab('POSITIONS',this)">POSITIONS</span>
@@ -221,6 +229,7 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
       </div>
     </div>
 
+    <!-- ARTICLES VIEW -->
     <div id="view-articles" class="view">
       <div class="ai"><div class="aic">📊</div><div class="act"><div class="at">Algo Trading <span class="mut">@MQL5</span></div><div class="ad">MTP (Multi-Indicator Trend Painter) is a trend-following indicator...</div><div class="am"><span>07:20</span><span>•</span></div></div></div>
       <div class="ai"><div class="aic">📰</div><div class="act"><div class="at">Articles <span class="mut">@MQL5</span></div><div class="ad">Beyond Clone and Commit: The Advanced Side of MQL5 Algo Forge</div><div class="am"><span>Thursday</span><span>•</span></div></div></div>
@@ -230,6 +239,7 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
     </div>
   </main>
 
+  <!-- BOTTOM NAV -->
   <nav id="nav">
     <div class="ni" data-tab="quotes" onclick="App.Nav.go('quotes')"><svg viewBox="0 0 24 24"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg><span>Quotes</span></div>
     <div class="ni on" data-tab="charts" onclick="App.Nav.go('charts')"><svg viewBox="0 0 24 24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2 2H5V5h14v14zm0-16H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg><span>Charts</span></div>
@@ -272,8 +282,7 @@ const Fmt={
 
 /* ─────── TICK FEED ─────── */
 function TickFeed(){
-  this.prices={};
-  this.started=false;
+  this.prices={};this.started=false;
   const self=this;
   Object.keys(SYMBOLS).forEach(function(sym){
     const sp=SYMBOLS[sym];
@@ -281,16 +290,14 @@ function TickFeed(){
   });
 }
 TickFeed.prototype.start=function(interval){
-  if(this.started)return;
-  this.started=true;
+  if(this.started)return;this.started=true;
   const self=this;
   setInterval(function(){self.tick();},interval||250);
 };
 TickFeed.prototype.tick=function(){
   const self=this;
   Object.keys(SYMBOLS).forEach(function(sym){
-    const spec=SYMBOLS[sym];
-    const p=self.prices[sym];
+    const spec=SYMBOLS[sym];const p=self.prices[sym];
     const drift=(Math.random()-0.5)*0.00003;
     const shock=(Math.random()-0.5)*spec.vol*2;
     const jump=Math.random()<0.02?(Math.random()-0.5)*spec.vol*8:0;
@@ -373,9 +380,7 @@ Account.prototype.recalc=function(positions,prices){
 };
 
 /* ─────── POSITIONS ─────── */
-function PositionTracker(account){
-  this.account=account;this.positions=[];this.nextId=1;
-}
+function PositionTracker(account){this.account=account;this.positions=[];this.nextId=1;}
 PositionTracker.prototype.open=function(o){
   const pos={id:this.nextId++,symbol:o.symbol,type:o.type,volume:o.volume,openPrice:o.price,sl:o.sl||null,tp:o.tp||null,openTime:new Date(),commission:-o.volume*3};
   this.positions.push(pos);Bus.emit('pos:open',pos);return pos;
@@ -407,15 +412,8 @@ PositionTracker.prototype.checkSLTP=function(prices){
 };
 
 /* ─────── HISTORY ─────── */
-function HistoryStore(){
-  this.positions=[];this.deals=[];this.orders=[];
-  try{this.positions=JSON.parse(localStorage.getItem('mt5_pos')||'[]');}catch(e){}
-}
-HistoryStore.prototype.add=function(p){
-  this.positions.unshift(p);
-  this.positions=this.positions.slice(0,100);
-  try{localStorage.setItem('mt5_pos',JSON.stringify(this.positions));}catch(e){}
-};
+function HistoryStore(){this.positions=[];this.deals=[];this.orders=[];try{this.positions=JSON.parse(localStorage.getItem('mt5_pos')||'[]');}catch(e){}}
+HistoryStore.prototype.add=function(p){this.positions.unshift(p);this.positions=this.positions.slice(0,100);try{localStorage.setItem('mt5_pos',JSON.stringify(this.positions));}catch(e){}};
 
 /* ─────── INSTANTIATE ─────── */
 const Feed=new TickFeed();
@@ -424,7 +422,6 @@ const AccountInst=new Account();
 const Tracker=new PositionTracker(AccountInst);
 const History=new HistoryStore();
 
-/* Wire engine */
 Bus.on('tick',function(){
   Candles.tick();
   AccountInst.recalc(Tracker.positions,Feed.prices);
@@ -454,7 +451,7 @@ function ChartEngine(canvas){
   this.cv=canvas;this.ctx=canvas.getContext('2d');
   this.symbol='XAUUSD';this.tf='H1';this.scrollOffset=0;
   this.candleW=7;this.spacing=2;this.W=0;this.H=0;
-  this.indicators={ema20:true,ema50:false};
+  this.indicators={ema20:false,ema50:false};
   this.bindPan();
 }
 ChartEngine.prototype.bindPan=function(){
@@ -506,20 +503,12 @@ ChartEngine.prototype.draw=function(){
   min-=pad;max+=pad;
   const yRange=max-min;
   const mapY=function(p){return chartH-((p-min)/yRange)*chartH;};
-  // Grid
-  ctx.strokeStyle='#141414';ctx.lineWidth=1;
+  // Grid - subtle
+  ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;
   const gl=8;
   for(let i=1;i<gl;i++){const y=(chartH/gl)*i;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(chartW,y);ctx.stroke();}
   const vg=Math.floor(chartW/70);
   for(let i=1;i<vg;i++){const x=(chartW/vg)*i;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,chartH);ctx.stroke();}
-  // Volume
-  let volMax=1;visible.forEach(function(c){if(c.v>volMax)volMax=c.v;});
-  visible.forEach(function(c,i){
-    const x=i*perCandle+4;
-    const h=(c.v/volMax)*(chartH*0.15);
-    ctx.fillStyle=c.c>=c.o?'rgba(0,200,83,0.15)':'rgba(229,57,53,0.15)';
-    ctx.fillRect(x,chartH-h,this.candleW,h);
-  },this);
   // Candles
   visible.forEach(function(c,i){
     const x=i*perCandle+4+this.candleW/2;
@@ -531,7 +520,7 @@ ChartEngine.prototype.draw=function(){
     const top=Math.min(yO,yC);const bh=Math.max(Math.abs(yO-yC),1);
     ctx.fillRect(x-this.candleW/2,top,this.candleW,bh);
   },this);
-  // EMA overlays
+  // EMA overlays (optional)
   const closes=candles.map(function(c){return c.c;});
   if(this.indicators.ema20){
     const ema=Indicators.ema(closes,20);
@@ -555,7 +544,7 @@ ChartEngine.prototype.draw=function(){
     }
     ctx.stroke();
   }
-  // Y-axis
+  // Y-axis labels
   const yax=document.getElementById('yax');
   yax.innerHTML='';
   for(let i=0;i<=gl;i++){
@@ -631,7 +620,6 @@ App.Charts={
     });
     window.addEventListener('resize',function(){self.resizeAndDraw();});
     window.addEventListener('orientationchange',function(){setTimeout(function(){self.resizeAndDraw();},200);});
-    // Initial resize after layout settles
     setTimeout(function(){self.resizeAndDraw();},100);
     setTimeout(function(){self.resizeAndDraw();},500);
   },
@@ -852,7 +840,7 @@ window.addEventListener('load',function(){
     App.Nav.renderTop('charts');
     Bus.on('tick',function(){updatePriceHeader(Feed.prices);});
     Feed.start(250);
-    console.log('✅ MT5 Terminal started. Feed running.');
+    console.log('✅ MT5 Terminal started.');
   }catch(err){
     console.error('❌ Boot error:',err);
     document.getElementById('chart-info').textContent='Error: '+err.message;
@@ -860,4 +848,4 @@ window.addEventListener('load',function(){
 });
 </script>
 </body>
-</html>
+                                                                                    </html>
