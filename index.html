@@ -26,7 +26,6 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
 .mbtn{width:100%;padding:16px;border:none;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer;color:#fff;margin-top:8px;letter-spacing:.5px}
 .mbtn.buy{background:#2962ff}
 .mbtn.sell{background:#e53935}
-.mbtn.set{background:#2a2a2a;font-size:14px;padding:12px;margin-top:0}
 /* SIDEBAR */
 #sidebar{position:absolute;top:0;left:-85%;width:85%;height:100%;background:#000;z-index:100;transition:left .25s;border-right:1px solid #2a2a2a;overflow-y:auto}
 #sidebar.on{left:0}
@@ -44,8 +43,7 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
 .tl{display:flex;align-items:center;gap:14px}
 .tt{font-size:16px;font-weight:600}
 .tr{display:flex;align-items:center;gap:14px}
-.tr .tg{font-size:12px;font-weight:700;cursor:pointer;padding:4px 8px;border-radius:4px}
-.tr .tg.on{background:#2962ff}
+.tr .tg{font-size:14px;font-weight:700;cursor:pointer;color:#8e8e93}
 /* MAIN */
 #main{flex:1;position:relative;overflow:hidden;min-height:0}
 .view{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -72,12 +70,12 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
 .tf.on{background:#1e1e1e;color:#fff}
 .ch-area{flex:1;position:relative;overflow:hidden;background:#000;touch-action:none;min-height:0}
 #cv{position:absolute;top:0;left:0;display:block}
-.ohlc{position:absolute;top:6px;left:8px;font-size:10px;color:#8e8e93;z-index:8;pointer-events:none;line-height:1.35;font-family:monospace}
-.ohlc .v{color:#fff}
 .yax{position:absolute;right:0;top:0;height:100%;width:60px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;padding:6px 6px 6px 0;font-size:9px;color:#8e8e93;background:rgba(0,0,0,.7);z-index:8;pointer-events:none;font-family:monospace}
 .px-line{position:absolute;left:0;right:60px;height:1px;background:#fff;z-index:5;pointer-events:none;opacity:.5}
 .px-tag{position:absolute;right:0;transform:translateY(-50%);background:#00c853;color:#fff;padding:3px 4px;font-size:10px;font-weight:700;z-index:11;width:60px;text-align:center;pointer-events:none;font-family:monospace}
+.px-tag::before{content:'◄';position:absolute;left:-8px;top:50%;transform:translateY(-50%);font-size:8px;color:#00c853}
 .ci{position:absolute;bottom:5px;left:8px;font-size:9px;color:#8e8e93;z-index:8;pointer-events:none;font-family:monospace}
+.fab{position:absolute;bottom:12px;right:65px;background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700;z-index:9;pointer-events:none;font-family:monospace}
 /* QUOTES */
 .q{display:flex;justify-content:space-between;padding:13px 14px;border-bottom:1px solid #1a1a1a;cursor:pointer}
 .q:active{background:#1a1a1a}
@@ -175,16 +173,29 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
       <svg onclick="App.Nav.toggle()" style="cursor:pointer" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
       <span class="tt" id="top-title">Charts</span>
     </div>
-    <div class="tr" id="top-icons"></div>
+    <div class="tr" id="top-icons">
+      <!-- MT5 style top icons -->
+      <svg class="sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      <span class="tg" onclick="App.Charts.toggleEma('ema20',this)">fx</span>
+      <span class="tg" style="font-size:12px;">H1</span>
+      <svg class="sm" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+      <svg class="sm" viewBox="0 0 24 24"><path d="M19.14 12.94l2.03-1.58-.12-.61-1.92-3.32-.59-.22-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54-.48-.41h-3.84l-.47.41-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96-.59.22L2.74 8.87l-.12.61 2.03 1.58-.09.94.09.94-2.03 1.58.12.61 1.92 3.32.59.22 2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54.48.41h3.84l.47-.41.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96.59-.22 1.92-3.32.12-.61-2.03-1.58.09-.94-.09-.94zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+    </div>
   </header>
 
   <main id="main">
     <!-- CHARTS VIEW -->
     <div id="view-charts" class="view on">
       <div class="ch-head">
-        <div class="ch-sell" onclick="App.Modal.open('SELL')"><span>SELL</span><span id="px-sell">0.00</span></div>
+        <div class="ch-sell" onclick="App.Modal.open('SELL')">
+          <span>SELL</span>
+          <span id="px-sell">0.00 <span style="font-size:10px;">▼</span></span>
+        </div>
         <div class="ch-spr" id="px-spr">0.01</div>
-        <div class="ch-buy" onclick="App.Modal.open('BUY')"><span>BUY</span><span id="px-buy">0.00</span></div>
+        <div class="ch-buy" onclick="App.Modal.open('BUY')">
+          <span>BUY</span>
+          <span id="px-buy">0.00 <span style="font-size:10px;">▼</span></span>
+        </div>
       </div>
       <div class="ch-info">
         <span id="ch-sym">XAUUSD · H1</span>
@@ -193,11 +204,12 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
       <div class="ch-tf" id="ch-tf"></div>
       <div class="ch-area" id="ch-area">
         <canvas id="cv"></canvas>
-        <div class="ohlc" id="ohlc"><span>O <span class="v" id="o-o">0.00</span></span> <span>H <span class="v" id="o-h">0.00</span></span><br><span>L <span class="v" id="o-l">0.00</span></span> <span>C <span class="v" id="o-c">0.00</span></span></div>
+        <!-- Removed OHLC overlay -->
         <div class="yax" id="yax"></div>
         <div class="px-line" id="px-line"></div>
         <div class="px-tag" id="px-tag">0.00</div>
         <div class="ci" id="chart-info">XAUUSD · H1 · 60 bars</div>
+        <div class="fab">0.52</div>
       </div>
     </div>
 
@@ -450,7 +462,7 @@ const Indicators={
 function ChartEngine(canvas){
   this.cv=canvas;this.ctx=canvas.getContext('2d');
   this.symbol='XAUUSD';this.tf='H1';this.scrollOffset=0;
-  this.candleW=7;this.spacing=2;this.W=0;this.H=0;
+  this.candleW=10;this.spacing=2;this.W=0;this.H=0; /* Candle width increased to 10 */
   this.indicators={ema20:false,ema50:false};
   this.bindPan();
 }
@@ -553,12 +565,6 @@ ChartEngine.prototype.draw=function(){
     s.textContent=price.toFixed(spec.digits);
     yax.appendChild(s);
   }
-  // OHLC
-  const last=visible[visible.length-1];
-  document.getElementById('o-o').textContent=last.o.toFixed(spec.digits);
-  document.getElementById('o-h').textContent=last.h.toFixed(spec.digits);
-  document.getElementById('o-l').textContent=last.l.toFixed(spec.digits);
-  document.getElementById('o-c').textContent=last.c.toFixed(spec.digits);
   // Info
   document.getElementById('chart-info').textContent=this.symbol+' · '+this.tf+' · '+visible.length+' bars'+(this.indicators.ema20?' · EMA20':'');
   // Price line
@@ -581,18 +587,9 @@ App.Nav={
     document.querySelectorAll('.view').forEach(function(v){v.classList.toggle('on',v.id==='view-'+tab);});
     const titles={charts:'Charts',quotes:'Quotes',trade:'Trade',history:'History',articles:'Community'};
     document.getElementById('top-title').textContent=titles[tab]||'MT5';
-    this.renderTop(tab);
     if(tab==='charts')setTimeout(function(){App.Charts.resizeAndDraw();},60);
     if(tab==='trade')App.Trade.render();
     if(tab==='history')App.History.render();
-  },
-  renderTop:function(tab){
-    const el=document.getElementById('top-icons');
-    if(tab==='charts'){
-      el.innerHTML='<span class="tg'+(App.Charts.engine&&App.Charts.engine.indicators.ema20?' on':'')+'" onclick="App.Charts.toggleEma(\'ema20\',this)">EMA20</span><span class="tg'+(App.Charts.engine&&App.Charts.engine.indicators.ema50?' on':'')+'" onclick="App.Charts.toggleEma(\'ema50\',this)">EMA50</span>';
-    }else{
-      el.innerHTML='<svg class="sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
-    }
   },
   toggle:function(){
     document.getElementById('sidebar').classList.toggle('on');
@@ -647,7 +644,7 @@ App.Charts={
   },
   toggleEma:function(name,el){
     this.engine.indicators[name]=!this.engine.indicators[name];
-    el.classList.toggle('on',this.engine.indicators[name]);
+    el.style.color = this.engine.indicators[name] ? '#2962ff' : '#8e8e93';
     this.engine.draw();
   },
   resizeAndDraw:function(){
@@ -659,8 +656,8 @@ App.Charts={
 
 function updatePriceHeader(prices){
   const sym=State.activeSymbol;const spec=SYMBOLS[sym];const p=prices[sym];
-  document.getElementById('px-sell').textContent=p.bid.toFixed(spec.digits);
-  document.getElementById('px-buy').textContent=p.ask.toFixed(spec.digits);
+  document.getElementById('px-sell').innerHTML=p.bid.toFixed(spec.digits)+' <span style="font-size:10px;">▼</span>';
+  document.getElementById('px-buy').innerHTML=p.ask.toFixed(spec.digits)+' <span style="font-size:10px;">▼</span>';
   document.getElementById('px-spr').textContent=(p.ask-p.bid).toFixed(spec.digits);
 }
 
@@ -837,7 +834,6 @@ window.addEventListener('load',function(){
     App.Quotes.init();
     App.Trade.init();
     App.History.render();
-    App.Nav.renderTop('charts');
     Bus.on('tick',function(){updatePriceHeader(Feed.prices);});
     Feed.start(250);
     console.log('✅ MT5 Terminal started.');
@@ -848,4 +844,4 @@ window.addEventListener('load',function(){
 });
 </script>
 </body>
-                                                                                    </html>
+        </html>
