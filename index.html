@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MetaTrader 5 Clone - Live Engine</title>
+    <title>MetaTrader 5 Clone - Full Engine</title>
     <style>
         /* --- Global Resets & Variables --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; user-select: none; }
@@ -28,9 +28,20 @@
         svg { width: 24px; height: 24px; fill: currentColor; }
         .icon-sm { width: 18px; height: 18px; }
 
-        /* --- Overlay for Sidebar --- */
+        /* --- Overlay & Modals --- */
         #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 90; display: none; }
         #overlay.active { display: block; }
+        
+        .modal { position: absolute; bottom: -100%; left: 0; width: 100%; background: var(--surface-light); z-index: 200; transition: bottom 0.3s ease; border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 20px; border-top: 1px solid var(--border); }
+        .modal.active { bottom: 0; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { font-size: 16px; }
+        .modal-close { color: var(--text-muted); cursor: pointer; font-size: 20px; }
+        .modal-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; }
+        .modal-row input { background: var(--bg); border: 1px solid var(--border); color: white; padding: 5px 10px; border-radius: 4px; width: 120px; text-align: right; }
+        .modal-btn { width: 100%; padding: 15px; border: none; border-radius: 5px; font-weight: bold; font-size: 16px; cursor: pointer; color: white; margin-top: 10px; }
+        .modal-btn.buy { background: var(--blue); }
+        .modal-btn.sell { background: var(--red); }
 
         /* --- Sidebar --- */
         #sidebar { position: absolute; top: 0; left: -80%; width: 80%; height: 100%; background: var(--bg); z-index: 100; transition: left 0.3s ease; border-right: 1px solid var(--border); overflow-y: auto; }
@@ -64,17 +75,22 @@
         .nav-item svg { width: 22px; height: 22px; }
         .nav-badge { position: absolute; top: -5px; right: -8px; background: var(--red); color: white; font-size: 9px; padding: 2px 5px; border-radius: 10px; font-weight: bold; }
 
-        /* --- View: Charts (Live Engine) --- */
+        /* --- View: Charts --- */
         #view-charts { display: flex; flex-direction: column; }
         .chart-header { display: flex; height: 40px; }
         .chart-sell { flex: 1; background: var(--red); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.2s; }
         .chart-spread { width: 80px; background: var(--bg); display: flex; justify-content: center; align-items: center; font-size: 14px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
         .chart-buy { flex: 1; background: var(--blue); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.2s; }
-        .chart-symbol-info { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); padding: 5px 10px; background: #000; }
+        .chart-symbol-info { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); padding: 5px 10px; background: #000; border-bottom: 1px solid var(--border); }
         
         .chart-area { flex: 1; position: relative; overflow: hidden; background: #000; }
         #chart-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         
+        /* OHLC Overlay */
+        .ohlc-overlay { position: absolute; top: 5px; left: 5px; font-size: 9px; color: var(--text-muted); z-index: 10; pointer-events: none; line-height: 1.2; }
+        .ohlc-overlay span { margin-right: 8px; }
+        .ohlc-overlay .val { color: var(--text); }
+
         .chart-y-axis { position: absolute; right: 0; top: 0; height: 100%; width: 60px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding: 5px 5px 5px 0; font-size: 9px; color: var(--text-muted); background: rgba(0,0,0,0.6); z-index: 10; pointer-events: none; }
         .chart-x-axis { position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; font-size: 9px; color: var(--text-muted); background: rgba(0,0,0,0.8); z-index: 10; border-top: 1px solid var(--border); pointer-events: none; }
         
@@ -82,7 +98,8 @@
         .current-price-tag { position: absolute; right: 0; transform: translateY(-50%); background-color: var(--green); color: white; padding: 2px 5px; font-size: 10px; font-weight: bold; z-index: 11; width: 60px; text-align: center; pointer-events: none; }
 
         /* --- View: Quotes --- */
-        .quote-item { display: flex; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid var(--border); }
+        .quote-item { display: flex; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
+        .quote-item:active { background: var(--surface-light); }
         .quote-left { display: flex; flex-direction: column; gap: 4px; }
         .quote-change { font-size: 11px; }
         .quote-change.positive { color: var(--blue); }
@@ -96,12 +113,26 @@
         .quote-highlow { font-size: 10px; color: var(--text-muted); }
 
         /* --- View: Trade --- */
-        .trade-info { padding: 15px; border-bottom: 1px solid var(--border); }
+        .trade-info { padding: 15px; border-bottom: 1px solid var(--border); background: var(--bg); }
         .trade-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; }
         .trade-row:last-child { margin-bottom: 0; }
         .trade-label { color: var(--text); }
         .trade-value { font-weight: bold; }
         .trade-dots { flex: 1; border-bottom: 1px dotted var(--text-muted); margin: 0 10px; margin-bottom: 4px; }
+        
+        .positions-list { flex: 1; overflow-y: auto; }
+        .position-item { display: flex; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid var(--border); font-size: 12px; }
+        .pos-left { display: flex; flex-direction: column; gap: 4px; }
+        .pos-type { font-weight: bold; }
+        .pos-type.buy { color: var(--blue); }
+        .pos-type.sell { color: var(--red); }
+        .pos-symbol { font-size: 14px; font-weight: bold; }
+        .pos-vol { color: var(--text-muted); }
+        .pos-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        .pos-profit { font-weight: bold; font-size: 14px; }
+        .pos-profit.positive { color: var(--green); }
+        .pos-profit.negative { color: var(--red); }
+        .pos-close-btn { background: var(--surface-light); border: 1px solid var(--border); color: white; padding: 4px 10px; border-radius: 4px; font-size: 10px; cursor: pointer; }
 
         /* --- View: History --- */
         .history-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); }
@@ -131,6 +162,35 @@
 <div id="app">
     <div id="overlay" onclick="toggleSidebar()"></div>
 
+    <!-- Order Ticket Modal -->
+    <div id="order-modal" class="modal">
+        <div class="modal-header">
+            <h3 id="modal-title">New Order</h3>
+            <span class="modal-close" onclick="closeOrderModal()">&times;</span>
+        </div>
+        <div class="modal-row">
+            <span>Symbol</span>
+            <strong id="modal-symbol">XAUUSD</strong>
+        </div>
+        <div class="modal-row">
+            <span>Volume (Lots)</span>
+            <input type="number" id="modal-volume" value="0.10" step="0.01" min="0.01">
+        </div>
+        <div class="modal-row">
+            <span>Price</span>
+            <strong id="modal-price">4175.56</strong>
+        </div>
+        <div class="modal-row">
+            <span>Stop Loss</span>
+            <input type="number" id="modal-sl" placeholder="0.00" step="0.01">
+        </div>
+        <div class="modal-row">
+            <span>Take Profit</span>
+            <input type="number" id="modal-tp" placeholder="0.00" step="0.01">
+        </div>
+        <button id="modal-execute-btn" class="modal-btn buy" onclick="executeOrder()">BUY</button>
+    </div>
+
     <!-- Sidebar Navigation -->
     <div id="sidebar">
         <div class="sidebar-header">
@@ -155,8 +215,6 @@
             <li><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>Economic calendar</li>
             <li><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Traders Community</li>
             <li><svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>MQL5 Algo Trading</li>
-            <li><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>User guide</li>
-            <li><svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>About</li>
         </ul>
     </div>
 
@@ -166,13 +224,7 @@
             <svg id="menu-btn" onclick="toggleSidebar()" style="cursor: pointer;" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
             <span class="top-title" id="top-title">Charts</span>
         </div>
-        <div class="top-right" id="top-right-icons">
-            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-            <span style="font-size:12px; font-weight:bold;">H1</span>
-            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-        </div>
+        <div class="top-right" id="top-right-icons"></div>
     </header>
 
     <!-- Main Content Area -->
@@ -181,26 +233,34 @@
         <!-- VIEW: Charts -->
         <div id="view-charts" class="view active">
             <div class="chart-header">
-                <div class="chart-sell" onclick="toggleChartColor(this)">
+                <div class="chart-sell" onclick="openOrderModal('SELL')">
                     <span>SELL</span>
                     <span id="sell-price">4175.26</span>
                 </div>
                 <div class="chart-spread">0.01</div>
-                <div class="chart-buy" onclick="toggleChartColor(this)">
+                <div class="chart-buy" onclick="openOrderModal('BUY')">
                     <span>BUY</span>
                     <span id="buy-price">4175.56</span>
                 </div>
             </div>
             <div class="chart-symbol-info">
-                <span>XAUUSD.vx • H1</span>
-                <span>Gold vs US Dollar</span>
+                <span id="chart-symbol-name">XAUUSD.vx • H1</span>
+                <span id="chart-symbol-desc">Gold vs US Dollar</span>
             </div>
             <div class="chart-area" id="chart-area">
                 <canvas id="chart-canvas"></canvas>
                 
+                <!-- OHLC Overlay -->
+                <div class="ohlc-overlay" id="ohlc-overlay">
+                    <span>O <span class="val" id="ohlc-o">0.00</span></span>
+                    <span>H <span class="val" id="ohlc-h">0.00</span></span><br>
+                    <span>L <span class="val" id="ohlc-l">0.00</span></span>
+                    <span>C <span class="val" id="ohlc-c">0.00</span></span>
+                </div>
+
                 <!-- Dynamic Y-Axis Labels -->
                 <div class="chart-y-axis" id="y-axis-labels"></div>
-                <!-- Static X-Axis Labels (Demo) -->
+                <!-- Static X-Axis Labels -->
                 <div class="chart-x-axis">
                     <span>14:00</span>
                     <span>15:00</span>
@@ -219,7 +279,7 @@
 
         <!-- VIEW: Quotes -->
         <div id="view-quotes" class="view">
-            <div class="quote-item">
+            <div class="quote-item" onclick="loadSymbolToChart('XAUUSD')">
                 <div class="quote-left">
                     <span class="quote-change positive">+666 0.16%</span>
                     <span class="quote-symbol">XAUUSD.vx</span>
@@ -227,13 +287,54 @@
                 </div>
                 <div class="quote-right">
                     <div class="quote-prices">
-                        <span class="quote-bid" id="quote-bid">4175.77</span>
-                        <span class="quote-ask" id="quote-ask">4176.10</span>
+                        <span class="quote-bid" id="q-xau-bid">4175.77</span>
+                        <span class="quote-ask" id="q-xau-ask">4176.10</span>
                     </div>
                     <span class="quote-highlow">L: 4 147.15 H: 4 186.26</span>
                 </div>
             </div>
-            <!-- Additional static quotes omitted for brevity -->
+            <div class="quote-item" onclick="loadSymbolToChart('GBPUSD')">
+                <div class="quote-left">
+                    <span class="quote-change positive">+278 0.21%</span>
+                    <span class="quote-symbol">GBPUSD</span>
+                    <span class="quote-time">09:02:37 ≒ 18</span>
+                </div>
+                <div class="quote-right">
+                    <div class="quote-prices">
+                        <span class="quote-bid" id="q-gbp-bid">1.32951</span>
+                        <span class="quote-ask" id="q-gbp-ask">1.32969</span>
+                    </div>
+                    <span class="quote-highlow">L: 1.32581 H: 1.33059</span>
+                </div>
+            </div>
+            <div class="quote-item" onclick="loadSymbolToChart('UK100')">
+                <div class="quote-left">
+                    <span class="quote-change positive">+97 0.09%</span>
+                    <span class="quote-symbol">UK100.vx</span>
+                    <span class="quote-time">09:02:36 ≒ 50</span>
+                </div>
+                <div class="quote-right">
+                    <div class="quote-prices">
+                        <span class="quote-bid" id="q-uk-bid">10824.8</span>
+                        <span class="quote-ask" id="q-uk-ask">10829.8</span>
+                    </div>
+                    <span class="quote-highlow">L: 10 801.2 H: 10 842.7</span>
+                </div>
+            </div>
+            <div class="quote-item" onclick="loadSymbolToChart('EURUSD')">
+                <div class="quote-left">
+                    <span class="quote-change positive">+103 0.09%</span>
+                    <span class="quote-symbol">EURUSD.vx</span>
+                    <span class="quote-time">09:02:37 ≒ 14</span>
+                </div>
+                <div class="quote-right">
+                    <div class="quote-prices">
+                        <span class="quote-bid" id="q-eur-bid">1.12244</span>
+                        <span class="quote-ask" id="q-eur-ask">1.12258</span>
+                    </div>
+                    <span class="quote-highlow">L: 1.12073 H: 1.12403</span>
+                </div>
+            </div>
         </div>
 
         <!-- VIEW: Trade -->
@@ -242,17 +343,23 @@
                 <div class="trade-row">
                     <span class="trade-label">Balance:</span>
                     <span class="trade-dots"></span>
-                    <span class="trade-value">0.52</span>
+                    <span class="trade-value" id="acc-balance">10000.00</span>
                 </div>
                 <div class="trade-row">
                     <span class="trade-label">Equity:</span>
                     <span class="trade-dots"></span>
-                    <span class="trade-value">0.52</span>
+                    <span class="trade-value" id="acc-equity">10000.00</span>
                 </div>
                 <div class="trade-row">
                     <span class="trade-label">Free margin:</span>
                     <span class="trade-dots"></span>
-                    <span class="trade-value">0.52</span>
+                    <span class="trade-value" id="acc-margin">10000.00</span>
+                </div>
+            </div>
+            <div class="positions-list" id="positions-list">
+                <!-- Open positions will be rendered here -->
+                <div style="text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 14px;">
+                    No open positions
                 </div>
             </div>
         </div>
@@ -308,76 +415,85 @@
 
 <script>
     // ==========================================
-    // 1. CANDLE ENGINE (LIVE SIMULATION)
+    // 1. STATE MANAGEMENT & GLOBAL VARIABLES
     // ==========================================
-    const canvas = document.getElementById('chart-canvas');
-    const ctx = canvas.getContext('2d');
-    const chartArea = document.getElementById('chart-area');
+    const symbols = {
+        'XAUUSD': { basePrice: 4175.00, name: 'Gold vs US Dollar', digits: 2 },
+        'GBPUSD': { basePrice: 1.3295, name: 'British Pound vs US Dollar', digits: 5 },
+        'UK100':  { basePrice: 10824.8, name: 'UK 100 Index', digits: 1 },
+        'EURUSD': { basePrice: 1.1224, name: 'Euro vs US Dollar', digits: 5 }
+    };
     
+    let activeSymbol = 'XAUUSD';
+    let balance = 10000.00;
+    let equity = 10000.00;
+    let margin = 0;
+    let positions = [];
+    let positionIdCounter = 1;
+    
+    // Engine State
     let data = [];
-    let basePrice = 4175.00;
     let currentCandle = null;
     let ticksInCurrentCandle = 0;
-    const TICKS_PER_CANDLE = 15; // Creates a new candle every 15 ticks
-    const MAX_CANDLES_ON_SCREEN = 40;
+    const TICKS_PER_CANDLE = 20;
     const CANDLE_WIDTH = 6;
     const CANDLE_SPACING = 10;
     const Y_AXIS_WIDTH = 60;
 
-    // Initialize Chart Data
+    // DOM Elements
+    const canvas = document.getElementById('chart-canvas');
+    const ctx = canvas.getContext('2d');
+    const chartArea = document.getElementById('chart-area');
+    const modal = document.getElementById('order-modal');
+
+    // ==========================================
+    // 2. CANDLE ENGINE (LIVE SIMULATION)
+    // ==========================================
     function generateInitialData() {
         data = [];
-        for (let i = 0; i < 50; i++) {
-            let open = basePrice + (Math.random() - 0.5) * 3;
-            let close = open + (Math.random() - 0.5) * 3;
-            let high = Math.max(open, close) + Math.random() * 2;
-            let low = Math.min(open, close) - Math.random() * 2;
+        let base = symbols[activeSymbol].basePrice;
+        for (let i = 0; i < 60; i++) {
+            let open = base + (Math.random() - 0.5) * (base * 0.001);
+            let close = open + (Math.random() - 0.5) * (base * 0.001);
+            let high = Math.max(open, close) + Math.random() * (base * 0.0005);
+            let low = Math.min(open, close) - Math.random() * (base * 0.0005);
             data.push({ open, high, low, close });
-            basePrice = close;
+            base = close;
         }
+        currentCandle = null;
     }
 
-    // Handle Canvas Resizing
     function resizeCanvas() {
         canvas.width = chartArea.clientWidth;
         canvas.height = chartArea.clientHeight;
         drawChart();
     }
 
-    // Draw the entire chart
     function drawChart() {
         if (data.length === 0) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Determine visible data based on screen width
         const availableWidth = canvas.width - Y_AXIS_WIDTH;
         const maxVisible = Math.floor(availableWidth / CANDLE_SPACING);
         const visibleData = data.slice(-maxVisible);
 
-        // Calculate Y-Axis Scale (Auto-scaling)
         let minPrice = Math.min(...visibleData.map(d => d.low));
         let maxPrice = Math.max(...visibleData.map(d => d.high));
         let priceRange = maxPrice - minPrice;
-        let padding = priceRange * 0.15; // 15% padding top and bottom
+        let padding = priceRange * 0.15;
         minPrice -= padding;
         maxPrice += padding;
         priceRange = maxPrice - minPrice;
 
-        // Map price to Y pixel coordinate
-        const mapY = (price) => {
-            return canvas.height - ((price - minPrice) / priceRange) * canvas.height;
-        };
+        const mapY = (price) => canvas.height - ((price - minPrice) / priceRange) * canvas.height;
 
-        // Draw Grid Lines (Horizontal)
+        // Draw Grid
         ctx.strokeStyle = '#1a1a1a';
         ctx.lineWidth = 1;
         const gridSteps = 8;
         for (let i = 1; i < gridSteps; i++) {
             let y = (canvas.height / gridSteps) * i;
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(canvas.width - Y_AXIS_WIDTH, y);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width - Y_AXIS_WIDTH, y); ctx.stroke();
         }
 
         // Draw Candles
@@ -386,74 +502,77 @@
             const isGreen = candle.close >= candle.open;
             const color = isGreen ? '#00c853' : '#e53935';
 
-            // Draw Wick
-            ctx.beginPath();
-            ctx.moveTo(x + CANDLE_WIDTH / 2, mapY(candle.high));
-            ctx.lineTo(x + CANDLE_WIDTH / 2, mapY(candle.low));
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 1;
-            ctx.stroke();
+            // Wick
+            ctx.beginPath(); ctx.moveTo(x + CANDLE_WIDTH / 2, mapY(candle.high)); ctx.lineTo(x + CANDLE_WIDTH / 2, mapY(candle.low));
+            ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.stroke();
 
-            // Draw Body
-            let yOpen = mapY(candle.open);
-            let yClose = mapY(candle.close);
-            let bodyTop = Math.min(yOpen, yClose);
-            let bodyHeight = Math.max(Math.abs(yOpen - yClose), 1); // Ensure minimum 1px height
-
-            ctx.fillStyle = color;
-            ctx.fillRect(x, bodyTop, CANDLE_WIDTH, bodyHeight);
+            // Body
+            let yOpen = mapY(candle.open); let yClose = mapY(candle.close);
+            let bodyTop = Math.min(yOpen, yClose); let bodyHeight = Math.max(Math.abs(yOpen - yClose), 1);
+            ctx.fillStyle = color; ctx.fillRect(x, bodyTop, CANDLE_WIDTH, bodyHeight);
         });
 
-        // Update Y-Axis Labels
         updateYAxisLabels(minPrice, maxPrice, gridSteps);
-        
-        // Update Current Price UI
-        updateCurrentPriceUI(visibleData[visibleData.length - 1].close, mapY);
+        updateCurrentPriceUI(visibleData[visibleData.length - 1], mapY);
+        updateOHLC(visibleData[visibleData.length - 1]);
     }
 
-    // Update the Y-Axis HTML labels
     function updateYAxisLabels(min, max, steps) {
         const yAxisContainer = document.getElementById('y-axis-labels');
         yAxisContainer.innerHTML = '';
         for (let i = 0; i <= steps; i++) {
             let price = max - (i * (max - min) / steps);
             let span = document.createElement('span');
-            span.innerText = price.toFixed(2);
+            span.innerText = price.toFixed(symbols[activeSymbol].digits);
             yAxisContainer.appendChild(span);
         }
     }
 
-    // Update Current Price Line, Tag, and Top Header
-    function updateCurrentPriceUI(currentPrice, mapY) {
-        const yPos = mapY(currentPrice);
-        
-        // Update Line
-        const line = document.getElementById('current-line');
-        line.style.top = `${yPos}px`;
-
-        // Update Tag
-        const tag = document.getElementById('current-tag');
-        tag.style.top = `${yPos}px`;
-        tag.innerText = currentPrice.toFixed(2);
-
-        // Update Sell/Buy Header
-        const sellPrice = (currentPrice - 0.15).toFixed(2);
-        const buyPrice = (currentPrice + 0.15).toFixed(2);
-        document.getElementById('sell-price').innerText = sellPrice;
-        document.getElementById('buy-price').innerText = buyPrice;
-
-        // Update Quotes View (if visible)
-        const quoteBid = document.getElementById('quote-bid');
-        if(quoteBid) quoteBid.innerText = sellPrice;
-        const quoteAsk = document.getElementById('quote-ask');
-        if(quoteAsk) quoteAsk.innerText = buyPrice;
+    function updateOHLC(candle) {
+        document.getElementById('ohlc-o').innerText = candle.open.toFixed(symbols[activeSymbol].digits);
+        document.getElementById('ohlc-h').innerText = candle.high.toFixed(symbols[activeSymbol].digits);
+        document.getElementById('ohlc-l').innerText = candle.low.toFixed(symbols[activeSymbol].digits);
+        document.getElementById('ohlc-c').innerText = candle.close.toFixed(symbols[activeSymbol].digits);
     }
 
-    // Simulate a Market Tick (Price movement)
+    function updateCurrentPriceUI(candle, mapY) {
+        const currentPrice = candle.close;
+        const yPos = mapY(currentPrice);
+        
+        document.getElementById('current-line').style.top = `${yPos}px`;
+        
+        const tag = document.getElementById('current-tag');
+        tag.style.top = `${yPos}px`;
+        tag.innerText = currentPrice.toFixed(symbols[activeSymbol].digits);
+        tag.style.backgroundColor = candle.close >= candle.open ? 'var(--green)' : 'var(--red)';
+
+        // Update Header
+        const spread = activeSymbol === 'XAUUSD' ? 0.15 : (activeSymbol === 'UK100' ? 1.0 : 0.00015);
+        document.getElementById('sell-price').innerText = (currentPrice - spread).toFixed(symbols[activeSymbol].digits);
+        document.getElementById('buy-price').innerText = (currentPrice + spread).toFixed(symbols[activeSymbol].digits);
+
+        // Update Quotes View
+        if (activeSymbol === 'XAUUSD') {
+            document.getElementById('q-xau-bid').innerText = (currentPrice - spread).toFixed(2);
+            document.getElementById('q-xau-ask').innerText = (currentPrice + spread).toFixed(2);
+        } else if (activeSymbol === 'GBPUSD') {
+            document.getElementById('q-gbp-bid').innerText = (currentPrice - spread).toFixed(5);
+            document.getElementById('q-gbp-ask').innerText = (currentPrice + spread).toFixed(5);
+        } else if (activeSymbol === 'UK100') {
+            document.getElementById('q-uk-bid').innerText = (currentPrice - spread).toFixed(1);
+            document.getElementById('q-uk-ask').innerText = (currentPrice + spread).toFixed(1);
+        } else if (activeSymbol === 'EURUSD') {
+            document.getElementById('q-eur-bid').innerText = (currentPrice - spread).toFixed(5);
+            document.getElementById('q-eur-ask').innerText = (currentPrice + spread).toFixed(5);
+        }
+
+        // Update Open Positions P&L
+        updatePositionsPnL(currentPrice);
+    }
+
     function simulateTick() {
         if (data.length === 0) return;
 
-        // If no current candle, start a new one
         if (!currentCandle) {
             let open = data[data.length - 1].close;
             currentCandle = { open, high: open, low: open, close: open };
@@ -461,60 +580,179 @@
             ticksInCurrentCandle = 0;
         }
 
-        // Random price fluctuation
-        let change = (Math.random() - 0.48) * 0.8; // Slight upward bias
+        let volatility = symbols[activeSymbol].basePrice * 0.0002;
+        let change = (Math.random() - 0.48) * volatility;
         let newPrice = currentCandle.close + change;
         
-        // Update Current Candle OHLC
         currentCandle.close = newPrice;
         if (newPrice > currentCandle.high) currentCandle.high = newPrice;
         if (newPrice < currentCandle.low) currentCandle.low = newPrice;
         
         ticksInCurrentCandle++;
-        
-        // End of candle period
-        if (ticksInCurrentCandle >= TICKS_PER_CANDLE) {
-            currentCandle = null; // Next tick will create a new candle
-        }
-
-        // Limit data array size to prevent memory leak
+        if (ticksInCurrentCandle >= TICKS_PER_CANDLE) currentCandle = null;
         if (data.length > 150) data.shift();
 
-        // Render the updated chart
         drawChart();
     }
 
-    // Initialize and start the engine
     function initEngine() {
         generateInitialData();
         resizeCanvas();
-        // Run simulation every 200ms (5 ticks per second)
         setInterval(simulateTick, 200); 
     }
 
-    window.addEventListener('resize', resizeCanvas);
-    // Start the engine when page loads
-    window.addEventListener('load', initEngine);
+    // ==========================================
+    // 3. TRADING LOGIC
+    // ==========================================
+    let pendingOrderType = 'BUY';
+    let pendingOrderPrice = 0;
 
+    function openOrderModal(type) {
+        pendingOrderType = type;
+        pendingOrderPrice = parseFloat(document.getElementById(type === 'BUY' ? 'buy-price' : 'sell-price').innerText);
+        
+        document.getElementById('modal-title').innerText = `New ${type} Order`;
+        document.getElementById('modal-symbol').innerText = activeSymbol;
+        document.getElementById('modal-price').innerText = pendingOrderPrice.toFixed(symbols[activeSymbol].digits);
+        
+        const btn = document.getElementById('modal-execute-btn');
+        btn.innerText = type;
+        btn.className = `modal-btn ${type.toLowerCase()}`;
+        
+        modal.classList.add('active');
+        document.getElementById('overlay').classList.add('active');
+    }
+
+    function closeOrderModal() {
+        modal.classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
+    }
+
+    function executeOrder() {
+        const volume = parseFloat(document.getElementById('modal-volume').value);
+        const sl = parseFloat(document.getElementById('modal-sl').value) || null;
+        const tp = parseFloat(document.getElementById('modal-tp').value) || null;
+
+        positions.push({
+            id: positionIdCounter++,
+            symbol: activeSymbol,
+            type: pendingOrderType,
+            volume: volume,
+            openPrice: pendingOrderPrice,
+            sl: sl,
+            tp: tp,
+            openTime: new Date().toLocaleTimeString()
+        });
+
+        closeOrderModal();
+        updateTradeView();
+        switchTab('trade');
+    }
+
+    function closePosition(id, currentPrice) {
+        const posIndex = positions.findIndex(p => p.id === id);
+        if (posIndex === -1) return;
+        
+        const pos = positions[posIndex];
+        const profit = calculateProfit(pos, currentPrice);
+        balance += profit;
+        
+        positions.splice(posIndex, 1);
+        updateTradeView();
+        updateAccountInfo();
+    }
+
+    function calculateProfit(pos, currentPrice) {
+        const contractSize = pos.symbol === 'XAUUSD' ? 100 : (pos.symbol === 'UK100' ? 10 : 100000);
+        const priceDiff = pos.type === 'BUY' ? (currentPrice - pos.openPrice) : (pos.openPrice - currentPrice);
+        return priceDiff * pos.volume * contractSize;
+    }
+
+    function updatePositionsPnL(currentPrice) {
+        let totalProfit = 0;
+        let usedMargin = 0;
+        
+        positions.forEach(pos => {
+            if (pos.symbol === activeSymbol) {
+                const profit = calculateProfit(pos, currentPrice);
+                totalProfit += profit;
+                
+                const profitEl = document.getElementById(`pos-profit-${pos.id}`);
+                if (profitEl) {
+                    profitEl.innerText = profit.toFixed(2);
+                    profitEl.className = `pos-profit ${profit >= 0 ? 'positive' : 'negative'}`;
+                }
+            }
+            usedMargin += (pos.volume * 1000); // Simplified margin calculation
+        });
+        
+        equity = balance + totalProfit;
+        margin = usedMargin;
+        
+        updateAccountInfo();
+    }
+
+    function updateAccountInfo() {
+        document.getElementById('acc-balance').innerText = balance.toFixed(2);
+        document.getElementById('acc-equity').innerText = equity.toFixed(2);
+        document.getElementById('acc-margin').innerText = (equity - margin).toFixed(2);
+    }
+
+    function updateTradeView() {
+        const list = document.getElementById('positions-list');
+        list.innerHTML = '';
+        
+        if (positions.length === 0) {
+            list.innerHTML = `<div style="text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 14px;">No open positions</div>`;
+            return;
+        }
+
+        positions.forEach(pos => {
+            const div = document.createElement('div');
+            div.className = 'position-item';
+            div.innerHTML = `
+                <div class="pos-left">
+                    <span class="pos-symbol">${pos.symbol}</span>
+                    <span class="pos-type ${pos.type.toLowerCase()}">${pos.type} ${pos.volume.toFixed(2)}</span>
+                    <span class="pos-vol">@ ${pos.openPrice.toFixed(symbols[pos.symbol].digits)}</span>
+                </div>
+                <div class="pos-right">
+                    <span class="pos-profit positive" id="pos-profit-${pos.id}">0.00</span>
+                    <button class="pos-close-btn" onclick="closePosition(${pos.id}, ${data[data.length-1].close})">Close</button>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
 
     // ==========================================
-    // 2. UI NAVIGATION & LOGIC
+    // 4. UI NAVIGATION & SYMBOL SWITCHING
     // ==========================================
-    
+    function loadSymbolToChart(symbol) {
+        activeSymbol = symbol;
+        
+        // Update Chart Header
+        document.getElementById('chart-symbol-name').innerText = `${symbol}.vx • H1`;
+        document.getElementById('chart-symbol-desc').innerText = symbols[symbol].name;
+        
+        // Reset Engine
+        generateInitialData();
+        resizeCanvas();
+        
+        // Switch to Charts Tab
+        switchTab('charts');
+    }
+
     function switchTab(tabName) {
-        // Update active class on bottom nav
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
         document.getElementById(`nav-${tabName}`).classList.add('active');
 
-        // Show corresponding view
         document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
         document.getElementById(`view-${tabName}`).classList.add('active');
 
-        // Update Top Bar Title
-        const titles = { 'quotes': 'Quotes', 'charts': 'Charts', 'history': 'History', 'articles': 'Articles' };
+        const titles = { 'quotes': 'Quotes', 'charts': 'Charts', 'history': 'History', 'articles': 'Articles', 'trade': 'Trade' };
         document.getElementById('top-title').innerText = titles[tabName] || 'App';
         
-        // Update Top Bar Icons based on view
         const topRight = document.getElementById('top-right-icons');
         if (tabName === 'charts') {
             topRight.innerHTML = `
@@ -524,6 +762,8 @@
                 <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
                 <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
             `;
+        } else if (tabName === 'trade') {
+             topRight.innerHTML = `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg>`;
         } else {
             topRight.innerHTML = `
                 <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
@@ -531,17 +771,14 @@
             `;
         }
         
-        // Resize chart when switching back to it to fix canvas rendering issues
         if (tabName === 'charts') {
             setTimeout(resizeCanvas, 50);
         }
     }
 
     function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
     }
 
     function switchHistoryTab(element) {
@@ -553,10 +790,8 @@
         if (element.innerText === 'DEALS') content.innerText = 'No deals found';
     }
 
-    function toggleChartColor(element) {
-        const currentBg = element.style.background;
-        element.style.background = currentBg === 'var(--red)' || currentBg === '' ? 'var(--blue)' : 'var(--red)';
-    }
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('load', initEngine);
 </script>
 </body>
-</html>
+                    </html>
