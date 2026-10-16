@@ -17,7 +17,10 @@
   --red:#ef4444;--blue:#3b82f6;--radius:16px;--radius-sm:10px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:#e5e7eb}
+html,body{
+  width:100%;height:100%;margin:0;padding:0;
+  overflow:hidden;background:var(--bg);
+}
 body{
   font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   color:var(--text);font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased;
@@ -25,29 +28,17 @@ body{
 button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
 input{font-family:inherit}
 
-/* ═══ FULL SCREEN FIX ═══ */
+/* ═══ FULLSCREEN ALWAYS — no phone frame ═══ */
 #app{
   position:fixed;
-  top:0;left:0;right:0;bottom:0;
-  width:100%;height:100%;
+  inset:0;
+  width:100vw;
+  height:100vh;
   background:var(--bg);
   display:flex;flex-direction:column;
   overflow:hidden;
 }
-/* Only center with phone frame on desktop (wide screens) */
-@media(min-width:600px){
-  body{display:flex;align-items:center;justify-content:center;padding:20px}
-  #app{
-    position:relative;
-    width:100%;max-width:420px;
-    height:min(100vh - 40px,880px);
-    border-radius:24px;
-    box-shadow:0 20px 60px rgba(0,0,0,.18);
-    overflow:hidden;
-  }
-}
 
-/* Header */
 .hdr{height:56px;flex:none;background:var(--white);display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--border);position:relative;z-index:10}
 .hdr-left,.hdr-right{display:flex;align-items:center;gap:12px;min-width:44px}
 .hdr-right{justify-content:flex-end}
@@ -69,13 +60,8 @@ input{font-family:inherit}
 .nav-btn.active{color:var(--green)}
 .nav-btn.active svg{stroke:var(--green)}
 
-/* ═══ HOME HERO — restructured ═══ */
-.home-hero{
-  background:linear-gradient(160deg,#d4f5e5 0%,#eafbf2 55%,#f5f7fa 100%);
-  padding:78px 18px 30px;
-  position:relative;
-  margin-top:-56px;
-}
+/* HOME HERO */
+.home-hero{background:linear-gradient(160deg,#d4f5e5 0%,#eafbf2 55%,#f5f7fa 100%);padding:78px 18px 30px;position:relative;margin-top:-56px}
 .home-top-balance{text-align:center;margin-bottom:22px}
 .home-top-balance .num{font-size:30px;font-weight:800;letter-spacing:-.03em;display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
 .home-top-balance .num svg{width:14px;height:14px;opacity:.7}
@@ -94,44 +80,17 @@ input{font-family:inherit}
 .acc-num{display:flex;align-items:center;gap:6px;color:var(--text-2);font-size:12.5px;font-weight:500}
 .acc-details{display:inline-flex;align-items:center;gap:4px;color:var(--text-2);font-size:12.5px;font-weight:600}
 
-/* ═══ ACTIONS ROW — separated from hero, clean overlap ═══ */
-.actions-wrap{
-  padding:0 18px;
-  margin-top:-20px;
-  position:relative;
-  z-index:2;
-}
-.actions-row{
-  background:var(--white);
-  border-radius:var(--radius);
-  padding:18px 10px 20px;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:4px;
-  border:1px solid var(--border);
-  box-shadow:0 6px 20px rgba(13,17,23,.06);
-}
-.action{
-  display:flex;flex-direction:column;align-items:center;gap:10px;
-  font-size:11.5px;font-weight:600;color:var(--text);
-  padding:4px 2px;
-}
+.actions-wrap{padding:0 18px;margin-top:-20px;position:relative;z-index:2}
+.actions-row{background:var(--white);border-radius:var(--radius);padding:18px 10px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;border:1px solid var(--border);box-shadow:0 6px 20px rgba(13,17,23,.06)}
+.action{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:11.5px;font-weight:600;color:var(--text);padding:4px 2px}
 .action:active .action-icon{transform:scale(.93)}
-.action-icon{
-  width:48px;height:48px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .15s;
-  position:relative;
-}
+.action-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:transform .15s;position:relative}
 .action-icon svg{width:22px;height:22px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-/* Deposit — green filled */
 .action-icon.primary{background:var(--green);box-shadow:0 4px 12px rgba(0,192,117,.35)}
 .action-icon.primary svg{stroke:#fff}
-/* Others — light with dark stroke */
 .action-icon.secondary{background:var(--soft);border:1px solid var(--border)}
 .action-icon.secondary svg{stroke:var(--text-2)}
 
-/* Rest of styles unchanged from before */
 .promo-banner{border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;display:flex;gap:12px;align-items:center;position:relative;overflow:hidden;border:1px solid var(--border)}
 .promo-banner.green{background:linear-gradient(135deg,#d9f6e7 0%,#eafbf2 100%)}
 .promo-banner.blue{background:linear-gradient(135deg,#dde9fc 0%,#ecf2fe 100%)}
@@ -167,6 +126,7 @@ input{font-family:inherit}
 .mc-lab{font-size:9.5px;color:var(--text-2);font-weight:500}
 .mc-val{font-size:13px;font-weight:800;color:var(--green-2)}
 
+/* FUNDS */
 .funds-hero{padding:18px;background:var(--white);border-bottom:1px solid var(--border)}
 .funds-title-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
 .funds-bal-num{font-size:26px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
@@ -220,6 +180,7 @@ input{font-family:inherit}
 .tx-amt.neg{color:var(--red)}
 .tx-time{color:var(--muted);font-size:11px;margin-top:2px}
 
+/* PROMOTIONS */
 .promo-hero{background:linear-gradient(135deg,#d9f6e7 0%,#f0fdf6 100%);height:180px;display:flex;align-items:center;justify-content:center;font-size:76px;border-bottom:1px solid var(--border)}
 .promo-code-card{background:var(--white);margin:18px;padding:18px;border-radius:var(--radius);border:1px solid var(--border)}
 .promo-code-card h4{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:14px}
@@ -233,6 +194,7 @@ input{font-family:inherit}
 .promo-tab.active{color:var(--text);border-bottom-color:var(--text)}
 .promo-empty{padding:80px 20px;text-align:center;color:var(--muted);font-size:13.5px}
 
+/* COPY TRADING */
 .ct-tabs{display:flex;gap:20px;padding:0 18px;background:var(--white);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
 .ct-tabs::-webkit-scrollbar{display:none}
 .ct-tab{padding:14px 0;font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
@@ -261,6 +223,7 @@ input{font-family:inherit}
 .ct-growth.neg{color:var(--red)}
 .ct-spark{width:60px;height:34px;display:block}
 
+/* PROFILE */
 .profile-hero{padding:24px 18px 22px;text-align:center;background:var(--white);border-bottom:1px solid var(--border)}
 .pf-avatar{width:70px;height:70px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--text-2);margin:0 auto 12px;position:relative}
 .pf-avatar::after{content:'✓';position:absolute;bottom:2px;right:2px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
@@ -285,6 +248,7 @@ input{font-family:inherit}
 .pf-item.logout svg.ic{stroke:var(--red)}
 .pf-ver{text-align:center;padding:24px 0;color:var(--muted);font-size:12px}
 
+/* DEPOSIT */
 .dep-progress{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--white);position:relative}
 .dep-step{flex:1;text-align:center;position:relative;font-size:11px;font-weight:600;color:var(--muted)}
 .dep-step .num{width:28px;height:28px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:12px;font-weight:700;color:var(--text-2)}
@@ -690,12 +654,17 @@ input{font-family:inherit}
 </div>
 
 <script>
-/* Shared IndexedDB */
+/* ═══════════════════════════════════════════════════════════
+   SHARED STORE — reads/writes the SAME IndexedDB as MT5 terminal
+   Database: mt5_web_terminal
+   Store:    account  →  key "acc"  →  { bal: number }
+   ═══════════════════════════════════════════════════════════ */
 const KES_RATE = 129.5;
 const DB_NAME = 'mt5_web_terminal';
 
 const Store = {
-  db: null, ch: null,
+  db: null,
+  ch: null,
   async open(){
     this.db = await new Promise((res, rej) => {
       const r = indexedDB.open(DB_NAME, 1);
@@ -713,38 +682,53 @@ const Store = {
   _os(name, mode){ return this.db.transaction(name, mode || 'readonly').objectStore(name); },
   getAccount(){
     return new Promise(res => {
-      const r = this._os('account').get('acc');
-      r.onsuccess = () => res(r.result || {bal:0});
-      r.onerror = () => res({bal:0});
+      try{
+        const r = this._os('account').get('acc');
+        r.onsuccess = () => res(r.result || {bal:0});
+        r.onerror = () => res({bal:0});
+      }catch(e){ res({bal:0}); }
     });
   },
   async setAccount(acc){
     return new Promise(res => {
-      const r = this._os('account','readwrite').put(acc, 'acc');
-      r.onsuccess = () => { if(this.ch) this.ch.postMessage({type:'account'}); res(); };
-      r.onerror = () => res();
+      try{
+        const r = this._os('account','readwrite').put(acc, 'acc');
+        r.onsuccess = () => { if(this.ch) this.ch.postMessage({type:'account'}); res(); };
+        r.onerror = () => res();
+      }catch(e){ res(); }
     });
   },
   async getSetting(key){
     return new Promise(res => {
-      const r = this._os('settings').get(key);
-      r.onsuccess = () => res(r.result ? r.result.value : null);
-      r.onerror = () => res(null);
+      try{
+        const r = this._os('settings').get(key);
+        r.onsuccess = () => res(r.result ? r.result.value : null);
+        r.onerror = () => res(null);
+      }catch(e){ res(null); }
     });
   },
   async setSetting(key, value){
     return new Promise(res => {
-      const r = this._os('settings','readwrite').put({key, value});
-      r.onsuccess = () => res();
-      r.onerror = () => res();
+      try{
+        const r = this._os('settings','readwrite').put({key, value});
+        r.onsuccess = () => res();
+        r.onerror = () => res();
+      }catch(e){ res(); }
     });
   },
   async deposit(usdAmount, kesAmount){
     const acc = await this.getAccount();
     acc.bal = (acc.bal || 0) + usdAmount;
     await this.setAccount(acc);
+    /* Log deposit */
     const history = (await this.getSetting('deposit_history')) || [];
-    history.unshift({ id: 'D' + Date.now(), usd: usdAmount, kes: kesAmount, date: Date.now(), status: 'completed' });
+    history.unshift({
+      id: 'D' + Date.now(),
+      usd: usdAmount,
+      kes: kesAmount,
+      date: Date.now(),
+      status: 'completed'
+    });
     await this.setSetting('deposit_history', history.slice(0, 200));
     return acc.bal;
   },
@@ -753,16 +737,25 @@ const Store = {
   }
 };
 
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════════════════════ */
 const STATE = { view:'home', account:null };
 
 function setView(view){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
   const el = document.getElementById('view-' + view);
   if(el) el.classList.add('on');
-  const titles = { home:null, funds:'Funds Summary', promotions:'Promotions', copytrade:'Copy Trading', profile:'Profile', deposit:'Deposit', methods:'Deposit' };
+
+  const titles = {
+    home:null, funds:'Funds Summary', promotions:'Promotions',
+    copytrade:'Copy Trading', profile:'Profile',
+    deposit:'Deposit', methods:'Deposit'
+  };
   const t = document.getElementById('hdr-title');
   const backBtn = document.getElementById('hdr-back');
   const menuBtn = document.getElementById('hdr-menu');
+
   if(titles[view]){
     t.textContent = titles[view];
     t.classList.remove('left');
@@ -777,9 +770,14 @@ function setView(view){
     backBtn.classList.add('hide');
     menuBtn.classList.remove('hide');
   }
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === view);
+  });
+
   STATE.view = view;
   document.getElementById('main').scrollTop = 0;
+
   if(view === 'funds') renderFunds();
   if(view === 'home') renderHome();
   if(view === 'deposit') renderDeposit();
@@ -788,6 +786,9 @@ function setView(view){
 function goBack(){ setView('home'); }
 function toggleMenu(){ setView(STATE.view === 'profile' ? 'home' : 'profile'); }
 
+/* ═══════════════════════════════════════════════════════════
+   RENDERERS — always read fresh from shared store
+   ═══════════════════════════════════════════════════════════ */
 async function renderHome(){
   const acc = await Store.getAccount();
   STATE.account = acc;
@@ -804,8 +805,10 @@ async function renderFunds(){
   document.getElementById('funds-total').textContent = '$ ' + bal.toFixed(2);
   document.getElementById('tr-bal').textContent = '$ ' + bal.toFixed(2);
   document.getElementById('tr-avail').textContent = '$ ' + bal.toFixed(2);
+
   const history = (await Store.getSetting('deposit_history')) || [];
   const txContainer = document.getElementById('tx-container');
+
   if(history.length === 0){
     txContainer.innerHTML = '<div class="promo-empty" style="padding:40px 20px">No transactions yet</div>';
   } else {
@@ -864,29 +867,54 @@ function confirmDeposit(){
   Store.deposit(usd, kes).then(newBal => {
     toast(`✓ Deposited $${usd.toFixed(2)} — Balance: $${newBal.toFixed(2)}`);
     document.getElementById('dep-amt').value = '';
-    renderHome(); renderFunds();
+    renderHome();
+    renderFunds();
     setTimeout(() => setView('home'), 800);
   });
 }
 
-function selectMethod(name){ toast('Selected: ' + name); setTimeout(() => setView('deposit'), 500); }
-function applyPromo(){ const v = document.getElementById('promo-input').value.trim(); if(!v){ toast('Enter a code'); return; } toast('Applying code: ' + v); }
+function selectMethod(name){
+  toast('Selected: ' + name);
+  setTimeout(() => setView('deposit'), 500);
+}
 
+function applyPromo(){
+  const v = document.getElementById('promo-input').value.trim();
+  if(!v){ toast('Enter a code'); return; }
+  toast('Applying code: ' + v);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COPY TRADING DATA
+   ═══════════════════════════════════════════════════════════ */
 const STRATEGIES = [
-  {name:'Multi b...',followers:5496,min:1,growth:1654.76,av:'🌍'},{name:'Kucing...',followers:3737,min:5,growth:184.58,av:'🐈'},
-  {name:'Go to ...',followers:3660,min:1,growth:192.32,av:'⚪'},{name:'Low Ri...',followers:3488,min:1,growth:742.16,av:'🪙'},
-  {name:'Trade ...',followers:3145,min:1,growth:360.21,av:'⚫'},{name:'Apex G...',followers:3040,min:25,growth:415.43,av:'🦍'},
-  {name:'ACM G...',followers:2678,min:5,growth:244.6,av:'🅰️'},{name:'SAFE ...',followers:2055,min:5,growth:667.98,av:'🛡️'},
-  {name:'Big Dre...',followers:1621,min:1,growth:1347.15,av:'🐻'},{name:'Gold$1',followers:1456,min:1,growth:1627.13,av:'🥇'},
-  {name:'HAZILI...',followers:1339,min:1,growth:40.13,av:'🦅'},{name:'My For...',followers:1131,min:1,growth:137.44,av:'📊'},
-  {name:'ANGEL ..',followers:1127,min:1,growth:1.21,av:'😇'},{name:'RAIZEN',followers:1125,min:1,growth:-99.95,av:'🔻'}
+  {name:'Multi b...',followers:5496,min:1,growth:1654.76,av:'🌍'},
+  {name:'Kucing...',followers:3737,min:5,growth:184.58,av:'🐈'},
+  {name:'Go to ...',followers:3660,min:1,growth:192.32,av:'⚪'},
+  {name:'Low Ri...',followers:3488,min:1,growth:742.16,av:'🪙'},
+  {name:'Trade ...',followers:3145,min:1,growth:360.21,av:'⚫'},
+  {name:'Apex G...',followers:3040,min:25,growth:415.43,av:'🦍'},
+  {name:'ACM G...',followers:2678,min:5,growth:244.6,av:'🅰️'},
+  {name:'SAFE ...',followers:2055,min:5,growth:667.98,av:'🛡️'},
+  {name:'Big Dre...',followers:1621,min:1,growth:1347.15,av:'🐻'},
+  {name:'Gold$1',followers:1456,min:1,growth:1627.13,av:'🥇'},
+  {name:'HAZILI...',followers:1339,min:1,growth:40.13,av:'🦅'},
+  {name:'My For...',followers:1131,min:1,growth:137.44,av:'📊'},
+  {name:'ANGEL ..',followers:1127,min:1,growth:1.21,av:'😇'},
+  {name:'RAIZEN',followers:1125,min:1,growth:-99.95,av:'🔻'}
 ];
 
 function sparkline(positive){
   const color = positive ? '#00c075' : '#ef4444';
   const w = 60, h = 34;
-  const pts = []; const n = 20; let v = 20;
-  for(let i=0;i<n;i++){ v += (Math.random()-0.45) * 6; v = Math.max(4, Math.min(h-4, v)); pts.push([i/(n-1)*(w-4)+2, h-v]); }
+  const pts = [];
+  const n = 20;
+  let v = 20;
+  for(let i=0;i<n;i++){
+    v += (Math.random()-0.45) * 6;
+    v = Math.max(4, Math.min(h-4, v));
+    pts.push([i/(n-1)*(w-4)+2, h-v]);
+  }
   const d = pts.map((p,i) => (i?'L':'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
   const area = d + ' L ' + (w-2) + ' ' + (h-2) + ' L 2 ' + (h-2) + ' Z';
   return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="none"><path d="${area}" fill="${color}" opacity=".12"/><path d="${d}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
@@ -894,20 +922,27 @@ function sparkline(positive){
 
 function renderCopyTrade(){
   document.getElementById('ct-list').innerHTML = STRATEGIES.map(s => {
-    const pos = s.growth >= 0; const sign = pos ? '+' : '';
+    const pos = s.growth >= 0;
+    const sign = pos ? '+' : '';
     return `<div class="ct-row" onclick="toast('Opening ${s.name}')">
-      <div class="ct-left"><div class="ct-avatar">${s.av}</div>
-        <div class="ct-meta"><div class="ct-name">${s.name}</div>
+      <div class="ct-left">
+        <div class="ct-avatar">${s.av}</div>
+        <div class="ct-meta">
+          <div class="ct-name">${s.name}</div>
           <div class="ct-stats">
             <span><svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${s.followers}</span>
             <span><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg>Min. $${s.min}</span>
-          </div></div></div>
+          </div>
+        </div>
+      </div>
       <div class="ct-growth ${pos?'pos':'neg'}">${sign}${s.growth.toFixed(2)}%</div>
-      <div class="ct-spark">${sparkline(pos)}</div></div>`;
+      <div class="ct-spark">${sparkline(pos)}</div>
+    </div>`;
   }).join('');
 }
 renderCopyTrade();
 
+/* Tabs */
 document.querySelectorAll('.tabs, .ct-tabs, .promo-tabs').forEach(tabs => {
   tabs.querySelectorAll('.tab, .ct-tab, .promo-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -917,6 +952,9 @@ document.querySelectorAll('.tabs, .ct-tabs, .promo-tabs').forEach(tabs => {
   });
 });
 
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════ */
 let toastT;
 function toast(msg){
   let el = document.getElementById('__toast');
@@ -930,21 +968,42 @@ function toast(msg){
   el.style.opacity = '1';
   el.style.transform = 'translateX(-50%) translateY(0)';
   clearTimeout(toastT);
-  toastT = setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(10px)'; }, 2000);
+  toastT = setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(10px)';
+  }, 2000);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════════ */
 (async function(){
   try{
     await Store.open();
     renderHome();
-    Store.onAccountChange(() => { renderHome(); if(STATE.view === 'funds') renderFunds(); });
-    setInterval(() => { if(STATE.view === 'home') renderHome(); if(STATE.view === 'funds') renderFunds(); }, 2000);
-  }catch(e){ console.warn('Shared store error:', e); }
+    /* Listen for changes from MT5 terminal page */
+    Store.onAccountChange(() => {
+      renderHome();
+      if(STATE.view === 'funds') renderFunds();
+      if(STATE.view === 'deposit') renderDeposit();
+    });
+    /* Poll every 2s as safety net */
+    setInterval(() => {
+      if(STATE.view === 'home') renderHome();
+      if(STATE.view === 'funds') renderFunds();
+      if(STATE.view === 'deposit') renderDeposit();
+    }, 2000);
+  }catch(e){
+    console.warn('Shared store error:', e);
+  }
   setView('home');
+
   if('serviceWorker' in navigator){
-    window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
   }
 })();
 </script>
 </body>
-                                                                                </html>
+                                              </html>
