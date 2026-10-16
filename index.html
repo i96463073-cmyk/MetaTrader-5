@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MetaTrader 5 Clone</title>
+    <style>
+        /* --- Global Resets & Variables --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; user-select: none; }
+        :root {
+            --bg: #000000;
+            --surface: #121212;
+            --surface-light: #1e1e1e;
+            --text: #ffffff;
+            --text-muted: #8e8e93;
+            --red: #e53935;
+            --green: #00c853;
+            --blue: #2962ff;
+            --border: #333333;
+            --nav-height: 60px;
+            --top-height: 50px;
+        }
+        body { background-color: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; justify-content: center; }
+        
+        /* Mobile Container to make it look good on desktop */
+        #app { width: 100%; max-width: 480px; height: 100vh; position: relative; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
+
+        /* --- Icons --- */
+        svg { width: 24px; height: 24px; fill: currentColor; }
+        .icon-sm { width: 18px; height: 18px; }
+
+        /* --- Overlay for Sidebar --- */
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 90; display: none; }
+        #overlay.active { display: block; }
+
+        /* --- Sidebar --- */
+        #sidebar { position: absolute; top: 0; left: -80%; width: 80%; height: 100%; background: var(--bg); z-index: 100; transition: left 0.3s ease; border-right: 1px solid var(--border); overflow-y: auto; }
+        #sidebar.active { left: 0; }
+        .sidebar-header { padding: 20px 15px; display: flex; align-items: center; gap: 15px; }
+        .sidebar-avatar { width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .sidebar-info h3 { font-size: 14px; font-weight: bold; }
+        .sidebar-info p { font-size: 12px; color: var(--text-muted); }
+        .sidebar-info a { font-size: 12px; color: var(--blue); text-decoration: none; display: block; margin-top: 2px; }
+        .sidebar-menu { list-style: none; padding: 10px 0; }
+        .sidebar-menu li { padding: 15px 20px; display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .sidebar-menu li.active { background: var(--surface-light); }
+        .sidebar-menu li svg { color: var(--text-muted); }
+        .sidebar-menu li.active svg { color: var(--text); }
+
+        /* --- Top Bar --- */
+        #top-bar { height: var(--top-height); background: var(--bg); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; z-index: 10; border-bottom: 1px solid var(--border); }
+        .top-left { display: flex; align-items: center; gap: 15px; }
+        .top-title { font-size: 16px; font-weight: 600; }
+        .top-right { display: flex; align-items: center; gap: 15px; }
+
+        /* --- Main Content Area --- */
+        #main-content { flex: 1; position: relative; overflow: hidden; }
+        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; overflow-y: auto; }
+        .view.active { display: flex; }
+
+        /* --- Bottom Navigation --- */
+        #bottom-nav { height: var(--nav-height); background: var(--bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 10; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; cursor: pointer; position: relative; }
+        .nav-item.active { color: var(--blue); }
+        .nav-item svg { width: 22px; height: 22px; }
+        .nav-badge { position: absolute; top: -5px; right: -8px; background: var(--red); color: white; font-size: 9px; padding: 2px 5px; border-radius: 10px; font-weight: bold; }
+
+        /* --- View: Charts --- */
+        #view-charts { display: flex; flex-direction: column; }
+        .chart-header { display: flex; height: 40px; }
+        .chart-sell { flex: 1; background: var(--red); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-weight: bold; font-size: 15px; cursor: pointer; }
+        .chart-spread { width: 80px; background: var(--bg); display: flex; justify-content: center; align-items: center; font-size: 14px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .chart-buy { flex: 1; background: var(--blue); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-weight: bold; font-size: 15px; cursor: pointer; }
+        .chart-symbol-info { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); padding: 5px 10px; background: #000; }
+        
+        .chart-area { flex: 1; position: relative; background-image: linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px); background-size: 40px 40px; background-position: center; overflow: hidden; }
+        .chart-y-axis { position: absolute; right: 0; top: 0; height: 100%; width: 60px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding: 5px 5px 5px 0; font-size: 9px; color: var(--text-muted); background: rgba(0,0,0,0.8); z-index: 10; }
+        .chart-x-axis { position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; font-size: 9px; color: var(--text-muted); background: rgba(0,0,0,0.8); z-index: 10; border-top: 1px solid var(--border); }
+        
+        .candle-container { position: absolute; bottom: 20px; left: 10px; right: 60px; height: calc(100% - 20px); display: flex; align-items: flex-end; gap: 4px; }
+        .candle { width: 6px; position: relative; }
+        .candle.up { background-color: var(--green); }
+        .candle.down { background-color: var(--red); }
+        .candle::before { content: ''; position: absolute; left: 50%; transform: translateX(-50%); width: 1px; height: 15px; background-color: inherit; }
+        .candle.up::before { bottom: 100%; }
+        .candle.down::before { top: 100%; }
+        
+        .current-price-line { position: absolute; top: 45%; left: 0; right: 60px; height: 1px; background-color: var(--text); z-index: 5; border-top: 1px dashed rgba(255,255,255,0.5); }
+        .current-price-tag { position: absolute; right: 0; top: 45%; transform: translateY(-50%); background-color: var(--green); color: white; padding: 2px 5px; font-size: 10px; font-weight: bold; z-index: 11; width: 60px; text-align: center; }
+
+        /* --- View: Quotes --- */
+        .quote-item { display: flex; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid var(--border); }
+        .quote-left { display: flex; flex-direction: column; gap: 4px; }
+        .quote-change { font-size: 11px; }
+        .quote-change.positive { color: var(--blue); }
+        .quote-change.negative { color: var(--red); }
+        .quote-symbol { font-size: 15px; font-weight: bold; }
+        .quote-time { font-size: 10px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+        .quote-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        .quote-prices { display: flex; gap: 15px; font-size: 15px; font-weight: bold; }
+        .quote-bid { color: var(--blue); }
+        .quote-ask { color: var(--red); }
+        .quote-highlow { font-size: 10px; color: var(--text-muted); }
+
+        /* --- View: Trade --- */
+        .trade-info { padding: 15px; border-bottom: 1px solid var(--border); }
+        .trade-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; }
+        .trade-row:last-child { margin-bottom: 0; }
+        .trade-label { color: var(--text); }
+        .trade-value { font-weight: bold; }
+        .trade-dots { flex: 1; border-bottom: 1px dotted var(--text-muted); margin: 0 10px; margin-bottom: 4px; }
+
+        /* --- View: History --- */
+        .history-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); }
+        .history-tab { flex: 1; text-align: center; padding: 15px 0; font-size: 12px; font-weight: bold; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; }
+        .history-tab.active { color: var(--text); border-bottom-color: var(--blue); }
+        .history-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-muted); }
+        .history-content svg { width: 60px; height: 60px; margin-bottom: 15px; opacity: 0.5; }
+        .history-content p { font-size: 14px; }
+
+        /* --- View: Articles (Community) --- */
+        .article-item { padding: 15px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; }
+        .article-icon { width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+        .article-content { flex: 1; }
+        .article-title { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
+        .article-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; margin-bottom: 8px; }
+        .article-meta { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); }
+        .section-title { padding: 15px; font-size: 12px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Utility */
+        .text-blue { color: var(--blue); }
+        .text-red { color: var(--red); }
+        .text-green { color: var(--green); }
+        .text-muted { color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- Overlay -->
+    <div id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar Navigation -->
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-avatar">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+            <div class="sidebar-info">
+                <h3>MAXWEL KIPR...</h3>
+                <p>501148369 - Val...</p>
+                <a href="#">Manage</a>
+            </div>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="active" onclick="switchTab('charts')">
+                <svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.09-4-4L2 16.08z"/></svg>
+                Trade
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                News
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                Mailbox
+                <span class="nav-badge" style="position:relative; top:0; right:0; margin-left:auto;">2</span>
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
+                Journal
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                Settings
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                Economic calendar
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                Traders Community
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                MQL5 Algo Trading
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+                User guide
+            </li>
+            <li>
+                <svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                About
+            </li>
+        </ul>
+    </div>
+
+    <!-- Top Bar -->
+    <header id="top-bar">
+        <div class="top-left">
+            <svg id="menu-btn" onclick="toggleSidebar()" style="cursor: pointer;" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+            <span class="top-title" id="top-title">Charts</span>
+        </div>
+        <div class="top-right">
+            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+        
+        <!-- VIEW: Charts -->
+        <div id="view-charts" class="view active">
+            <div class="chart-header">
+                <div class="chart-sell" onclick="toggleChartColor(this)">
+                    <span>SELL</span>
+                    <span>4175.26</span>
+                </div>
+                <div class="chart-spread">0.01</div>
+                <div class="chart-buy" onclick="toggleChartColor(this)">
+                    <span>BUY</span>
+                    <span>4175.56</span>
+                </div>
+            </div>
+            <div class="chart-symbol-info">
+                <span>XAUUSD.vx • H1</span>
+                <span>Gold vs US Dollar</span>
+            </div>
+            <div class="chart-area">
+                <!-- Mock Candlesticks -->
+                <div class="candle-container">
+                    <div class="candle down" style="height: 30px;"></div>
+                    <div class="candle down" style="height: 50px;"></div>
+                    <div class="candle up" style="height: 40px;"></div>
+                    <div class="candle up" style="height: 80px;"></div>
+                    <div class="candle down" style="height: 25px;"></div>
+                    <div class="candle up" style="height: 60px;"></div>
+                    <div class="candle up" style="height: 90px;"></div>
+                    <div class="candle down" style="height: 20px;"></div>
+                    <div class="candle up" style="height: 70px;"></div>
+                    <div class="candle up" style="height: 110px;"></div>
+                    <div class="candle down" style="height: 30px;"></div>
+                    <div class="candle up" style="height: 50px;"></div>
+                </div>
+                <!-- Current Price Line -->
+                <div class="current-price-line"></div>
+                <div class="current-price-tag">4175.26</div>
+                <!-- Y-Axis -->
+                <div class="chart-y-axis">
+                    <span>4246.86</span>
+                    <span>4238.76</span>
+                    <span>4230.66</span>
+                    <span>4222.56</span>
+                    <span>4214.46</span>
+                    <span>4206.36</span>
+                    <span>4198.26</span>
+                    <span>4190.16</span>
+                    <span>4182.06</span>
+                    <span>4173.96</span>
+                    <span>4165.86</span>
+                    <span>4157.76</span>
+                    <span>4149.66</span>
+                    <span>4141.56</span>
+                    <span>4133.46</span>
+                    <span>4125.36</span>
+                    <span>4117.26</span>
+                    <span>4109.16</span>
+                </div>
+                <!-- X-Axis -->
+                <div class="chart-x-axis">
+                    <span>14:00</span>
+                    <span>14 Oct 03:00</span>
+                    <span>14 Oct 15:00</span>
+                    <span>15 Oct 04:00</span>
+                    <span>15 Oct 16:00</span>
+                    <span>16 Oct 05:00</span>
+                    <span>16 Oct 17:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: Quotes -->
+        <div id="view-quotes" class="view">
+            <div class="quote-item">
+                <div class="quote-left">
+                    <span class="quote-change positive">+666 0.16%</span>
+                    <span class="quote-symbol">XAUUSD.vx</span>
+                    <span class="quote-time">09:02:37 ≒ 33</span>
+                </div>
+                <div class="quote-right">
+                    <div class="quote-prices">
+                        <span class="quote-bid">4175.77</span>
+                        <span class="quote-ask">4176.10</span>
+                    </div>
+                    <span class="quote-highlow">L: 4 147.15 H: 4 186.26</span>
+                </div>
+            </div>
+            <div class="quote-item">
+                <div class="quote-left">
+                    <span class="quote-change positive">+278 0.21%</span>
+                    <span class="quote-symbol">GBPUSD</span>
+                    <span class="quote-time">09:02:37 ≒ 18</span>
+                </div>
+                <div class="quote-right">
+                    <div class="quote-prices">
+                        <span class="quote-bid">1.32951</span>
+                        <span class="quote-ask">1.32969</span>
+                    </div>
+                    <span class="quote-highlow">L: 1.32581 H: 1.33059</span>
+                </div>
+            </div>
+            <div class="quote-item">
+                <div class="quote-left">
+                    <span class="quote-change positive">+97 0.09%</span>
+                    <span class="quote-symbol">UK100.vx</span>
+                    <span class="quote-time">09:02:36 ≒ 50</span>
+                </div>
+                <div class="quote-right">
+                    <div class="quote-prices">
+                        <span class="quote-bid">10824.8</span>
+                        <span class="quote-ask">10829.8</span>
+                    </div>
+                    <span class="quote-highlow">L: 10 801.2 H: 10 842.7</span>
+                </div>
+            </div>
+            <div class="quote-item">
+                <div class="quote-left">
+                    <span class="quote-change positive">+103 0.09%</span>
+                    <span class="quote-symbol">EURUSD.vx</span>
+                    <span class="quote-time">09:02:37 ≒ 14</span>
+                </div>
+                <div class="quote-right">
+                    <div class="quote-prices">
+                        <span class="quote-bid">1.12244</span>
+                        <span class="quote-ask">1.12258</span>
+                    </div>
+                    <span class="quote-highlow">L: 1.12073 H: 1.12403</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: Trade -->
+        <div id="view-trade" class="view">
+            <div class="trade-info">
+                <div class="trade-row">
+                    <span class="trade-label">Balance:</span>
+                    <span class="trade-dots"></span>
+                    <span class="trade-value">0.52</span>
+                </div>
+                <div class="trade-row">
+                    <span class="trade-label">Equity:</span>
+                    <span class="trade-dots"></span>
+                    <span class="trade-value">0.52</span>
+                </div>
+                <div class="trade-row">
+                    <span class="trade-label">Free margin:</span>
+                    <span class="trade-dots"></span>
+                    <span class="trade-value">0.52</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: History -->
+        <div id="view-history" class="view">
+            <div class="history-tabs">
+                <div class="history-tab active" onclick="switchHistoryTab(this)">POSITIONS</div>
+                <div class="history-tab" onclick="switchHistoryTab(this)">ORDERS</div>
+                <div class="history-tab" onclick="switchHistoryTab(this)">DEALS</div>
+            </div>
+            <div class="history-content">
+                <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+                <p>Empty history</p>
+            </div>
+        </div>
+
+        <!-- VIEW: Articles / Community -->
+        <div id="view-articles" class="view">
+            <div class="article-item">
+                <div class="article-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                </div>
+                <div class="article-content">
+                    <div class="article-title">Algo Trading <span class="text-muted">@MQL5</span></div>
+                    <div class="article-desc">MTP (Multi-Indicator Trend Painter) is a trend-following indicator that ...</div>
+                    <div class="article-meta">
+                        <span>07:20</span>
+                        <span>•</span>
+                    </div>
+                </div>
+            </div>
+            <div class="article-item">
+                <div class="article-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                </div>
+                <div class="article-content">
+                    <div class="article-title">Articles <span class="text-muted">@MQL5</span></div>
+                    <div class="article-desc">Beyond Clone and Commit: The Advanced Side of MQL5 Algo Forge - ht...</div>
+                    <div class="article-meta">
+                        <span>Thursday</span>
+                        <span>•</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-title">POPULAR CHANNELS</div>
+            
+            <div class="article-item">
+                <div class="article-icon">📈</div>
+                <div class="article-content">
+                    <div class="article-title">Forecast and Levels</div>
+                    <div class="article-desc">Mini-articles with technical and fundamental analysis on the way as fore...</div>
+                    <div class="article-meta"><span>489.6 k</span></div>
+                </div>
+            </div>
+            <div class="article-item">
+                <div class="article-icon">⚡</div>
+                <div class="article-content">
+                    <div class="article-title">Scalping</div>
+                    <div class="article-desc">Signals • Automation. Built for speed.</div>
+                    <div class="article-meta"><span>4.8 k</span></div>
+                </div>
+            </div>
+            <div class="article-item">
+                <div class="article-icon">📰</div>
+                <div class="article-content">
+                    <div class="article-title">New Gadgets and Game Tech News</div>
+                    <div class="article-desc">New Gadgets and Game Technical News</div>
+                    <div class="article-meta"><span>110.8 k</span></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav id="bottom-nav">
+        <div class="nav-item" onclick="switchTab('quotes')" id="nav-quotes">
+            <svg viewBox="0 0 24 24"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg>
+            <span>Quotes</span>
+        </div>
+        <div class="nav-item active" onclick="switchTab('charts')" id="nav-charts">
+            <svg viewBox="0 0 24 24"><path d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2 2H5V5h14v14zm0-16H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+            <span>Charts</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('history')" id="nav-history">
+            <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+            <span>History</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('articles')" id="nav-articles">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+            <span>Messages</span>
+            <span class="nav-badge">2</span>
+        </div>
+    </nav>
+</div>
+
+<script>
+    // --- Navigation Logic ---
+    function switchTab(tabName) {
+        // Update active class on bottom nav
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        document.getElementById(`nav-${tabName}`).classList.add('active');
+
+        // Show corresponding view
+        document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+        document.getElementById(`view-${tabName}`).classList.add('active');
+
+        // Update Top Bar Title
+        const titles = {
+            'quotes': 'Quotes',
+            'charts': 'Charts',
+            'history': 'History',
+            'articles': 'Articles'
+        };
+        document.getElementById('top-title').innerText = titles[tabName] || 'App';
+        
+        // Update Top Bar Icons based on view
+        const topRight = document.querySelector('.top-right');
+        if (tabName === 'quotes' || tabName === 'articles') {
+            topRight.innerHTML = `
+                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            `;
+        } else if (tabName === 'charts') {
+            topRight.innerHTML = `
+                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                <span style="font-size:12px; font-weight:bold;">H1</span>
+                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+            `;
+        } else if (tabName === 'history') {
+            topRight.innerHTML = `
+                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+            `;
+        }
+    }
+
+    // --- Sidebar Logic ---
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+
+    // --- History Tabs Logic ---
+    function switchHistoryTab(element) {
+        document.querySelectorAll('.history-tab').forEach(tab => tab.classList.remove('active'));
+        element.classList.add('active');
+        
+        // Update content based on tab (simulated)
+        const content = document.querySelector('.history-content p');
+        if (element.innerText === 'POSITIONS') content.innerText = 'Empty history';
+        if (element.innerText === 'ORDERS') content.innerText = 'No orders found';
+        if (element.innerText === 'DEALS') content.innerText = 'No deals found';
+    }
+
+    // --- Chart Color Toggle (Demo purpose) ---
+    function toggleChartColor(element) {
+        if (element.classList.contains('chart-sell')) {
+            element.style.background = element.style.background === 'blue' ? 'var(--red)' : 'blue';
+        } else {
+            element.style.background = element.style.background === 'blue' ? 'var(--red)' : 'blue';
+        }
+    }
+</script>
+
+</body>
+          </html>
