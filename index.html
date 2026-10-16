@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>MetaTrader 5</title><meta name="theme-color" content="#000000"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="manifest" href='data:application/manifest+json,{"name":"MetaTrader 5","short_name":"MT5","start_url":".","display":"standalone","orientation":"any","background_color":"#000000","theme_color":"#000000"}'><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>MetaTrader 5</title><meta name="theme-color" content="#000000"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="manifest" href="/manifest.json"><link rel="icon" type="image/png" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="apple-mobile-web-app-title" content="MT5"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap">
 <style>
 :root{--bg:#000;--s:#141414;--s2:#222;--bd:#1c1c1c;--tx:#d0d0d0;--tb:#fff;--bl:#2962FF;--rd:#F6465D;--gr:#0ECB81;color-scheme:dark;box-sizing:border-box}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -231,7 +231,6 @@ cv.onpointerdown=e=>{
   ptr.set(e.pointerId,e);
   const r=cv.getBoundingClientRect();
   drag={x:e.clientX,y:e.clientY,off:S.off,mv:0,pm:S.pm};
-  /* ═══ Y-AXIS SCALE DRAG (wider 90px hit zone) ═══ */
   if(e.clientX-r.left > W-90 && ptr.size==1){
     if(!S.pr || S.pr<=0){ S.pr=VM.mx-VM.mn; S.pm=(VM.mn+VM.mx)/2; }
     drag.ax=1; drag.mv=1; drag.pm=S.pm; drag.pr=S.pr;
@@ -245,7 +244,6 @@ cv.onpointermove=e=>{
   ptr.set(e.pointerId,e);
   const r=cv.getBoundingClientRect();
   const bw=(W-56)/S.vis;
-  /* ═══ Y-AXIS SCALE DRAG ═══ */
   if(drag && drag.ax){
     if(!S.pr || S.pr<=0){ S.pr=VM.mx-VM.mn; }
     const dy=e.clientY-drag.y;
@@ -344,7 +342,7 @@ const TT={quotes:'Quotes',trade:'Trade',history:'History',msg:'Messages',setting
 function top_(){const R={chart:`<button class="ib ${S.cross?'on':''}" data-a="cross"><svg viewBox='0 0 24 24' width='24' height='24' fill='none' stroke='currentColor' stroke-width='1.6'><path d='M12 3v6M12 15v6M3 12h6M15 12h6'/></svg></button><button class="ib" data-a="ind"><svg viewBox='0 0 24 24' width='24' height='24' fill='none' stroke='currentColor' stroke-width='1.6'><path d='M3 17l5-6 4 4 5-8 4 4'/><path d='M3 21h18'/></svg></button><button class="ib" data-a="tf" style="font-size:15px;font-weight:700">${S.tf}</button><button class="ib" data-a="cs"><svg viewBox='0 0 24 24' width='24' height='24'><circle cx='12' cy='12' r='8' fill='none' stroke='#2F7CF6' stroke-width='3'/><path d='M12 4a8 8 0 0 1 0 16' fill='none' stroke='#F6465D' stroke-width='3'/><circle cx='12' cy='12' r='3' fill='#F5A623'/></svg></button><button class="ib ${S.oc?'on':''}" data-a="oc"><svg viewBox='0 0 24 24' width='24' height='24'><rect x='3' y='6' width='18' height='12' rx='3' fill='#2F7CF6'/><rect x='12' y='6' width='9' height='12' rx='3' fill='#F6465D'/><rect x='8' y='9' width='8' height='6' rx='2' fill='#fff'/></svg></button>`,quotes:'<button class="ib" data-a="add">+</button><button class="ib" data-a="edit">✏️</button>',trade:`<button class="ib" data-a="sort">${IC.sort}</button><button class="ib" data-a="new">${IC.neww}</button>`,history:`<button class="ib" data-a="href">${IC.ref}</button><button class="ib" data-a="sort">${IC.sort}</button><button class="ib" data-a="date">${IC.cal}</button>`,msg:`<button class="ib">${IC.mq}</button><button class="ib">${IC.srch}</button><button class="ib" data-a="none">+</button><button class="ib" data-a="none">⋮</button>`,acc:`<button class="ib" data-a="none">${IC.ref}</button><button class="ib" data-a="none">+</button><button class="ib" data-a="none">⋮</button>`,settings:''};
 $('#top').innerHTML=`<div class="L"><button class="ib" data-a="menu" style="font-size:24px">☰</button>${TTL()}</div><div>${R[S.tab]}</div>`}
 $('#top').onclick=e=>{const a=e.target.closest('button')?.dataset.a;if(!a)return;({menu:menu,cross:()=>{S.cross^=1;cx=null;top_();draw()},ind:indSheet,tf:tfSheet,cs:chartSettings,oc:()=>{S.oc^=1;ocUp();top_();save()},add:()=>{const r=Object.keys(SY).filter(s=>!S.syms.includes(s));if(!r.length)return toast('All symbols added');sheet('<h3>Add Symbol</h3>'+r.map(s=>`<div class="row" data-s="${s}"><span>${s}</span><span>${SY[s].n}</span></div>`).join(''),(sh,cl)=>{sh.onclick=e=>{const x=e.target.closest('.row');if(x){S.syms.push(x.dataset.s);save();rQuotes();cl()}}})},edit:()=>{edit^=1;rQuotes()},new:()=>ticket('BUY'),sort:()=>{if(S.tab!='trade'){desc^=1;return rHist()}sheet('<h3>Sorting</h3>'+['Symbol','Ticket','Time','Profit'].map(k=>`<div class='row' data-k='${k}'><span>${k}</span><span>${SRT==k?(desc?'↓':'↑'):''}</span></div>`).join(''),(sh,cl)=>{sh.onclick=e=>{const k=e.target.closest('.row')?.dataset.k;if(!k)return;if(SRT==k)desc^=1;else{SRT=k;desc=0}cl();rTrade()}})},date:()=>sheet('<h3>Period</h3>'+Object.keys(FL).map(k=>`<div class="row" data-f="${k}"><span>${k}</span><span>${k==S.filter?'✓':''}</span></div>`).join(''),(sh,cl)=>{sh.onclick=e=>{const x=e.target.closest('.row');if(x){S.filter=x.dataset.f;save();rHist();cl()}}})})[a]()};
-function menu(){const I=['Trade','News','Mailbox','Journal','Settings','Economic Calendar','Traders Community','MQL5 Algo Trading','Messages','User Guide','About'];sheet('',(sh,cl)=>{const o=sh.parentNode;sh.className='';sh.id='sb';sh.innerHTML=`<div class="hd" style="display:flex;align-items:center;gap:14px"><span class="av-wrap">${BROKER_ICON}</span><div><b style="display:block">MAXWEL KIPRONO YEGON</b><small style="display:block;margin-top:5px">501148369 · ValetaxGlobal-Live3</small><small style="display:block;margin-top:3px;color:#5b8dff;font-weight:700" data-m="Manage Account">Manage Account</small></div></div>`+I.map(x=>`<div class="it" data-m="${x}">${x}</div>`).join('');sh.onclick=e=>{const m=e.target.dataset.m;if(!m)return;cl();m=='Trade'?go('trade'):m=='Settings'?go('settings'):m=='Messages'?go('msg'):m=='Manage Account'?go('acc'):toast(m+' – not available in demo')}})}
+function menu(){const I=['Trade','News','Mailbox','Journal','Settings','Economic Calendar','Traders Community','MQL5 Algo Trading','Messages','User Guide','About'];sheet('',(sh,cl)=>{const o=sh.parentNode;sh.className='';sh.id='sb';sh.innerHTML=`<div class="hd" style="display:flex;align-items:center;gap:14px"><span class="av-wrap">${BROKER_ICON}</span><div><b style="display:block">MAXWEL KIPRONO YEGON</b><small style="display:block;margin-top:5px">501148369 · ValetaxGlobal-Live3</small><small style="display:block;margin-top:3px;color:#5b8dff;font-weight:700" data-m="Manage Account">Manage Account</small></div></div>`+I.map(x=>`<div class="it" data-m="${x}">${x}</div>`).join('')+'<div class="it" data-m="Install App" id="installBtn" style="display:none;color:#5b8dff;font-weight:700">⬇ Install App</div>';sh.onclick=e=>{const m=e.target.dataset.m;if(!m)return;cl();if(m=='Install App'){if(window._deferredInstall){window._deferredInstall.prompt();window._deferredInstall.userChoice.then(()=>{window._deferredInstall=null;document.getElementById('installBtn')&&(document.getElementById('installBtn').style.display='none')})}else{toast('Open browser menu → Add to Home Screen')}return}m=='Trade'?go('trade'):m=='Settings'?go('settings'):m=='Messages'?go('msg'):m=='Manage Account'?go('acc'):toast(m+' – not available in demo')}})}
 function ocUp(){const o=$('#oc');o.classList.toggle('on',!!S.oc);o.classList.toggle('bl',S.ocPos=='Below chart');setTimeout(rs,0)}
 function pxs(id,s,v){const t=fm(s,v),d=SY[s].d,n=d>=3?3:d>=2?2:1,u=d>=3?1:0,e=$(id).children;e[1].textContent=t.slice(0,t.length-n);e[2].textContent=t.slice(t.length-n,t.length-u);e[3].textContent=u?t.slice(-1):''}
 function uOc(){const s=S.sym,q=P[s];pxs('#ocs',s,q.b);pxs('#ocb',s,q.b+SY[s].sp);const pv=uOc.p||q.b,d=q.b>pv?1:q.b<pv?-1:(uOc.d||-1);uOc.p=q.b;uOc.d=d;$('#ocs').style.background=$('#ocb').style.background=d>0?'#3F83F8':'#EF5350'}
@@ -450,12 +448,29 @@ rAcc=function(){
 };
 async function boot(){await idb();if(db){const s=await get('settings','state');if(s)SAVE.forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});const a=await get('account','acc');if(a)ACC=a;POS=await all('positions');DL=await all('deals');ORD=await all('orders')}
 if(S.v!=4){S.v=4;S.syms=Object.keys(SY).slice(0,11);S.oc=1;S.scheme='Custom';S.col={};S.vis=68;S.grid=1;S.ohlc=0;S.vol=0;S.ask=1;S.bid=1;S.sep=0;S.lot=.01}S.oct=0;delete S.auto;
-/* Reset chart scale on boot so the live price is always in view */
 S.pr=0;S.pm=0;
 if(!SY[S.sym])S.sym='XAUUSD.vx';for(const s in SY){const p=SY[s].p;P[s]={b:p,o:p,hi:p,lo:p,t:Date.now()}}
 applyScheme();$('#ocl').value=S.lot;broker=new ADP[S.adapter]();reconnect();ocUp();go('chart');uOc();if(S.lock&&S.pin)lockScr();
 initAudio();
 setInterval(()=>{const pr=broker.getPrices();if(!pr||!pr[S.sym])return;upCandles();pend();POS.slice().forEach(p=>{const b=P[p.sym].b,a=b+SY[p.sym].sp;if(p.type=='BUY'?(p.sl&&b<=p.sl):(p.sl&&a>=p.sl))closeP(p.id,'sl');else if(p.type=='BUY'?(p.tp&&b>=p.tp):(p.tp&&a<=p.tp))closeP(p.id,'tp')});marginCall();uOc();{const e=$('#npl');if(e){const v=calc().pl;e.textContent=f2(v);e.className='pill '+(v>0?'pu':v<0?'pd':'')}}if(S.tab=='quotes')uQuotes();if(S.tab=='trade')uTrade()},1000);
 setInterval(draw,80);addEventListener('resize',rs);addEventListener('orientationchange',()=>setTimeout(rs,200));window.visualViewport&&visualViewport.addEventListener('resize',rs);window.ResizeObserver&&new ResizeObserver(rs).observe($('#cw'))}
+
+/* ═══ PWA — Service Worker + Install prompt ═══ */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  });
+}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  window._deferredInstall=e;
+  const btn=document.getElementById('installBtn');
+  if(btn) btn.style.display='block';
+});
+window.addEventListener('appinstalled',()=>{
+  window._deferredInstall=null;
+  toast('MT5 installed to home screen');
+});
+
 boot();
 </script></body></html>
