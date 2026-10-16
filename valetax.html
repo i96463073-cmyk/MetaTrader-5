@@ -17,17 +17,37 @@
   --red:#ef4444;--blue:#3b82f6;--radius:16px;--radius-sm:10px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
+html,body{height:100%;overflow:hidden;background:#e5e7eb}
 body{
   font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-  background:#e5e7eb;color:var(--text);font-size:14px;line-height:1.4;
-  -webkit-font-smoothing:antialiased;
+  color:var(--text);font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased;
 }
 button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
 input{font-family:inherit}
-#app{position:fixed;inset:0;max-width:480px;margin:0 auto;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.08)}
-@media(min-width:481px){body{display:flex;align-items:center;justify-content:center}}
 
+/* ═══ FULL SCREEN FIX ═══ */
+#app{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  width:100%;height:100%;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+/* Only center with phone frame on desktop (wide screens) */
+@media(min-width:600px){
+  body{display:flex;align-items:center;justify-content:center;padding:20px}
+  #app{
+    position:relative;
+    width:100%;max-width:420px;
+    height:min(100vh - 40px,880px);
+    border-radius:24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.18);
+    overflow:hidden;
+  }
+}
+
+/* Header */
 .hdr{height:56px;flex:none;background:var(--white);display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--border);position:relative;z-index:10}
 .hdr-left,.hdr-right{display:flex;align-items:center;gap:12px;min-width:44px}
 .hdr-right{justify-content:flex-end}
@@ -49,8 +69,13 @@ input{font-family:inherit}
 .nav-btn.active{color:var(--green)}
 .nav-btn.active svg{stroke:var(--green)}
 
-/* Home */
-.home-hero{background:linear-gradient(160deg,#d4f5e5 0%,#eafbf2 55%,#ffffff 100%);padding:78px 18px 90px;position:relative;margin-top:-56px}
+/* ═══ HOME HERO — restructured ═══ */
+.home-hero{
+  background:linear-gradient(160deg,#d4f5e5 0%,#eafbf2 55%,#f5f7fa 100%);
+  padding:78px 18px 30px;
+  position:relative;
+  margin-top:-56px;
+}
 .home-top-balance{text-align:center;margin-bottom:22px}
 .home-top-balance .num{font-size:30px;font-weight:800;letter-spacing:-.03em;display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
 .home-top-balance .num svg{width:14px;height:14px;opacity:.7}
@@ -69,14 +94,44 @@ input{font-family:inherit}
 .acc-num{display:flex;align-items:center;gap:6px;color:var(--text-2);font-size:12.5px;font-weight:500}
 .acc-details{display:inline-flex;align-items:center;gap:4px;color:var(--text-2);font-size:12.5px;font-weight:600}
 
-.actions-row{background:var(--white);border-radius:var(--radius);padding:20px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px;border:1px solid var(--border)}
-.action{display:flex;flex-direction:column;align-items:center;gap:9px;font-size:11.5px;font-weight:600}
-.action:active .action-icon{transform:scale(.95)}
-.action-icon{width:46px;height:46px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;transition:transform .15s}
-.action-icon svg{width:20px;height:20px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.action:nth-child(n+2) .action-icon{background:var(--soft);border:1px solid var(--border)}
-.action:nth-child(n+2) .action-icon svg{stroke:var(--text-2)}
+/* ═══ ACTIONS ROW — separated from hero, clean overlap ═══ */
+.actions-wrap{
+  padding:0 18px;
+  margin-top:-20px;
+  position:relative;
+  z-index:2;
+}
+.actions-row{
+  background:var(--white);
+  border-radius:var(--radius);
+  padding:18px 10px 20px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:4px;
+  border:1px solid var(--border);
+  box-shadow:0 6px 20px rgba(13,17,23,.06);
+}
+.action{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  font-size:11.5px;font-weight:600;color:var(--text);
+  padding:4px 2px;
+}
+.action:active .action-icon{transform:scale(.93)}
+.action-icon{
+  width:48px;height:48px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s;
+  position:relative;
+}
+.action-icon svg{width:22px;height:22px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* Deposit — green filled */
+.action-icon.primary{background:var(--green);box-shadow:0 4px 12px rgba(0,192,117,.35)}
+.action-icon.primary svg{stroke:#fff}
+/* Others — light with dark stroke */
+.action-icon.secondary{background:var(--soft);border:1px solid var(--border)}
+.action-icon.secondary svg{stroke:var(--text-2)}
 
+/* Rest of styles unchanged from before */
 .promo-banner{border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;display:flex;gap:12px;align-items:center;position:relative;overflow:hidden;border:1px solid var(--border)}
 .promo-banner.green{background:linear-gradient(135deg,#d9f6e7 0%,#eafbf2 100%)}
 .promo-banner.blue{background:linear-gradient(135deg,#dde9fc 0%,#ecf2fe 100%)}
@@ -112,7 +167,6 @@ input{font-family:inherit}
 .mc-lab{font-size:9.5px;color:var(--text-2);font-weight:500}
 .mc-val{font-size:13px;font-weight:800;color:var(--green-2)}
 
-/* Funds */
 .funds-hero{padding:18px;background:var(--white);border-bottom:1px solid var(--border)}
 .funds-title-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
 .funds-bal-num{font-size:26px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
@@ -148,7 +202,7 @@ input{font-family:inherit}
 .tr-acct-name span{font-weight:600;color:var(--text-2);margin-left:6px}
 .tr-line{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
 .tr-line span:first-child{color:var(--text-2);font-size:13px}
-.tr-line span:last-child{font-weight:700;font-size:13.5px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.tr-line span:last-child{font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums}
 
 .tx-date{font-weight:700;font-size:13.5px;margin:18px 0 10px}
 .tx-list{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
@@ -161,12 +215,11 @@ input{font-family:inherit}
 .tx-title svg{width:12px;height:12px;color:var(--green)}
 .tx-id{color:var(--muted);font-size:11px;font-weight:500;margin-top:2px}
 .tx-right{text-align:right}
-.tx-amt{font-weight:800;font-size:14px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.tx-amt{font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
 .tx-amt.pos{color:var(--green-2)}
 .tx-amt.neg{color:var(--red)}
 .tx-time{color:var(--muted);font-size:11px;margin-top:2px}
 
-/* Promotions */
 .promo-hero{background:linear-gradient(135deg,#d9f6e7 0%,#f0fdf6 100%);height:180px;display:flex;align-items:center;justify-content:center;font-size:76px;border-bottom:1px solid var(--border)}
 .promo-code-card{background:var(--white);margin:18px;padding:18px;border-radius:var(--radius);border:1px solid var(--border)}
 .promo-code-card h4{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:14px}
@@ -180,7 +233,6 @@ input{font-family:inherit}
 .promo-tab.active{color:var(--text);border-bottom-color:var(--text)}
 .promo-empty{padding:80px 20px;text-align:center;color:var(--muted);font-size:13.5px}
 
-/* Copy Trading */
 .ct-tabs{display:flex;gap:20px;padding:0 18px;background:var(--white);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
 .ct-tabs::-webkit-scrollbar{display:none}
 .ct-tab{padding:14px 0;font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
@@ -204,12 +256,11 @@ input{font-family:inherit}
 .ct-stats{font-size:11px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:8px;font-weight:500}
 .ct-stats span{display:inline-flex;align-items:center;gap:3px}
 .ct-stats svg{width:10px;height:10px;stroke:var(--muted);stroke-width:2;fill:none}
-.ct-growth{text-align:center;font-weight:800;font-size:14px;letter-spacing:-.01em}
+.ct-growth{text-align:center;font-weight:800;font-size:14px}
 .ct-growth.pos{color:var(--green-2)}
 .ct-growth.neg{color:var(--red)}
 .ct-spark{width:60px;height:34px;display:block}
 
-/* Profile */
 .profile-hero{padding:24px 18px 22px;text-align:center;background:var(--white);border-bottom:1px solid var(--border)}
 .pf-avatar{width:70px;height:70px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--text-2);margin:0 auto 12px;position:relative}
 .pf-avatar::after{content:'✓';position:absolute;bottom:2px;right:2px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
@@ -218,7 +269,7 @@ input{font-family:inherit}
 
 .invite-card{margin:18px;padding:20px;border-radius:var(--radius);background:linear-gradient(135deg,#d4f5e5 0%,#eafbf2 100%);display:flex;gap:14px;align-items:center;position:relative;overflow:hidden}
 .invite-content{flex:1;min-width:0;z-index:1}
-.invite-content h4{font-size:16px;font-weight:800;margin-bottom:5px;letter-spacing:-.01em}
+.invite-content h4{font-size:16px;font-weight:800;margin-bottom:5px}
 .invite-content p{font-size:12.5px;color:var(--text-2);line-height:1.4;margin-bottom:12px}
 .btn-invite{background:var(--white);padding:9px 18px;border-radius:100px;font-weight:700;font-size:12.5px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .invite-gift{font-size:52px;line-height:1;z-index:1}
@@ -234,7 +285,6 @@ input{font-family:inherit}
 .pf-item.logout svg.ic{stroke:var(--red)}
 .pf-ver{text-align:center;padding:24px 0;color:var(--muted);font-size:12px}
 
-/* Deposit */
 .dep-progress{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--white);position:relative}
 .dep-step{flex:1;text-align:center;position:relative;font-size:11px;font-weight:600;color:var(--muted)}
 .dep-step .num{width:28px;height:28px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:12px;font-weight:700;color:var(--text-2)}
@@ -243,7 +293,6 @@ input{font-family:inherit}
 .dep-step.done .num{background:var(--green);color:#fff}
 .dep-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:calc(50% + 16px);right:calc(-50% + 16px);height:2px;background:var(--border)}
 .dep-step.done:not(:last-child)::after{background:var(--green)}
-.dep-step .num svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.5;fill:none}
 
 .dep-block{padding:16px 18px;background:var(--white);margin-top:8px}
 .dep-label{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-2)}
@@ -253,7 +302,6 @@ input{font-family:inherit}
 .dep-account-icon svg{width:16px;height:16px;stroke:var(--text-2);stroke-width:2;fill:none}
 .dep-account-name{font-weight:700;font-size:14px}
 .dep-account-sub{color:var(--text-2);font-size:12px;margin-top:2px}
-.dep-account svg.chev{width:14px;height:14px;stroke:var(--muted);stroke-width:2;fill:none}
 .dep-balance{display:flex;gap:8px;align-items:baseline;margin-bottom:8px}
 .dep-balance .lbl{color:var(--text-2);font-weight:600;font-size:13px}
 .dep-balance .val{color:var(--green-2);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
@@ -279,7 +327,6 @@ input{font-family:inherit}
 .method:active{background:var(--soft-2)}
 .method-left{display:flex;align-items:center;gap:12px}
 .method-icon{width:34px;height:34px;border-radius:8px;background:var(--white);display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden}
-.method svg.chev{width:14px;height:14px;stroke:var(--muted);stroke-width:2;fill:none}
 
 .btn-summary{display:block;width:calc(100% - 36px);margin:24px auto 20px;padding:16px;background:var(--soft-2);color:var(--muted);border-radius:12px;font-weight:700;font-size:15px;text-align:center}
 .btn-summary.active{background:var(--green);color:#fff;box-shadow:0 6px 20px rgba(0,192,117,.25)}
@@ -316,9 +363,7 @@ input{font-family:inherit}
     <section class="view on" id="view-home">
       <div class="home-hero">
         <div class="home-top-balance">
-          <div class="num" id="home-bal">$ 0.00
-            <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
+          <div class="num" id="home-bal">$ 0.00</div>
           <div class="lbl">Total Funds <span class="sync-dot"></span></div>
         </div>
         <div class="home-chips">
@@ -348,26 +393,36 @@ input{font-family:inherit}
           </div>
         </div>
       </div>
-      <div style="padding:0 18px;margin-top:-72px">
+
+      <div class="actions-wrap">
         <div class="actions-row">
           <button class="action" onclick="openDeposit()">
-            <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
+            <div class="action-icon primary">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            </div>
             Deposit
           </button>
           <button class="action" onclick="toast('Transfer coming soon')">
-            <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4M21 5H9M7 23l-4-4 4-4M3 19h12"/></svg></div>
+            <div class="action-icon secondary">
+              <svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4M21 5H9M7 23l-4-4 4-4M3 19h12"/></svg>
+            </div>
             Transfer
           </button>
           <button class="action" onclick="location.href='/index.html'">
-            <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M3 20l4-4M7 16l-4 4M14 10l6-6M11 11l8-8M4 20h4v-4"/></svg></div>
+            <div class="action-icon secondary">
+              <svg viewBox="0 0 24 24"><path d="M3 20l4-4M7 16l-4 4M14 10l6-6M11 11l8-8M4 20h4v-4"/></svg>
+            </div>
             Trade
           </button>
           <button class="action" onclick="toast('More options')">
-            <div class="action-icon"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></div>
+            <div class="action-icon secondary">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>
+            </div>
             More
           </button>
         </div>
       </div>
+
       <div class="section">
         <div class="promo-banner green">
           <div class="promo-content">
@@ -397,11 +452,12 @@ input{font-family:inherit}
           <span class="promo-counter">1 / 4</span>
         </div>
       </div>
+
       <div class="section">
         <div class="section-head"><h3>Hot News</h3><a href="#">See all</a></div>
         <div class="news-grid">
           <div class="news-card a">
-            <span class="news-tag">Banks · Fed · United States · Interest Rate</span>
+            <span class="news-tag">Banks · Fed · United States</span>
             <div><div class="news-title">According to the Federal Reserve Board, enforcement actions ag...</div><div class="news-date">16 Oct 2026</div></div>
           </div>
           <div class="news-card b">
@@ -410,6 +466,7 @@ input{font-family:inherit}
           </div>
         </div>
       </div>
+
       <div class="section">
         <div class="section-head"><h3>Market Companion</h3><a href="#">See all</a></div>
         <div class="mc-grid">
@@ -465,16 +522,11 @@ input{font-family:inherit}
               <div><div class="funds-amt" id="funds-withdraw">$ 0.00</div><div class="funds-name">Withdrawable Trading Balance</div></div>
             </div>
           </div>
-          <div class="funds-total-row">
-            <span>Total withdrawable balance</span>
-            <span id="funds-total">$ 0.00</span>
-          </div>
+          <div class="funds-total-row"><span>Total withdrawable balance</span><span id="funds-total">$ 0.00</span></div>
         </div>
         <div class="section-head" style="margin-top:24px;padding:0 4px"><h3 style="font-size:18px">Trading</h3><a href="#">See all</a></div>
         <div class="tr-card">
-          <div class="tr-head">
-            <div><span class="tr-tag">STANDARD · MT5</span><div class="tr-acct-name">501148369 <span>My Real Account</span></div></div>
-          </div>
+          <div class="tr-head"><div><span class="tr-tag">STANDARD · MT5</span><div class="tr-acct-name">501148369 <span>My Real Account</span></div></div></div>
           <div class="tr-body">
             <div class="tr-line"><span>Balance</span><span id="tr-bal">$ 0.00</span></div>
             <div class="tr-line"><span>Available for withdrawal</span><span id="tr-avail">$ 0.00</span></div>
@@ -564,7 +616,6 @@ input{font-family:inherit}
             <div class="dep-account-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
             <div><div class="dep-account-name">501148369</div><div class="dep-account-sub">My Real Account</div></div>
           </div>
-          <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
         </div>
         <div class="dep-balance"><span class="lbl">Balance</span><span class="val" id="dep-bal">0.00 USD</span></div>
         <div class="dep-label" style="margin-top:14px">Amount to deposit</div>
@@ -598,40 +649,19 @@ input{font-family:inherit}
       <div class="dep-block">
         <div class="method-group-title">Credit/Debit Cards</div>
         <div class="method-list">
-          <div class="method" onclick="selectMethod('CCJenapay No_Fee')">
-            <div class="method-left"><div class="method-icon">💳</div><span>CCJenapay No_Fee</span></div>
-            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
+          <div class="method" onclick="selectMethod('CCJenapay No_Fee')"><div class="method-left"><div class="method-icon">💳</div><span>CCJenapay No_Fee</span></div></div>
         </div>
         <div class="method-group-title">Crypto</div>
         <div class="method-list">
-          <div class="method" onclick="selectMethod('USDT TRC20')">
-            <div class="method-left"><div class="method-icon">💎</div><span>USDT TRC20</span></div>
-            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
-          <div class="method" onclick="selectMethod('USDT BEP20')">
-            <div class="method-left"><div class="method-icon">💎</div><span>USDT BEP20</span></div>
-            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
-          <div class="method" onclick="selectMethod('Binance Pay')">
-            <div class="method-left"><div class="method-icon">🟡</div><span>Binance Pay</span></div>
-            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
+          <div class="method" onclick="selectMethod('USDT TRC20')"><div class="method-left"><div class="method-icon">💎</div><span>USDT TRC20</span></div></div>
+          <div class="method" onclick="selectMethod('USDT BEP20')"><div class="method-left"><div class="method-icon">💎</div><span>USDT BEP20</span></div></div>
+          <div class="method" onclick="selectMethod('Binance Pay')"><div class="method-left"><div class="method-icon">🟡</div><span>Binance Pay</span></div></div>
         </div>
         <div class="method-group-title">E-Wallet</div>
         <div class="method-list">
-          <div class="method" onclick="selectMethod('Mobile Money MPESA and more')">
-            <div class="method-left"><div class="method-icon">📱</div><span>Mobile Money MPESA and more</span></div>
-            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
-          <div class="method" onclick="selectMethod('Mobile Money')">
-            <div class="method-left"><div class="method-icon">📱</div><span>Mobile Money</span></div>
-            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
-          <div class="method" onclick="selectMethod('Skrill EUR')">
-            <div class="method-left"><div class="method-icon">💜</div><span>Skrill EUR</span></div>
-            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-          </div>
+          <div class="method" onclick="selectMethod('Mobile Money MPESA and more')"><div class="method-left"><div class="method-icon">📱</div><span>Mobile Money MPESA and more</span></div></div>
+          <div class="method" onclick="selectMethod('Mobile Money')"><div class="method-left"><div class="method-icon">📱</div><span>Mobile Money</span></div></div>
+          <div class="method" onclick="selectMethod('Skrill EUR')"><div class="method-left"><div class="method-icon">💜</div><span>Skrill EUR</span></div></div>
         </div>
       </div>
     </section>
@@ -660,15 +690,12 @@ input{font-family:inherit}
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   SHARED STORE — reads/writes the same IndexedDB as MT5 terminal
-   ═══════════════════════════════════════════════════════════ */
+/* Shared IndexedDB */
 const KES_RATE = 129.5;
 const DB_NAME = 'mt5_web_terminal';
 
 const Store = {
-  db: null,
-  ch: null,
+  db: null, ch: null,
   async open(){
     this.db = await new Promise((res, rej) => {
       const r = indexedDB.open(DB_NAME, 1);
@@ -694,18 +721,8 @@ const Store = {
   async setAccount(acc){
     return new Promise(res => {
       const r = this._os('account','readwrite').put(acc, 'acc');
-      r.onsuccess = () => {
-        if(this.ch) this.ch.postMessage({type:'account'});
-        res();
-      };
+      r.onsuccess = () => { if(this.ch) this.ch.postMessage({type:'account'}); res(); };
       r.onerror = () => res();
-    });
-  },
-  async getStore(name){
-    return new Promise(res => {
-      const r = this._os(name).getAll();
-      r.onsuccess = () => res(r.result || []);
-      r.onerror = () => res([]);
     });
   },
   async getSetting(key){
@@ -726,15 +743,8 @@ const Store = {
     const acc = await this.getAccount();
     acc.bal = (acc.bal || 0) + usdAmount;
     await this.setAccount(acc);
-    /* Log the deposit */
     const history = (await this.getSetting('deposit_history')) || [];
-    history.unshift({
-      id: 'D' + Date.now(),
-      usd: usdAmount,
-      kes: kesAmount,
-      date: Date.now(),
-      status: 'completed'
-    });
+    history.unshift({ id: 'D' + Date.now(), usd: usdAmount, kes: kesAmount, date: Date.now(), status: 'completed' });
     await this.setSetting('deposit_history', history.slice(0, 200));
     return acc.bal;
   },
@@ -743,25 +753,16 @@ const Store = {
   }
 };
 
-/* ═══════════════════════════════════════════════════════════
-   STATE + NAVIGATION
-   ═══════════════════════════════════════════════════════════ */
-const STATE = { view:'home', account:null, depositPending:null };
+const STATE = { view:'home', account:null };
 
 function setView(view){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
   const el = document.getElementById('view-' + view);
   if(el) el.classList.add('on');
-
-  const titles = {
-    home:null, funds:'Funds Summary', promotions:'Promotions',
-    copytrade:'Copy Trading', profile:'Profile',
-    deposit:'Deposit', methods:'Deposit'
-  };
+  const titles = { home:null, funds:'Funds Summary', promotions:'Promotions', copytrade:'Copy Trading', profile:'Profile', deposit:'Deposit', methods:'Deposit' };
   const t = document.getElementById('hdr-title');
   const backBtn = document.getElementById('hdr-back');
   const menuBtn = document.getElementById('hdr-menu');
-
   if(titles[view]){
     t.textContent = titles[view];
     t.classList.remove('left');
@@ -776,35 +777,22 @@ function setView(view){
     backBtn.classList.add('hide');
     menuBtn.classList.remove('hide');
   }
-
-  document.querySelectorAll('.nav-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.view === view);
-  });
-
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   STATE.view = view;
   document.getElementById('main').scrollTop = 0;
-
   if(view === 'funds') renderFunds();
   if(view === 'home') renderHome();
   if(view === 'deposit') renderDeposit();
 }
 
-function goBack(){
-  if(STATE.view === 'methods' || STATE.view === 'deposit') setView('home');
-  else if(STATE.view === 'profile') setView('home');
-  else setView('home');
-}
-
+function goBack(){ setView('home'); }
 function toggleMenu(){ setView(STATE.view === 'profile' ? 'home' : 'profile'); }
 
-/* ═══════════════════════════════════════════════════════════
-   RENDERERS — pull live data from shared store
-   ═══════════════════════════════════════════════════════════ */
 async function renderHome(){
   const acc = await Store.getAccount();
   STATE.account = acc;
-  const bal = (acc.bal || 0);
-  document.getElementById('home-bal').innerHTML = '$ ' + bal.toFixed(2) + ' <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const bal = acc.bal || 0;
+  document.getElementById('home-bal').innerHTML = '$ ' + bal.toFixed(2) + ' <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   document.getElementById('home-acc-bal').textContent = '$ ' + bal.toFixed(2);
 }
 
@@ -816,14 +804,11 @@ async function renderFunds(){
   document.getElementById('funds-total').textContent = '$ ' + bal.toFixed(2);
   document.getElementById('tr-bal').textContent = '$ ' + bal.toFixed(2);
   document.getElementById('tr-avail').textContent = '$ ' + bal.toFixed(2);
-
-  /* Render transactions from deposit history */
   const history = (await Store.getSetting('deposit_history')) || [];
   const txContainer = document.getElementById('tx-container');
   if(history.length === 0){
     txContainer.innerHTML = '<div class="promo-empty" style="padding:40px 20px">No transactions yet</div>';
   } else {
-    /* Group by date */
     const groups = {};
     history.forEach(h => {
       const d = new Date(h.date);
@@ -856,8 +841,7 @@ async function renderFunds(){
 
 async function renderDeposit(){
   const acc = await Store.getAccount();
-  const bal = acc.bal || 0;
-  document.getElementById('dep-bal').textContent = bal.toFixed(2) + ' USD';
+  document.getElementById('dep-bal').textContent = (acc.bal || 0).toFixed(2) + ' USD';
   updateDeposit();
 }
 
@@ -867,104 +851,63 @@ function updateDeposit(){
   document.getElementById('dep-conv').textContent = usd.toFixed(2) + ' USD';
   document.getElementById('dep-final').textContent = usd.toFixed(2) + ' USD';
   const btn = document.getElementById('dep-summary');
-  if(kes > 0) btn.classList.add('active');
-  else btn.classList.remove('active');
+  if(kes > 0) btn.classList.add('active'); else btn.classList.remove('active');
 }
 
-function openDeposit(){
-  STATE.depositPending = null;
-  setView('deposit');
-}
+function openDeposit(){ setView('deposit'); }
 
 function confirmDeposit(){
   const kes = parseFloat(document.getElementById('dep-amt').value) || 0;
   if(kes <= 0){ toast('Enter an amount first'); return; }
   const usd = kes / KES_RATE;
-  /* Show confirmation */
   if(!confirm(`Deposit $${usd.toFixed(2)} USD (${kes} KES) to account 501148369?`)) return;
-  /* Process */
   Store.deposit(usd, kes).then(newBal => {
     toast(`✓ Deposited $${usd.toFixed(2)} — Balance: $${newBal.toFixed(2)}`);
     document.getElementById('dep-amt').value = '';
-    /* Refresh everything */
-    renderHome();
-    renderFunds();
-    /* Go to home */
+    renderHome(); renderFunds();
     setTimeout(() => setView('home'), 800);
   });
 }
 
-function selectMethod(name){
-  toast('Selected: ' + name);
-  setTimeout(() => setView('deposit'), 500);
-}
+function selectMethod(name){ toast('Selected: ' + name); setTimeout(() => setView('deposit'), 500); }
+function applyPromo(){ const v = document.getElementById('promo-input').value.trim(); if(!v){ toast('Enter a code'); return; } toast('Applying code: ' + v); }
 
-function applyPromo(){
-  const v = document.getElementById('promo-input').value.trim();
-  if(!v){ toast('Enter a code'); return; }
-  toast('Applying code: ' + v);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   COPY TRADING
-   ═══════════════════════════════════════════════════════════ */
 const STRATEGIES = [
-  {name:'Multi b...',followers:5496,min:1,growth:1654.76,av:'🌍'},
-  {name:'Kucing...',followers:3737,min:5,growth:184.58,av:'🐈'},
-  {name:'Go to ...',followers:3660,min:1,growth:192.32,av:'⚪'},
-  {name:'Low Ri...',followers:3488,min:1,growth:742.16,av:'🪙'},
-  {name:'Trade ...',followers:3145,min:1,growth:360.21,av:'⚫'},
-  {name:'Apex G...',followers:3040,min:25,growth:415.43,av:'🦍'},
-  {name:'ACM G...',followers:2678,min:5,growth:244.6,av:'🅰️'},
-  {name:'SAFE ...',followers:2055,min:5,growth:667.98,av:'🛡️'},
-  {name:'Big Dre...',followers:1621,min:1,growth:1347.15,av:'🐻'},
-  {name:'Gold$1',followers:1456,min:1,growth:1627.13,av:'🥇'},
-  {name:'HAZILI...',followers:1339,min:1,growth:40.13,av:'🦅'},
-  {name:'My For...',followers:1131,min:1,growth:137.44,av:'📊'},
-  {name:'ANGEL ..',followers:1127,min:1,growth:1.21,av:'😇'},
-  {name:'RAIZEN',followers:1125,min:1,growth:-99.95,av:'🔻'}
+  {name:'Multi b...',followers:5496,min:1,growth:1654.76,av:'🌍'},{name:'Kucing...',followers:3737,min:5,growth:184.58,av:'🐈'},
+  {name:'Go to ...',followers:3660,min:1,growth:192.32,av:'⚪'},{name:'Low Ri...',followers:3488,min:1,growth:742.16,av:'🪙'},
+  {name:'Trade ...',followers:3145,min:1,growth:360.21,av:'⚫'},{name:'Apex G...',followers:3040,min:25,growth:415.43,av:'🦍'},
+  {name:'ACM G...',followers:2678,min:5,growth:244.6,av:'🅰️'},{name:'SAFE ...',followers:2055,min:5,growth:667.98,av:'🛡️'},
+  {name:'Big Dre...',followers:1621,min:1,growth:1347.15,av:'🐻'},{name:'Gold$1',followers:1456,min:1,growth:1627.13,av:'🥇'},
+  {name:'HAZILI...',followers:1339,min:1,growth:40.13,av:'🦅'},{name:'My For...',followers:1131,min:1,growth:137.44,av:'📊'},
+  {name:'ANGEL ..',followers:1127,min:1,growth:1.21,av:'😇'},{name:'RAIZEN',followers:1125,min:1,growth:-99.95,av:'🔻'}
 ];
 
 function sparkline(positive){
   const color = positive ? '#00c075' : '#ef4444';
   const w = 60, h = 34;
-  const pts = [];
-  const n = 20;
-  let v = 20;
-  for(let i=0;i<n;i++){
-    v += (Math.random()-0.45) * 6;
-    v = Math.max(4, Math.min(h-4, v));
-    pts.push([i/(n-1)*(w-4)+2, h-v]);
-  }
+  const pts = []; const n = 20; let v = 20;
+  for(let i=0;i<n;i++){ v += (Math.random()-0.45) * 6; v = Math.max(4, Math.min(h-4, v)); pts.push([i/(n-1)*(w-4)+2, h-v]); }
   const d = pts.map((p,i) => (i?'L':'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
   const area = d + ' L ' + (w-2) + ' ' + (h-2) + ' L 2 ' + (h-2) + ' Z';
   return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="none"><path d="${area}" fill="${color}" opacity=".12"/><path d="${d}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
 }
 
 function renderCopyTrade(){
-  const list = document.getElementById('ct-list');
-  list.innerHTML = STRATEGIES.map(s => {
-    const pos = s.growth >= 0;
-    const sign = pos ? '+' : '';
+  document.getElementById('ct-list').innerHTML = STRATEGIES.map(s => {
+    const pos = s.growth >= 0; const sign = pos ? '+' : '';
     return `<div class="ct-row" onclick="toast('Opening ${s.name}')">
-      <div class="ct-left">
-        <div class="ct-avatar">${s.av}</div>
-        <div class="ct-meta">
-          <div class="ct-name">${s.name}</div>
+      <div class="ct-left"><div class="ct-avatar">${s.av}</div>
+        <div class="ct-meta"><div class="ct-name">${s.name}</div>
           <div class="ct-stats">
             <span><svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${s.followers}</span>
             <span><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg>Min. $${s.min}</span>
-          </div>
-        </div>
-      </div>
+          </div></div></div>
       <div class="ct-growth ${pos?'pos':'neg'}">${sign}${s.growth.toFixed(2)}%</div>
-      <div class="ct-spark">${sparkline(pos)}</div>
-    </div>`;
+      <div class="ct-spark">${sparkline(pos)}</div></div>`;
   }).join('');
 }
 renderCopyTrade();
 
-/* Tabs */
 document.querySelectorAll('.tabs, .ct-tabs, .promo-tabs').forEach(tabs => {
   tabs.querySelectorAll('.tab, .ct-tab, .promo-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -974,9 +917,6 @@ document.querySelectorAll('.tabs, .ct-tabs, .promo-tabs').forEach(tabs => {
   });
 });
 
-/* ═══════════════════════════════════════════════════════════
-   TOAST
-   ═══════════════════════════════════════════════════════════ */
 let toastT;
 function toast(msg){
   let el = document.getElementById('__toast');
@@ -990,40 +930,21 @@ function toast(msg){
   el.style.opacity = '1';
   el.style.transform = 'translateX(-50%) translateY(0)';
   clearTimeout(toastT);
-  toastT = setTimeout(() => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateX(-50%) translateY(10px)';
-  }, 2000);
+  toastT = setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(-50%) translateY(10px)'; }, 2000);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   BOOT
-   ═══════════════════════════════════════════════════════════ */
 (async function(){
   try{
     await Store.open();
     renderHome();
-    /* Listen for changes from the terminal page */
-    Store.onAccountChange(() => {
-      renderHome();
-      if(STATE.view === 'funds') renderFunds();
-    });
-    /* Poll every 2s as fallback (in case BroadcastChannel isn't available) */
-    setInterval(() => {
-      if(STATE.view === 'home') renderHome();
-      if(STATE.view === 'funds') renderFunds();
-    }, 2000);
-  }catch(e){
-    console.warn('Shared store error:', e);
-  }
+    Store.onAccountChange(() => { renderHome(); if(STATE.view === 'funds') renderFunds(); });
+    setInterval(() => { if(STATE.view === 'home') renderHome(); if(STATE.view === 'funds') renderFunds(); }, 2000);
+  }catch(e){ console.warn('Shared store error:', e); }
   setView('home');
-
   if('serviceWorker' in navigator){
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
-    });
+    window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
   }
 })();
 </script>
 </body>
-  </html>
+                                                                                </html>
