@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#00c075">
+<title>Valetax</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f7fa;--white:#fff;--soft:#f0f3f6;--soft-2:#e8ecf0;
+  --border:#e4e8ed;--text:#0d1117;--text-2:#4a5158;--muted:#8b939c;
+  --green:#00c075;--green-2:#00a562;--green-soft:#e6f9f0;
+  --red:#ef4444;--blue:#3b82f6;--radius:16px;--radius-sm:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:#e5e7eb;color:var(--text);font-size:14px;line-height:1.4;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input{font-family:inherit}
+#app{position:fixed;inset:0;max-width:480px;margin:0 auto;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.08)}
+@media(min-width:481px){body{display:flex;align-items:center;justify-content:center}}
+
+.hdr{height:56px;flex:none;background:var(--white);display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--border);position:relative;z-index:10}
+.hdr-left,.hdr-right{display:flex;align-items:center;gap:12px;min-width:44px}
+.hdr-right{justify-content:flex-end}
+.hdr-icon{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;color:var(--text)}
+.hdr-icon:active{background:var(--soft)}
+.hdr-title{font-size:18px;font-weight:800;letter-spacing:-.02em;position:absolute;left:50%;transform:translateX(-50%)}
+.hdr-title.left{position:static;transform:none}
+.bell{position:relative}
+.bell-badge{position:absolute;top:4px;right:4px;background:var(--red);color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;padding:0 4px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+
+#main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:90px}
+.view{display:none;animation:fade .2s ease-out}
+.view.on{display:block}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+#nav{flex:none;height:76px;background:var(--white);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding-bottom:env(safe-area-inset-bottom,0);position:relative;z-index:20}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--muted);padding:10px 4px}
+.nav-btn svg{width:24px;height:24px}
+.nav-btn.active{color:var(--green)}
+.nav-btn.active svg{stroke:var(--green)}
+
+/* Home */
+.home-hero{background:linear-gradient(160deg,#d4f5e5 0%,#eafbf2 55%,#ffffff 100%);padding:78px 18px 90px;position:relative;margin-top:-56px}
+.home-top-balance{text-align:center;margin-bottom:22px}
+.home-top-balance .num{font-size:30px;font-weight:800;letter-spacing:-.03em;display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.home-top-balance .num svg{width:14px;height:14px;opacity:.7}
+.home-top-balance .lbl{color:var(--text-2);font-size:12.5px;font-weight:500;margin-top:2px}
+.home-chips{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.chip-accounts{display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--border);padding:8px 14px;border-radius:100px;font-weight:700;font-size:12.5px}
+.chip-accounts svg{width:12px;height:12px;color:var(--muted)}
+.btn-add-account{background:var(--green);color:#fff;padding:9px 16px;border-radius:100px;font-weight:700;font-size:12.5px;display:inline-flex;align-items:center;gap:5px}
+
+.acc-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:0 2px 8px rgba(13,17,23,.03)}
+.acc-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.acc-tag{display:inline-block;background:var(--green-soft);color:var(--green-2);font-weight:700;font-size:10.5px;padding:4px 9px;border-radius:6px;letter-spacing:.02em}
+.acc-balance{font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.acc-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.acc-name{font-weight:700;font-size:15px;letter-spacing:-.01em}
+.acc-num{display:flex;align-items:center;gap:6px;color:var(--text-2);font-size:12.5px;font-weight:500}
+.acc-details{display:inline-flex;align-items:center;gap:4px;color:var(--text-2);font-size:12.5px;font-weight:600}
+
+.actions-row{background:var(--white);border-radius:var(--radius);padding:20px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px;border:1px solid var(--border)}
+.action{display:flex;flex-direction:column;align-items:center;gap:9px;font-size:11.5px;font-weight:600}
+.action:active .action-icon{transform:scale(.95)}
+.action-icon{width:46px;height:46px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.action-icon svg{width:20px;height:20px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.action:nth-child(n+2) .action-icon{background:var(--soft);border:1px solid var(--border)}
+.action:nth-child(n+2) .action-icon svg{stroke:var(--text-2)}
+
+.promo-banner{border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;display:flex;gap:12px;align-items:center;position:relative;overflow:hidden;border:1px solid var(--border)}
+.promo-banner.green{background:linear-gradient(135deg,#d9f6e7 0%,#eafbf2 100%)}
+.promo-banner.blue{background:linear-gradient(135deg,#dde9fc 0%,#ecf2fe 100%)}
+.promo-banner.light{background:linear-gradient(135deg,#f0f4f8 0%,#f8fafc 100%)}
+.promo-content{flex:1;min-width:0}
+.promo-content h4{font-size:14.5px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px}
+.promo-content p{font-size:12px;color:var(--text-2);margin-bottom:10px;line-height:1.4}
+.btn-promo{display:inline-block;background:var(--white);padding:7px 14px;border-radius:100px;font-size:11.5px;font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.promo-img{width:78px;height:78px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:44px}
+.promo-counter{position:absolute;bottom:12px;right:14px;background:var(--white);padding:3px 9px;border-radius:100px;font-size:11px;font-weight:800}
+
+.section{margin-top:24px;padding:0 18px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.section-head h3{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.section-head a{font-size:12.5px;font-weight:600;color:var(--text-2)}
+
+.news-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.news-card{border-radius:var(--radius-sm);padding:12px;min-height:130px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;position:relative;overflow:hidden}
+.news-card::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,.65) 100%)}
+.news-card>*{position:relative;z-index:1}
+.news-card.a{background:linear-gradient(135deg,#7e22ce,#c026d3,#fb923c)}
+.news-card.b{background:linear-gradient(135deg,#334155,#1e293b,#0f172a)}
+.news-tag{align-self:flex-start;background:rgba(255,255,255,.9);color:#0d1117;padding:2px 8px;border-radius:100px;font-size:9.5px;font-weight:700;margin-bottom:8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.news-title{font-size:12px;font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
+.news-date{font-size:10px;font-weight:500;opacity:.8}
+
+.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mc-card{background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);border-radius:var(--radius-sm);padding:12px;color:#0d1117;min-height:110px;display:flex;flex-direction:column;justify-content:space-between}
+.mc-card.b{background:linear-gradient(135deg,#ddd6fe 0%,#c4b5fd 100%)}
+.mc-tag{align-self:flex-start;background:rgba(255,255,255,.7);padding:2px 8px;border-radius:100px;font-size:9.5px;font-weight:700;margin-bottom:6px}
+.mc-title{font-size:11.5px;font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:6px}
+.mc-footer{display:flex;justify-content:space-between;align-items:flex-end}
+.mc-lab{font-size:9.5px;color:var(--text-2);font-weight:500}
+.mc-val{font-size:13px;font-weight:800;color:var(--green-2)}
+
+/* Funds */
+.funds-hero{padding:18px;background:var(--white);border-bottom:1px solid var(--border)}
+.funds-title-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.funds-bal-num{font-size:26px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.funds-bal-lbl{color:var(--text-2);font-size:12.5px;font-weight:500;margin-top:2px}
+.btn-deposit{background:var(--green);color:#fff;padding:10px 18px;border-radius:10px;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:6px}
+.btn-deposit svg{width:14px;height:14px;stroke:#fff;stroke-width:2.5;fill:none}
+
+.tabs{display:flex;border-bottom:1px solid var(--border);padding:0 18px;gap:24px;background:var(--white);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:14px 0;font-size:14px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;margin-bottom:-1px}
+.tab.active{color:var(--text);border-bottom-color:var(--green)}
+
+.funds-section{padding:18px}
+.funds-card{background:var(--white);border-radius:var(--radius);padding:16px;margin-bottom:12px;border:1px solid var(--border)}
+.funds-card-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.funds-card-row:last-child{margin-bottom:0}
+.funds-card-left{display:flex;align-items:center;gap:12px}
+.funds-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.funds-icon.blue{background:var(--blue)}
+.funds-icon.green{background:var(--green)}
+.funds-icon svg{width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.funds-amt{font-size:16px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.funds-name{color:var(--text-2);font-size:12.5px;font-weight:500;margin-top:2px}
+.funds-total-row{display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid var(--border);margin-top:14px}
+.funds-total-row span:first-child{font-weight:600;color:var(--text-2);font-size:13px}
+.funds-total-row span:last-child{font-weight:800;font-size:16px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+.tr-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:12px;overflow:hidden}
+.tr-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#f8fafc}
+.tr-tag{display:inline-block;background:var(--green-soft);color:var(--green-2);font-weight:700;font-size:10.5px;padding:4px 9px;border-radius:6px;margin-bottom:8px}
+.tr-body{padding:14px 16px}
+.tr-acct-name{font-weight:700;font-size:14.5px;margin-bottom:10px}
+.tr-acct-name span{font-weight:600;color:var(--text-2);margin-left:6px}
+.tr-line{display:flex;justify-content:space-between;align-items:center;padding:6px 0}
+.tr-line span:first-child{color:var(--text-2);font-size:13px}
+.tr-line span:last-child{font-weight:700;font-size:13.5px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+
+.tx-date{font-weight:700;font-size:13.5px;margin:18px 0 10px}
+.tx-list{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.tx-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.tx-item:last-child{border-bottom:0}
+.tx-icon{width:34px;height:34px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tx-icon svg{width:16px;height:16px;stroke:var(--text-2);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tx-body{flex:1;min-width:0}
+.tx-title{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:5px}
+.tx-title svg{width:12px;height:12px;color:var(--green)}
+.tx-id{color:var(--muted);font-size:11px;font-weight:500;margin-top:2px}
+.tx-right{text-align:right}
+.tx-amt{font-weight:800;font-size:14px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.tx-amt.pos{color:var(--green-2)}
+.tx-amt.neg{color:var(--red)}
+.tx-time{color:var(--muted);font-size:11px;margin-top:2px}
+
+/* Promotions */
+.promo-hero{background:linear-gradient(135deg,#d9f6e7 0%,#f0fdf6 100%);height:180px;display:flex;align-items:center;justify-content:center;font-size:76px;border-bottom:1px solid var(--border)}
+.promo-code-card{background:var(--white);margin:18px;padding:18px;border-radius:var(--radius);border:1px solid var(--border)}
+.promo-code-card h4{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.new-badge{background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px}
+.promo-input-row{display:flex;gap:8px;background:var(--soft);border-radius:10px;padding:4px;border:1px solid var(--border)}
+.promo-input-row input{flex:1;border:0;background:transparent;padding:11px 12px;outline:none;font-size:14px}
+.promo-input-row input::placeholder{color:var(--muted)}
+.promo-input-row button{background:var(--text);color:#fff;padding:0 18px;border-radius:8px;font-weight:700;font-size:13px}
+.promo-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 18px;background:var(--white)}
+.promo-tab{flex:1;padding:14px 0;font-size:14px;font-weight:700;color:var(--muted);border-bottom:2px solid transparent;text-align:center}
+.promo-tab.active{color:var(--text);border-bottom-color:var(--text)}
+.promo-empty{padding:80px 20px;text-align:center;color:var(--muted);font-size:13.5px}
+
+/* Copy Trading */
+.ct-tabs{display:flex;gap:20px;padding:0 18px;background:var(--white);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.ct-tabs::-webkit-scrollbar{display:none}
+.ct-tab{padding:14px 0;font-size:14px;font-weight:700;color:var(--muted);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.ct-tab.active{color:var(--text);border-bottom-color:var(--green)}
+.ct-search{display:flex;gap:8px;align-items:center;padding:14px 18px;background:var(--white)}
+.ct-search-box{flex:1;display:flex;align-items:center;gap:10px;background:var(--soft);border-radius:10px;padding:10px 14px}
+.ct-search-box svg{width:16px;height:16px;stroke:var(--muted);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.ct-search-box input{flex:1;border:0;background:transparent;outline:none;font-size:13.5px}
+.ct-filter{width:38px;height:38px;background:var(--soft);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.ct-filter svg{width:16px;height:16px;stroke:var(--text-2);stroke-width:2;fill:none}
+.ct-head{display:grid;grid-template-columns:1fr 90px 60px;padding:10px 18px;font-size:12px;font-weight:600;color:var(--muted);background:var(--bg)}
+.ct-head>div:nth-child(2){text-align:center}
+.ct-head>div:nth-child(3){text-align:right}
+.ct-list{background:var(--white)}
+.ct-row{display:grid;grid-template-columns:1fr 90px 60px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border);cursor:pointer}
+.ct-row:active{background:var(--soft)}
+.ct-left{display:flex;align-items:center;gap:10px;min-width:0}
+.ct-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--soft);overflow:hidden}
+.ct-meta{min-width:0}
+.ct-name{font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct-stats{font-size:11px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:8px;font-weight:500}
+.ct-stats span{display:inline-flex;align-items:center;gap:3px}
+.ct-stats svg{width:10px;height:10px;stroke:var(--muted);stroke-width:2;fill:none}
+.ct-growth{text-align:center;font-weight:800;font-size:14px;letter-spacing:-.01em}
+.ct-growth.pos{color:var(--green-2)}
+.ct-growth.neg{color:var(--red)}
+.ct-spark{width:60px;height:34px;display:block}
+
+/* Profile */
+.profile-hero{padding:24px 18px 22px;text-align:center;background:var(--white);border-bottom:1px solid var(--border)}
+.pf-avatar{width:70px;height:70px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:var(--text-2);margin:0 auto 12px;position:relative}
+.pf-avatar::after{content:'✓';position:absolute;bottom:2px;right:2px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.pf-name{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.pf-email{color:var(--text-2);font-size:13px;margin-top:3px}
+
+.invite-card{margin:18px;padding:20px;border-radius:var(--radius);background:linear-gradient(135deg,#d4f5e5 0%,#eafbf2 100%);display:flex;gap:14px;align-items:center;position:relative;overflow:hidden}
+.invite-content{flex:1;min-width:0;z-index:1}
+.invite-content h4{font-size:16px;font-weight:800;margin-bottom:5px;letter-spacing:-.01em}
+.invite-content p{font-size:12.5px;color:var(--text-2);line-height:1.4;margin-bottom:12px}
+.btn-invite{background:var(--white);padding:9px 18px;border-radius:100px;font-weight:700;font-size:12.5px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.invite-gift{font-size:52px;line-height:1;z-index:1}
+
+.pf-menu{margin:0 18px;background:var(--white);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.pf-item{display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid var(--border);cursor:pointer}
+.pf-item:last-child{border-bottom:0}
+.pf-item:active{background:var(--soft)}
+.pf-item svg.ic{width:20px;height:20px;stroke:var(--text-2);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.pf-item span{flex:1;font-weight:600;font-size:14.5px}
+.pf-item svg.chev{width:14px;height:14px;stroke:var(--muted);stroke-width:2;fill:none}
+.pf-item.logout span{color:var(--red)}
+.pf-item.logout svg.ic{stroke:var(--red)}
+.pf-ver{text-align:center;padding:24px 0;color:var(--muted);font-size:12px}
+
+/* Deposit */
+.dep-progress{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--white);position:relative}
+.dep-step{flex:1;text-align:center;position:relative;font-size:11px;font-weight:600;color:var(--muted)}
+.dep-step .num{width:28px;height:28px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-size:12px;font-weight:700;color:var(--text-2)}
+.dep-step.active{color:var(--text)}
+.dep-step.active .num{background:var(--green);color:#fff}
+.dep-step.done .num{background:var(--green);color:#fff}
+.dep-step:not(:last-child)::after{content:'';position:absolute;top:14px;left:calc(50% + 16px);right:calc(-50% + 16px);height:2px;background:var(--border)}
+.dep-step.done:not(:last-child)::after{background:var(--green)}
+.dep-step .num svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.5;fill:none}
+
+.dep-block{padding:16px 18px;background:var(--white);margin-top:8px}
+.dep-label{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-2)}
+.dep-account{display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--soft);border-radius:12px;margin-bottom:14px}
+.dep-account-info{display:flex;align-items:center;gap:12px}
+.dep-account-icon{width:36px;height:36px;border-radius:50%;background:var(--white);display:flex;align-items:center;justify-content:center}
+.dep-account-icon svg{width:16px;height:16px;stroke:var(--text-2);stroke-width:2;fill:none}
+.dep-account-name{font-weight:700;font-size:14px}
+.dep-account-sub{color:var(--text-2);font-size:12px;margin-top:2px}
+.dep-account svg.chev{width:14px;height:14px;stroke:var(--muted);stroke-width:2;fill:none}
+.dep-balance{display:flex;gap:8px;align-items:baseline;margin-bottom:8px}
+.dep-balance .lbl{color:var(--text-2);font-weight:600;font-size:13px}
+.dep-balance .val{color:var(--green-2);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
+.dep-amount{display:flex;align-items:baseline;gap:8px;padding:14px 0;border-bottom:1px solid var(--border)}
+.dep-amount input{flex:1;border:0;background:transparent;outline:none;font-size:26px;font-weight:800;letter-spacing:-.02em;width:100%}
+.dep-amount input::placeholder{color:var(--muted)}
+.dep-amount .cur{font-weight:800;font-size:14px;color:var(--text-2)}
+.dep-convert{font-size:12.5px;color:var(--text-2);margin-top:12px;font-weight:500}
+.dep-convert strong{color:var(--green-2);font-weight:700;font-variant-numeric:tabular-nums}
+.dep-phone{padding-top:16px}
+.dep-phone label{font-size:13px;font-weight:600;color:var(--text-2);display:block;margin-bottom:8px}
+.dep-phone .row{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.dep-phone .row input{flex:1;border:0;background:transparent;outline:none;font-size:14px}
+.dep-hint{font-size:12px;color:var(--muted);margin-top:8px;font-weight:500}
+.dep-summary-line{display:flex;justify-content:space-between;align-items:center;padding:8px 0}
+.dep-summary-line span:first-child{color:var(--text-2);font-size:13px;font-weight:500}
+.dep-summary-line span:last-child{font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums}
+.dep-link{display:inline-block;color:var(--green-2);font-weight:700;font-size:13.5px;padding:14px 0;cursor:pointer}
+
+.method-group-title{font-size:13px;font-weight:700;color:var(--text-2);margin:18px 0 8px}
+.method-list{display:flex;flex-direction:column;gap:8px}
+.method{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--soft);border-radius:12px;cursor:pointer;font-weight:700;font-size:14px}
+.method:active{background:var(--soft-2)}
+.method-left{display:flex;align-items:center;gap:12px}
+.method-icon{width:34px;height:34px;border-radius:8px;background:var(--white);display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden}
+.method svg.chev{width:14px;height:14px;stroke:var(--muted);stroke-width:2;fill:none}
+
+.btn-summary{display:block;width:calc(100% - 36px);margin:24px auto 20px;padding:16px;background:var(--soft-2);color:var(--muted);border-radius:12px;font-weight:700;font-size:15px;text-align:center}
+.btn-summary.active{background:var(--green);color:#fff;box-shadow:0 6px 20px rgba(0,192,117,.25)}
+.hide{display:none!important}
+.sync-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:5px;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <header class="hdr" id="hdr">
+    <div class="hdr-left">
+      <button class="hdr-icon" id="hdr-menu" onclick="toggleMenu()">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <button class="hdr-icon hide" id="hdr-back" onclick="goBack()">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+    <div class="hdr-title left" id="hdr-title"></div>
+    <div class="hdr-right">
+      <button class="hdr-icon bell" onclick="toast('No new notifications')">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="bell-badge">3</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- HOME -->
+    <section class="view on" id="view-home">
+      <div class="home-hero">
+        <div class="home-top-balance">
+          <div class="num" id="home-bal">$ 0.00
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="lbl">Total Funds <span class="sync-dot"></span></div>
+        </div>
+        <div class="home-chips">
+          <button class="chip-accounts">Real Accounts
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="btn-add-account" onclick="toast('New account coming soon')">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Add Account
+          </button>
+        </div>
+        <div class="acc-card">
+          <div class="acc-card-head">
+            <span class="acc-tag">STANDARD · MT5</span>
+            <span class="acc-balance" id="home-acc-bal">$ 0.00</span>
+          </div>
+          <div class="acc-row">
+            <div>
+              <div class="acc-name">My Real Account</div>
+              <div class="acc-num">501148369
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </div>
+            </div>
+            <button class="acc-details" onclick="setView('funds')">Details
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div style="padding:0 18px;margin-top:-72px">
+        <div class="actions-row">
+          <button class="action" onclick="openDeposit()">
+            <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
+            Deposit
+          </button>
+          <button class="action" onclick="toast('Transfer coming soon')">
+            <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4M21 5H9M7 23l-4-4 4-4M3 19h12"/></svg></div>
+            Transfer
+          </button>
+          <button class="action" onclick="location.href='/index.html'">
+            <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M3 20l4-4M7 16l-4 4M14 10l6-6M11 11l8-8M4 20h4v-4"/></svg></div>
+            Trade
+          </button>
+          <button class="action" onclick="toast('More options')">
+            <div class="action-icon"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></div>
+            More
+          </button>
+        </div>
+      </div>
+      <div class="section">
+        <div class="promo-banner green">
+          <div class="promo-content">
+            <h4>Join Contest</h4>
+            <p>Explore contests, compete with other traders, and win exclusive rewards</p>
+            <button class="btn-promo">Open Contests</button>
+          </div>
+          <div class="promo-img">🏆</div>
+          <span class="promo-counter">3 / 4</span>
+        </div>
+        <div class="promo-banner blue">
+          <div class="promo-content">
+            <h4>Explore Analysis Centre</h4>
+            <p>Access expert insights, clear signals, and proven strategies</p>
+            <button class="btn-promo">Go to analysis</button>
+          </div>
+          <div class="promo-img">💻</div>
+          <span class="promo-counter">2 / 4</span>
+        </div>
+        <div class="promo-banner light">
+          <div class="promo-content">
+            <h4>💰 240.00</h4>
+            <p>Collect coins and explore exclusive rewards at the Valetax Store</p>
+            <button class="btn-promo">Open VXclusive</button>
+          </div>
+          <div class="promo-img">🎁</div>
+          <span class="promo-counter">1 / 4</span>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-head"><h3>Hot News</h3><a href="#">See all</a></div>
+        <div class="news-grid">
+          <div class="news-card a">
+            <span class="news-tag">Banks · Fed · United States · Interest Rate</span>
+            <div><div class="news-title">According to the Federal Reserve Board, enforcement actions ag...</div><div class="news-date">16 Oct 2026</div></div>
+          </div>
+          <div class="news-card b">
+            <span class="news-tag">🇺🇸 USD/CAD</span>
+            <div><div class="news-title">The termination of enforcement actions against Gardner Bancsh...</div><div class="news-date">16 Oct 2026</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-head"><h3>Market Companion</h3><a href="#">See all</a></div>
+        <div class="mc-grid">
+          <div class="mc-card">
+            <span class="mc-tag">🇪🇺 EUR/JPY</span>
+            <div>
+              <div class="mc-title">The EUR/JPY is trading higher during the Evidence</div>
+              <div class="mc-footer"><div><div class="mc-lab">Very Low</div><div class="mc-lab">Percent</div></div><div class="mc-val">0.09 %</div></div>
+            </div>
+          </div>
+          <div class="mc-card b">
+            <span class="mc-tag">🇨🇦 CAD/JPY</span>
+            <div>
+              <div class="mc-title">The Canadian dollar advanced against the Evidence</div>
+              <div class="mc-footer"><div><div class="mc-lab">Very Low</div><div class="mc-lab">Percent</div></div><div class="mc-val">0.24 %</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="height:20px"></div>
+    </section>
+
+    <!-- FUNDS -->
+    <section class="view" id="view-funds">
+      <div class="funds-hero">
+        <div class="funds-title-row">
+          <div>
+            <div class="funds-bal-num" id="funds-bal">$ 0.00</div>
+            <div class="funds-bal-lbl">Total Funds</div>
+          </div>
+          <button class="btn-deposit" onclick="openDeposit()">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            Deposit
+          </button>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab active">Overview</button>
+        <button class="tab">Accounts</button>
+        <button class="tab">Transactions</button>
+      </div>
+      <div class="funds-section">
+        <div class="funds-card">
+          <div class="funds-card-row">
+            <div class="funds-card-left">
+              <div class="funds-icon blue"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
+              <div><div class="funds-amt">$ 0.00</div><div class="funds-name">Wallet Balance</div></div>
+            </div>
+          </div>
+          <div class="funds-card-row">
+            <div class="funds-card-left">
+              <div class="funds-icon green"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
+              <div><div class="funds-amt" id="funds-withdraw">$ 0.00</div><div class="funds-name">Withdrawable Trading Balance</div></div>
+            </div>
+          </div>
+          <div class="funds-total-row">
+            <span>Total withdrawable balance</span>
+            <span id="funds-total">$ 0.00</span>
+          </div>
+        </div>
+        <div class="section-head" style="margin-top:24px;padding:0 4px"><h3 style="font-size:18px">Trading</h3><a href="#">See all</a></div>
+        <div class="tr-card">
+          <div class="tr-head">
+            <div><span class="tr-tag">STANDARD · MT5</span><div class="tr-acct-name">501148369 <span>My Real Account</span></div></div>
+          </div>
+          <div class="tr-body">
+            <div class="tr-line"><span>Balance</span><span id="tr-bal">$ 0.00</span></div>
+            <div class="tr-line"><span>Available for withdrawal</span><span id="tr-avail">$ 0.00</span></div>
+          </div>
+        </div>
+        <div class="section-head" style="margin-top:24px;padding:0 4px"><h3 style="font-size:18px">Transactions</h3><a href="#">See all</a></div>
+        <div id="tx-container"></div>
+        <div style="height:20px"></div>
+      </div>
+    </section>
+
+    <!-- PROMOTIONS -->
+    <section class="view" id="view-promotions">
+      <div class="promo-hero">🎁</div>
+      <div class="promo-code-card">
+        <h4>Activate promo code or voucher <span class="new-badge">New</span></h4>
+        <div class="promo-input-row">
+          <input type="text" placeholder="Your promocode" id="promo-input">
+          <button onclick="applyPromo()">Apply</button>
+        </div>
+      </div>
+      <div class="promo-tabs">
+        <button class="promo-tab active">Active</button>
+        <button class="promo-tab">Archived</button>
+      </div>
+      <div class="promo-empty">No active promotions</div>
+    </section>
+
+    <!-- COPY TRADING -->
+    <section class="view" id="view-copytrade">
+      <div class="ct-tabs">
+        <button class="ct-tab active">Available strategies</button>
+        <button class="ct-tab">Investment results</button>
+        <button class="ct-tab">For money ma...</button>
+      </div>
+      <div class="ct-search">
+        <div class="ct-search-box">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="text" placeholder="Search">
+        </div>
+        <button class="ct-filter"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
+      </div>
+      <div class="ct-head"><div>Strategy</div><div>Growth</div><div>Chart</div></div>
+      <div class="ct-list" id="ct-list"></div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="view" id="view-profile">
+      <div class="profile-hero">
+        <div class="pf-avatar">MK</div>
+        <div class="pf-name">MAXWEL KIPRONO YEGON</div>
+        <div class="pf-email">borrose607@gmail.com</div>
+      </div>
+      <div class="invite-card">
+        <div class="invite-content">
+          <h4>Invite and earn</h4>
+          <p>Share Valetax with friends and get rewarded for every referral</p>
+          <button class="btn-invite" onclick="toast('Invite link copied!')">Invite now</button>
+        </div>
+        <div class="invite-gift">🎁</div>
+      </div>
+      <div class="pf-menu">
+        <div class="pf-item" onclick="toast('Partnership Section')"><svg class="ic" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Partnership Section</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div class="pf-item" onclick="toast('Analysis')"><svg class="ic" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 9l-4 4-3-3-5 5"/></svg><span>Analysis</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div class="pf-item" onclick="toast('VXclusive')"><svg class="ic" viewBox="0 0 24 24"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7"/></svg><span>VXclusive</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div class="pf-item" onclick="toast('Contests')"><svg class="ic" viewBox="0 0 24 24"><path d="M17 3H7v7a5 5 0 0 0 10 0V3zM8 21h8M12 17v4"/></svg><span>Contests</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div class="pf-item" onclick="toast('My Manager')"><svg class="ic" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>My Manager</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div class="pf-item" onclick="toast('Support Chat')"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 3-3 3M12 17h.01"/></svg><span>Support Chat</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div class="pf-item" onclick="toast('Tickets')"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V6a5 5 0 0 1 10 0v2"/></svg><span>Tickets</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div class="pf-item" onclick="toast('Profile Settings')"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg><span>Profile Settings</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+        <div class="pf-item logout" onclick="toast('Logging out...')"><svg class="ic" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span>Log Out</span><svg class="chev" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+      <div class="pf-ver">App Version: 63.0(135)</div>
+    </section>
+
+    <!-- DEPOSIT -->
+    <section class="view" id="view-deposit">
+      <div class="dep-progress">
+        <div class="dep-step"><div class="num">1</div>Deposit method</div>
+        <div class="dep-step active"><div class="num">$</div>Specify amount</div>
+        <div class="dep-step"><div class="num">✓</div>Summary</div>
+      </div>
+      <div class="dep-block">
+        <div class="dep-label">Deposit to</div>
+        <div class="dep-account">
+          <div class="dep-account-info">
+            <div class="dep-account-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
+            <div><div class="dep-account-name">501148369</div><div class="dep-account-sub">My Real Account</div></div>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="dep-balance"><span class="lbl">Balance</span><span class="val" id="dep-bal">0.00 USD</span></div>
+        <div class="dep-label" style="margin-top:14px">Amount to deposit</div>
+        <div class="dep-amount">
+          <input type="number" inputmode="decimal" id="dep-amt" value="" placeholder="0" oninput="updateDeposit()">
+          <span class="cur">KES</span>
+        </div>
+        <div class="dep-convert">In account currency <strong id="dep-conv">0.00 USD</strong></div>
+        <div class="dep-phone">
+          <label>Phone number</label>
+          <div class="row"><input type="tel" value="254796681162" readonly></div>
+          <div class="dep-hint">Default phone number. To change it, contact support.</div>
+        </div>
+        <div style="margin-top:22px">
+          <div class="dep-summary-line"><span>Payment method</span><span>Mobile Money</span></div>
+          <div class="dep-summary-line"><span>Deposit fees</span><span>0.00 USD</span></div>
+          <div class="dep-summary-line"><span>Will be deposited</span><span id="dep-final">0.00 USD</span></div>
+        </div>
+        <div class="dep-link" onclick="toast('Enter promo code above')">Have a promocode?</div>
+      </div>
+      <button class="btn-summary" id="dep-summary" onclick="confirmDeposit()">Summary</button>
+    </section>
+
+    <!-- DEPOSIT METHODS -->
+    <section class="view" id="view-methods">
+      <div class="dep-progress">
+        <div class="dep-step active"><div class="num">1</div>Deposit method</div>
+        <div class="dep-step"><div class="num">$</div>Specify amount</div>
+        <div class="dep-step"><div class="num">✓</div>Summary</div>
+      </div>
+      <div class="dep-block">
+        <div class="method-group-title">Credit/Debit Cards</div>
+        <div class="method-list">
+          <div class="method" onclick="selectMethod('CCJenapay No_Fee')">
+            <div class="method-left"><div class="method-icon">💳</div><span>CCJenapay No_Fee</span></div>
+            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="method-group-title">Crypto</div>
+        <div class="method-list">
+          <div class="method" onclick="selectMethod('USDT TRC20')">
+            <div class="method-left"><div class="method-icon">💎</div><span>USDT TRC20</span></div>
+            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="method" onclick="selectMethod('USDT BEP20')">
+            <div class="method-left"><div class="method-icon">💎</div><span>USDT BEP20</span></div>
+            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="method" onclick="selectMethod('Binance Pay')">
+            <div class="method-left"><div class="method-icon">🟡</div><span>Binance Pay</span></div>
+            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="method-group-title">E-Wallet</div>
+        <div class="method-list">
+          <div class="method" onclick="selectMethod('Mobile Money MPESA and more')">
+            <div class="method-left"><div class="method-icon">📱</div><span>Mobile Money MPESA and more</span></div>
+            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="method" onclick="selectMethod('Mobile Money')">
+            <div class="method-left"><div class="method-icon">📱</div><span>Mobile Money</span></div>
+            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+          <div class="method" onclick="selectMethod('Skrill EUR')">
+            <div class="method-left"><div class="method-icon">💜</div><span>Skrill EUR</span></div>
+            <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav id="nav">
+    <button class="nav-btn active" data-view="home" onclick="setView('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8l4 8 4-8"/><path d="M12 8l4 8 4-8" opacity=".55"/></svg>
+      Home
+    </button>
+    <button class="nav-btn" data-view="funds" onclick="setView('funds')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="2.5"/><path d="M3 9h18"/></svg>
+      Funds
+    </button>
+    <button class="nav-btn" data-view="promotions" onclick="setView('promotions')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 15l6-6"/></svg>
+      Promotions
+    </button>
+    <button class="nav-btn" data-view="copytrade" onclick="setView('copytrade')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/></svg>
+      CopyTrade
+    </button>
+  </nav>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   SHARED STORE — reads/writes the same IndexedDB as MT5 terminal
+   ═══════════════════════════════════════════════════════════ */
+const KES_RATE = 129.5;
+const DB_NAME = 'mt5_web_terminal';
+
+const Store = {
+  db: null,
+  ch: null,
+  async open(){
+    this.db = await new Promise((res, rej) => {
+      const r = indexedDB.open(DB_NAME, 1);
+      r.onupgradeneeded = e => {
+        const d = e.target.result;
+        ['settings','account'].forEach(n => { if(!d.objectStoreNames.contains(n)) d.createObjectStore(n); });
+        ['positions','orders','deals'].forEach(n => { if(!d.objectStoreNames.contains(n)) d.createObjectStore(n, {keyPath:'id'}); });
+      };
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    if('BroadcastChannel' in window) this.ch = new BroadcastChannel('mt5_shared');
+    return this;
+  },
+  _os(name, mode){ return this.db.transaction(name, mode || 'readonly').objectStore(name); },
+  getAccount(){
+    return new Promise(res => {
+      const r = this._os('account').get('acc');
+      r.onsuccess = () => res(r.result || {bal:0});
+      r.onerror = () => res({bal:0});
+    });
+  },
+  async setAccount(acc){
+    return new Promise(res => {
+      const r = this._os('account','readwrite').put(acc, 'acc');
+      r.onsuccess = () => {
+        if(this.ch) this.ch.postMessage({type:'account'});
+        res();
+      };
+      r.onerror = () => res();
+    });
+  },
+  async getStore(name){
+    return new Promise(res => {
+      const r = this._os(name).getAll();
+      r.onsuccess = () => res(r.result || []);
+      r.onerror = () => res([]);
+    });
+  },
+  async getSetting(key){
+    return new Promise(res => {
+      const r = this._os('settings').get(key);
+      r.onsuccess = () => res(r.result ? r.result.value : null);
+      r.onerror = () => res(null);
+    });
+  },
+  async setSetting(key, value){
+    return new Promise(res => {
+      const r = this._os('settings','readwrite').put({key, value});
+      r.onsuccess = () => res();
+      r.onerror = () => res();
+    });
+  },
+  async deposit(usdAmount, kesAmount){
+    const acc = await this.getAccount();
+    acc.bal = (acc.bal || 0) + usdAmount;
+    await this.setAccount(acc);
+    /* Log the deposit */
+    const history = (await this.getSetting('deposit_history')) || [];
+    history.unshift({
+      id: 'D' + Date.now(),
+      usd: usdAmount,
+      kes: kesAmount,
+      date: Date.now(),
+      status: 'completed'
+    });
+    await this.setSetting('deposit_history', history.slice(0, 200));
+    return acc.bal;
+  },
+  onAccountChange(fn){
+    if(this.ch) this.ch.onmessage = e => { if(e.data && e.data.type === 'account') fn(); };
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════
+   STATE + NAVIGATION
+   ═══════════════════════════════════════════════════════════ */
+const STATE = { view:'home', account:null, depositPending:null };
+
+function setView(view){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  const el = document.getElementById('view-' + view);
+  if(el) el.classList.add('on');
+
+  const titles = {
+    home:null, funds:'Funds Summary', promotions:'Promotions',
+    copytrade:'Copy Trading', profile:'Profile',
+    deposit:'Deposit', methods:'Deposit'
+  };
+  const t = document.getElementById('hdr-title');
+  const backBtn = document.getElementById('hdr-back');
+  const menuBtn = document.getElementById('hdr-menu');
+
+  if(titles[view]){
+    t.textContent = titles[view];
+    t.classList.remove('left');
+    backBtn.classList.remove('hide');
+    menuBtn.classList.add('hide');
+  } else {
+    t.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M6 8l4 8 4-8" stroke="#00c075" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8l4 8 4-8" stroke="#00c075" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/></svg>
+      Valetax
+    </span>`;
+    t.classList.add('left');
+    backBtn.classList.add('hide');
+    menuBtn.classList.remove('hide');
+  }
+
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === view);
+  });
+
+  STATE.view = view;
+  document.getElementById('main').scrollTop = 0;
+
+  if(view === 'funds') renderFunds();
+  if(view === 'home') renderHome();
+  if(view === 'deposit') renderDeposit();
+}
+
+function goBack(){
+  if(STATE.view === 'methods' || STATE.view === 'deposit') setView('home');
+  else if(STATE.view === 'profile') setView('home');
+  else setView('home');
+}
+
+function toggleMenu(){ setView(STATE.view === 'profile' ? 'home' : 'profile'); }
+
+/* ═══════════════════════════════════════════════════════════
+   RENDERERS — pull live data from shared store
+   ═══════════════════════════════════════════════════════════ */
+async function renderHome(){
+  const acc = await Store.getAccount();
+  STATE.account = acc;
+  const bal = (acc.bal || 0);
+  document.getElementById('home-bal').innerHTML = '$ ' + bal.toFixed(2) + ' <svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  document.getElementById('home-acc-bal').textContent = '$ ' + bal.toFixed(2);
+}
+
+async function renderFunds(){
+  const acc = await Store.getAccount();
+  const bal = acc.bal || 0;
+  document.getElementById('funds-bal').textContent = '$ ' + bal.toFixed(2);
+  document.getElementById('funds-withdraw').textContent = '$ ' + bal.toFixed(2);
+  document.getElementById('funds-total').textContent = '$ ' + bal.toFixed(2);
+  document.getElementById('tr-bal').textContent = '$ ' + bal.toFixed(2);
+  document.getElementById('tr-avail').textContent = '$ ' + bal.toFixed(2);
+
+  /* Render transactions from deposit history */
+  const history = (await Store.getSetting('deposit_history')) || [];
+  const txContainer = document.getElementById('tx-container');
+  if(history.length === 0){
+    txContainer.innerHTML = '<div class="promo-empty" style="padding:40px 20px">No transactions yet</div>';
+  } else {
+    /* Group by date */
+    const groups = {};
+    history.forEach(h => {
+      const d = new Date(h.date);
+      const key = d.toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+      if(!groups[key]) groups[key] = [];
+      groups[key].push(h);
+    });
+    let html = '';
+    Object.keys(groups).forEach(date => {
+      html += `<div class="tx-date">${date}</div><div class="tx-list">`;
+      groups[date].forEach(h => {
+        const time = new Date(h.date).toLocaleString('en-GB', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',','');
+        html += `<div class="tx-item">
+          <div class="tx-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div>
+          <div class="tx-body">
+            <div class="tx-title">Deposit <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="tx-id">ID: ${h.id.slice(-7)}</div>
+          </div>
+          <div class="tx-right">
+            <div class="tx-amt pos">+ $${h.usd.toFixed(2)}</div>
+            <div class="tx-time">${time}</div>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    });
+    txContainer.innerHTML = html;
+  }
+}
+
+async function renderDeposit(){
+  const acc = await Store.getAccount();
+  const bal = acc.bal || 0;
+  document.getElementById('dep-bal').textContent = bal.toFixed(2) + ' USD';
+  updateDeposit();
+}
+
+function updateDeposit(){
+  const kes = parseFloat(document.getElementById('dep-amt').value) || 0;
+  const usd = kes / KES_RATE;
+  document.getElementById('dep-conv').textContent = usd.toFixed(2) + ' USD';
+  document.getElementById('dep-final').textContent = usd.toFixed(2) + ' USD';
+  const btn = document.getElementById('dep-summary');
+  if(kes > 0) btn.classList.add('active');
+  else btn.classList.remove('active');
+}
+
+function openDeposit(){
+  STATE.depositPending = null;
+  setView('deposit');
+}
+
+function confirmDeposit(){
+  const kes = parseFloat(document.getElementById('dep-amt').value) || 0;
+  if(kes <= 0){ toast('Enter an amount first'); return; }
+  const usd = kes / KES_RATE;
+  /* Show confirmation */
+  if(!confirm(`Deposit $${usd.toFixed(2)} USD (${kes} KES) to account 501148369?`)) return;
+  /* Process */
+  Store.deposit(usd, kes).then(newBal => {
+    toast(`✓ Deposited $${usd.toFixed(2)} — Balance: $${newBal.toFixed(2)}`);
+    document.getElementById('dep-amt').value = '';
+    /* Refresh everything */
+    renderHome();
+    renderFunds();
+    /* Go to home */
+    setTimeout(() => setView('home'), 800);
+  });
+}
+
+function selectMethod(name){
+  toast('Selected: ' + name);
+  setTimeout(() => setView('deposit'), 500);
+}
+
+function applyPromo(){
+  const v = document.getElementById('promo-input').value.trim();
+  if(!v){ toast('Enter a code'); return; }
+  toast('Applying code: ' + v);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COPY TRADING
+   ═══════════════════════════════════════════════════════════ */
+const STRATEGIES = [
+  {name:'Multi b...',followers:5496,min:1,growth:1654.76,av:'🌍'},
+  {name:'Kucing...',followers:3737,min:5,growth:184.58,av:'🐈'},
+  {name:'Go to ...',followers:3660,min:1,growth:192.32,av:'⚪'},
+  {name:'Low Ri...',followers:3488,min:1,growth:742.16,av:'🪙'},
+  {name:'Trade ...',followers:3145,min:1,growth:360.21,av:'⚫'},
+  {name:'Apex G...',followers:3040,min:25,growth:415.43,av:'🦍'},
+  {name:'ACM G...',followers:2678,min:5,growth:244.6,av:'🅰️'},
+  {name:'SAFE ...',followers:2055,min:5,growth:667.98,av:'🛡️'},
+  {name:'Big Dre...',followers:1621,min:1,growth:1347.15,av:'🐻'},
+  {name:'Gold$1',followers:1456,min:1,growth:1627.13,av:'🥇'},
+  {name:'HAZILI...',followers:1339,min:1,growth:40.13,av:'🦅'},
+  {name:'My For...',followers:1131,min:1,growth:137.44,av:'📊'},
+  {name:'ANGEL ..',followers:1127,min:1,growth:1.21,av:'😇'},
+  {name:'RAIZEN',followers:1125,min:1,growth:-99.95,av:'🔻'}
+];
+
+function sparkline(positive){
+  const color = positive ? '#00c075' : '#ef4444';
+  const w = 60, h = 34;
+  const pts = [];
+  const n = 20;
+  let v = 20;
+  for(let i=0;i<n;i++){
+    v += (Math.random()-0.45) * 6;
+    v = Math.max(4, Math.min(h-4, v));
+    pts.push([i/(n-1)*(w-4)+2, h-v]);
+  }
+  const d = pts.map((p,i) => (i?'L':'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const area = d + ' L ' + (w-2) + ' ' + (h-2) + ' L 2 ' + (h-2) + ' Z';
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="none"><path d="${area}" fill="${color}" opacity=".12"/><path d="${d}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+
+function renderCopyTrade(){
+  const list = document.getElementById('ct-list');
+  list.innerHTML = STRATEGIES.map(s => {
+    const pos = s.growth >= 0;
+    const sign = pos ? '+' : '';
+    return `<div class="ct-row" onclick="toast('Opening ${s.name}')">
+      <div class="ct-left">
+        <div class="ct-avatar">${s.av}</div>
+        <div class="ct-meta">
+          <div class="ct-name">${s.name}</div>
+          <div class="ct-stats">
+            <span><svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${s.followers}</span>
+            <span><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg>Min. $${s.min}</span>
+          </div>
+        </div>
+      </div>
+      <div class="ct-growth ${pos?'pos':'neg'}">${sign}${s.growth.toFixed(2)}%</div>
+      <div class="ct-spark">${sparkline(pos)}</div>
+    </div>`;
+  }).join('');
+}
+renderCopyTrade();
+
+/* Tabs */
+document.querySelectorAll('.tabs, .ct-tabs, .promo-tabs').forEach(tabs => {
+  tabs.querySelectorAll('.tab, .ct-tab, .promo-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tab.parentElement.querySelectorAll('.tab, .ct-tab, .promo-tab').forEach(s => s.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════ */
+let toastT;
+function toast(msg){
+  let el = document.getElementById('__toast');
+  if(!el){
+    el = document.createElement('div');
+    el.id = '__toast';
+    el.style.cssText = 'position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:rgba(20,20,20,.95);color:#fff;padding:12px 20px;border-radius:100px;font-size:13.5px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:opacity .25s,transform .25s;pointer-events:none;opacity:0;font-family:inherit;max-width:90vw;text-align:center';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  el.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastT);
+  toastT = setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(10px)';
+  }, 2000);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════════ */
+(async function(){
+  try{
+    await Store.open();
+    renderHome();
+    /* Listen for changes from the terminal page */
+    Store.onAccountChange(() => {
+      renderHome();
+      if(STATE.view === 'funds') renderFunds();
+    });
+    /* Poll every 2s as fallback (in case BroadcastChannel isn't available) */
+    setInterval(() => {
+      if(STATE.view === 'home') renderHome();
+      if(STATE.view === 'funds') renderFunds();
+    }, 2000);
+  }catch(e){
+    console.warn('Shared store error:', e);
+  }
+  setView('home');
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+})();
+</script>
+</body>
+  </html>
