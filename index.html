@@ -11,7 +11,7 @@ html,body{height:100%;width:100%;margin:0;overscroll-behavior:none;touch-action:
 .scr{display:none;position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}#sc-chart{overflow:hidden}.scr.on{display:block}#sc-chart.on{display:flex;flex-direction:column}
 #oc{display:none;height:46px;flex:none;background:#000;align-items:stretch}#oc.on{display:flex}#oc.bl{order:2}
 #oc button{flex:1;border:0;border-radius:0;background:#EF5350;color:#fff;padding:0 12px;position:relative;font-family:Roboto,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center}#oc button small{position:absolute;top:4px;left:8px;font-size:11px;font-weight:700}#oc button b{font-size:18px;font-weight:500}#oc button i{font-size:24px;font-weight:700;font-style:normal}#oc button u{font-size:14px;text-decoration:none;align-self:flex-start;margin-top:11px}#ocv{width:34%;display:flex;align-items:center;justify-content:space-between;padding:0 10px;color:#fff;font-size:15px}#ocv span{padding:10px;cursor:pointer;font-size:20px}#ocv input{width:80px;background:none;border:0;color:#fff;text-align:center;font-size:22px;font-weight:700;-moz-appearance:textfield}#ocv input::-webkit-inner-spin-button{display:none}
-#cw{flex:1;position:relative;min-height:0}#cv{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
+#cw{flex:1;position:relative;min-height:0;touch-action:none}#cv{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
 #live{display:none;position:absolute;right:66px;bottom:26px;background:var(--bl);color:#fff;border:0;border-radius:15px;padding:8px 14px;font-size:14px;font-weight:700;z-index:21}
 #tradestack{position:absolute;left:10px;right:10px;bottom:14px;z-index:20;pointer-events:none;display:flex;flex-direction:column;gap:2px;max-height:46vh;overflow:hidden;justify-content:flex-end}
 .trade-notif{display:flex;align-items:center;background:rgba(42,45,51,.96);border-left:5px solid #2962FF;padding:14px 18px;font-size:17px;color:#d0d0d0;font-weight:500;animation:slideup .25s ease-out;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
@@ -225,15 +225,20 @@ g.textAlign='left';g.font='bold 12px Roboto,Arial,sans-serif';g.fillStyle='#4D9D
 if(S.cross&&cx!=null&&ax!=null&&(Math.abs(cx-ax)>2||Math.abs(cy-ay)>2)){const pa=mn+(mx-mn)*(1-ay/PH),pb=mn+(mx-mn)*(1-cy/PH),df=pb-pa,ia=Math.round(last+12.5-(PW-ax)/bw),ib=Math.round(last+12.5-(PW-cx)/bw),nb=Math.abs(ib-ia),mi=nb*TFS[S.tf],du=mi>=1440?Math.floor(mi/1440)+'d '+Math.floor(mi%1440/60)+'h':Math.floor(mi/60)+'h'+(mi%60?' '+mi%60+'m':'');g.fillStyle=df>=0?'rgba(41,98,255,.2)':'rgba(239,83,80,.2)';g.fillRect(Math.min(ax,cx),Math.min(ay,cy),Math.abs(cx-ax),Math.abs(cy-ay));const sg=df>=0?'+':'-',t1=Math.round(Math.abs(df)*10**d)+' points ('+sg+Math.abs(df/pa*100).toFixed(2)+'%, '+sg+Math.abs(df).toFixed(d)+')',t2=nb+' bars, '+du;g.font='11px Roboto,Arial,sans-serif';const tw=Math.max(g.measureText(t1).width,g.measureText(t2).width)+10,tx=Math.max(0,Math.min(PW-tw,cx-tw/2)),ty=df>=0?cy-38:cy+8;g.fillStyle=S.theme=='Light'?'#f0f0f0':'#d0d0d0';g.fillRect(tx,ty,tw,32);g.fillStyle='#222';g.textAlign='left';g.font='bold 11px Roboto,Arial,sans-serif';g.fillText(t1,tx+5,ty+9);g.fillText(t2,tx+5,ty+23)}
 if(S.cross&&cx!=null){g.strokeStyle=C.tx;g.setLineDash([3,3]);g.beginPath();g.moveTo(cx,0);g.lineTo(cx,PH);g.moveTo(0,cy);g.lineTo(PW,cy);g.stroke();g.setLineDash([]);const pr=mn+(mx-mn)*(1-cy/PH),lblBg=S.theme=='Light'?'#E0E0E0':'#363A45',lblFg=S.theme=='Light'?'#111':'#fff';g.fillStyle=lblBg;g.fillRect(PW,cy-9,56,18);g.fillStyle=lblFg;g.textAlign='center';g.font='bold 11px Roboto,Arial,sans-serif';g.fillText(fm(sy,pr),PW+28,cy);const i=Math.max(0,Math.min(a.length-1,Math.round(last+12.5-(PW-cx)/bw)));g.fillStyle=lblBg;g.fillRect(Math.max(0,Math.min(PW-70,cx-35)),PH+1,70,17);g.fillStyle=lblFg;g.fillText(ft(a[i].t),Math.max(35,Math.min(PW-35,cx)),PH+9)}
 $('#live').style.display=S.off>0?'block':'none'}
+/* ═══ Chart interaction ═══ */
 const ptr=new Map();let drag=null,pd0=0;
+/* Robust price-scale (Y-axis) hit test — 100px wide strip on the right */
+function isOnPriceScale(x,r){return (x - r.left) >= (W - 100)}
 cv.onpointerdown=e=>{
   cv.setPointerCapture(e.pointerId);
   ptr.set(e.pointerId,e);
   const r=cv.getBoundingClientRect();
-  drag={x:e.clientX,y:e.clientY,off:S.off,mv:0,pm:S.pm};
-  if(e.clientX-r.left > W-90 && ptr.size==1){
-    if(!S.pr || S.pr<=0){ S.pr=VM.mx-VM.mn; S.pm=(VM.mn+VM.mx)/2; }
-    drag.ax=1; drag.mv=1; drag.pm=S.pm; drag.pr=S.pr;
+  const onAxis = isOnPriceScale(e.clientX, r) && ptr.size===1;
+  drag={x:e.clientX,y:e.clientY,off:S.off,mv:0,pm:S.pm,ax:onAxis?1:0};
+  /* Initialize the manual scale on first axis touch */
+  if(onAxis){
+    if(!S.pr || S.pr<=0){ S.pr = VM.mx - VM.mn; S.pm = (VM.mn + VM.mx) / 2; }
+    drag.pm = S.pm;
     return;
   }
   if(S.cross){cx=e.clientX-r.left;cy=e.clientY-r.top;ax=cx;ay=cy;draw()}
@@ -244,28 +249,42 @@ cv.onpointermove=e=>{
   ptr.set(e.pointerId,e);
   const r=cv.getBoundingClientRect();
   const bw=(W-56)/S.vis;
+  /* Price-scale drag */
   if(drag && drag.ax){
-    if(!S.pr || S.pr<=0){ S.pr=VM.mx-VM.mn; }
-    const dy=e.clientY-drag.y;
-    S.pm = drag.pm + dy*(S.pr/(H-18));
+    if(!S.pr || S.pr<=0) S.pr = VM.mx - VM.mn;
+    const dy = e.clientY - drag.y;
+    S.pm = drag.pm + dy * (S.pr / (H-18));
     draw();
     return;
   }
-  if(ptr.size==2&&drag.v){const[a,b]=[...ptr.values()];S.vis=Math.max(15,Math.min(250,Math.round(drag.v*pd0/Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY))));drag.mv=1;draw();return}
+  if(ptr.size==2 && drag.v){const[a,b]=[...ptr.values()];S.vis=Math.max(15,Math.min(250,Math.round(drag.v*pd0/Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY))));drag.mv=1;draw();return}
   if(!drag) return;
-  if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6)drag.mv=1;
+  if(Math.hypot(e.clientX-drag.x, e.clientY-drag.y) > 6) drag.mv = 1;
   if(S.cross){cx=e.clientX-r.left;cy=e.clientY-r.top}
   else if(drag.mv){
     const dx=e.clientX-drag.x;
     const dy=e.clientY-drag.y;
-    S.off=Math.max(0,Math.min(cands().length-10,drag.off+Math.round(dx/bw)));
-    S.pm=drag.pm+(dy*S.pr/(H-18));
+    S.off = Math.max(0, Math.min(cands().length-10, drag.off + Math.round(dx/bw)));
+    S.pm  = drag.pm + (dy * S.pr / (H-18));
   }
   draw();
 };
-cv.onpointerup=e=>{ptr.delete(e.pointerId);if(drag&&!drag.mv&&!S.cross&&!drag.ax&&ptr.size==0)radial(e.clientX,e.clientY);if(ptr.size==0){drag=null;save()}};
-cv.onpointercancel=e=>{ptr.delete(e.pointerId);if(ptr.size==0)drag=null};
-cv.onwheel=e=>{e.preventDefault();if(e.offsetX>W-90){if(!S.pr){S.pm=(VM.mn+VM.mx)/2;S.pr=VM.mx-VM.mn}S.pr*=e.deltaY>0?1.1:.9;save();draw();return}S.vis=Math.max(15,Math.min(250,Math.round(S.vis*(e.deltaY>0?1.1:.9))));draw()};
+cv.onpointerup=e=>{
+  ptr.delete(e.pointerId);
+  if(drag && !drag.mv && !S.cross && !drag.ax && ptr.size==0) radial(e.clientX, e.clientY);
+  if(ptr.size==0){ drag=null; save() }
+};
+cv.onpointercancel=e=>{ptr.delete(e.pointerId); if(ptr.size==0) drag=null};
+cv.onwheel=e=>{
+  e.preventDefault();
+  if(e.offsetX > W-90){
+    if(!S.pr){S.pm=(VM.mn+VM.mx)/2; S.pr=VM.mx-VM.mn}
+    S.pr *= e.deltaY>0 ? 1.1 : 0.9;
+    save(); draw(); return;
+  }
+  S.vis = Math.max(15, Math.min(250, Math.round(S.vis*(e.deltaY>0?1.1:.9))));
+  draw();
+};
 $('#live').onclick=()=>{S.off=0;S.pr=0;S.pm=0;draw()};
 let tt;const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),1800)};
 function sheet(html,mount){const o=document.createElement('div');o.className='ov';o.innerHTML='<div class="sheet">'+html+'</div>';$('#app').appendChild(o);const cl=()=>{o.classList.remove('on');setTimeout(()=>o.remove(),330)};o.onclick=e=>{if(e.target==o)cl()};requestAnimationFrame(()=>requestAnimationFrame(()=>o.classList.add('on')));mount&&mount(o.firstChild,cl);return cl}
@@ -443,8 +462,7 @@ rAcc=function(){
       <span class="ac-head-grid">${gridIcon}</span>
       <span class="ac-head-bell">${bellIcon}</span>
     </div>
-    `+sm('Valetax Demo','641339533','ValetaxGlobal-Live3',f2(ACC.bal))
-     +sm('Isaac','581022950','ValetaxGlobal-Live3','0.00');
+    `+sm('Isaac','581022950','ValetaxGlobal-Live3','0.00');
 };
 async function boot(){await idb();if(db){const s=await get('settings','state');if(s)SAVE.forEach(k=>{if(s[k]!==undefined)S[k]=s[k]});const a=await get('account','acc');if(a)ACC=a;POS=await all('positions');DL=await all('deals');ORD=await all('orders')}
 if(S.v!=4){S.v=4;S.syms=Object.keys(SY).slice(0,11);S.oc=1;S.scheme='Custom';S.col={};S.vis=68;S.grid=1;S.ohlc=0;S.vol=0;S.ask=1;S.bid=1;S.sep=0;S.lot=.01}S.oct=0;delete S.auto;
