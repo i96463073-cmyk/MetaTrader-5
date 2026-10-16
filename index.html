@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MetaTrader 5 Clone</title>
+    <title>MetaTrader 5 Clone - Live Engine</title>
     <style>
         /* --- Global Resets & Variables --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; user-select: none; }
@@ -22,7 +22,6 @@
         }
         body { background-color: var(--bg); color: var(--text); overflow: hidden; height: 100vh; display: flex; justify-content: center; }
         
-        /* Mobile Container to make it look good on desktop */
         #app { width: 100%; max-width: 480px; height: 100vh; position: relative; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
 
         /* --- Icons --- */
@@ -65,28 +64,22 @@
         .nav-item svg { width: 22px; height: 22px; }
         .nav-badge { position: absolute; top: -5px; right: -8px; background: var(--red); color: white; font-size: 9px; padding: 2px 5px; border-radius: 10px; font-weight: bold; }
 
-        /* --- View: Charts --- */
+        /* --- View: Charts (Live Engine) --- */
         #view-charts { display: flex; flex-direction: column; }
         .chart-header { display: flex; height: 40px; }
-        .chart-sell { flex: 1; background: var(--red); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-weight: bold; font-size: 15px; cursor: pointer; }
+        .chart-sell { flex: 1; background: var(--red); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.2s; }
         .chart-spread { width: 80px; background: var(--bg); display: flex; justify-content: center; align-items: center; font-size: 14px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-        .chart-buy { flex: 1; background: var(--blue); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-weight: bold; font-size: 15px; cursor: pointer; }
+        .chart-buy { flex: 1; background: var(--blue); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-weight: bold; font-size: 15px; cursor: pointer; transition: background 0.2s; }
         .chart-symbol-info { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); padding: 5px 10px; background: #000; }
         
-        .chart-area { flex: 1; position: relative; background-image: linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px); background-size: 40px 40px; background-position: center; overflow: hidden; }
-        .chart-y-axis { position: absolute; right: 0; top: 0; height: 100%; width: 60px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding: 5px 5px 5px 0; font-size: 9px; color: var(--text-muted); background: rgba(0,0,0,0.8); z-index: 10; }
-        .chart-x-axis { position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; font-size: 9px; color: var(--text-muted); background: rgba(0,0,0,0.8); z-index: 10; border-top: 1px solid var(--border); }
+        .chart-area { flex: 1; position: relative; overflow: hidden; background: #000; }
+        #chart-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         
-        .candle-container { position: absolute; bottom: 20px; left: 10px; right: 60px; height: calc(100% - 20px); display: flex; align-items: flex-end; gap: 4px; }
-        .candle { width: 6px; position: relative; }
-        .candle.up { background-color: var(--green); }
-        .candle.down { background-color: var(--red); }
-        .candle::before { content: ''; position: absolute; left: 50%; transform: translateX(-50%); width: 1px; height: 15px; background-color: inherit; }
-        .candle.up::before { bottom: 100%; }
-        .candle.down::before { top: 100%; }
+        .chart-y-axis { position: absolute; right: 0; top: 0; height: 100%; width: 60px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; padding: 5px 5px 5px 0; font-size: 9px; color: var(--text-muted); background: rgba(0,0,0,0.6); z-index: 10; pointer-events: none; }
+        .chart-x-axis { position: absolute; bottom: 0; left: 0; width: 100%; height: 20px; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; font-size: 9px; color: var(--text-muted); background: rgba(0,0,0,0.8); z-index: 10; border-top: 1px solid var(--border); pointer-events: none; }
         
-        .current-price-line { position: absolute; top: 45%; left: 0; right: 60px; height: 1px; background-color: var(--text); z-index: 5; border-top: 1px dashed rgba(255,255,255,0.5); }
-        .current-price-tag { position: absolute; right: 0; top: 45%; transform: translateY(-50%); background-color: var(--green); color: white; padding: 2px 5px; font-size: 10px; font-weight: bold; z-index: 11; width: 60px; text-align: center; }
+        .current-price-line { position: absolute; left: 0; right: 60px; height: 1px; background-color: var(--text); z-index: 5; border-top: 1px dashed rgba(255,255,255,0.5); pointer-events: none; }
+        .current-price-tag { position: absolute; right: 0; transform: translateY(-50%); background-color: var(--green); color: white; padding: 2px 5px; font-size: 10px; font-weight: bold; z-index: 11; width: 60px; text-align: center; pointer-events: none; }
 
         /* --- View: Quotes --- */
         .quote-item { display: flex; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid var(--border); }
@@ -118,7 +111,7 @@
         .history-content svg { width: 60px; height: 60px; margin-bottom: 15px; opacity: 0.5; }
         .history-content p { font-size: 14px; }
 
-        /* --- View: Articles (Community) --- */
+        /* --- View: Articles --- */
         .article-item { padding: 15px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; }
         .article-icon { width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
         .article-content { flex: 1; }
@@ -127,7 +120,6 @@
         .article-meta { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); }
         .section-title { padding: 15px; font-size: 12px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Utility */
         .text-blue { color: var(--blue); }
         .text-red { color: var(--red); }
         .text-green { color: var(--green); }
@@ -137,7 +129,6 @@
 <body>
 
 <div id="app">
-    <!-- Overlay -->
     <div id="overlay" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar Navigation -->
@@ -157,43 +148,15 @@
                 <svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.09-4-4L2 16.08z"/></svg>
                 Trade
             </li>
-            <li>
-                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-                News
-            </li>
-            <li>
-                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                Mailbox
-                <span class="nav-badge" style="position:relative; top:0; right:0; margin-left:auto;">2</span>
-            </li>
-            <li>
-                <svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>
-                Journal
-            </li>
-            <li>
-                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-                Settings
-            </li>
-            <li>
-                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-                Economic calendar
-            </li>
-            <li>
-                <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-                Traders Community
-            </li>
-            <li>
-                <svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-                MQL5 Algo Trading
-            </li>
-            <li>
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
-                User guide
-            </li>
-            <li>
-                <svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
-                About
-            </li>
+            <li><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>News</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>Mailbox <span class="nav-badge" style="position:relative; top:0; right:0; margin-left:auto;">2</span></li>
+            <li><svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg>Journal</li>
+            <li><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>Settings</li>
+            <li><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>Economic calendar</li>
+            <li><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>Traders Community</li>
+            <li><svg viewBox="0 0 24 24"><path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>MQL5 Algo Trading</li>
+            <li><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>User guide</li>
+            <li><svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>About</li>
         </ul>
     </div>
 
@@ -203,9 +166,12 @@
             <svg id="menu-btn" onclick="toggleSidebar()" style="cursor: pointer;" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
             <span class="top-title" id="top-title">Charts</span>
         </div>
-        <div class="top-right">
+        <div class="top-right" id="top-right-icons">
             <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             <svg class="icon-sm" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+            <span style="font-size:12px; font-weight:bold;">H1</span>
+            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
         </div>
     </header>
 
@@ -217,68 +183,37 @@
             <div class="chart-header">
                 <div class="chart-sell" onclick="toggleChartColor(this)">
                     <span>SELL</span>
-                    <span>4175.26</span>
+                    <span id="sell-price">4175.26</span>
                 </div>
                 <div class="chart-spread">0.01</div>
                 <div class="chart-buy" onclick="toggleChartColor(this)">
                     <span>BUY</span>
-                    <span>4175.56</span>
+                    <span id="buy-price">4175.56</span>
                 </div>
             </div>
             <div class="chart-symbol-info">
                 <span>XAUUSD.vx • H1</span>
                 <span>Gold vs US Dollar</span>
             </div>
-            <div class="chart-area">
-                <!-- Mock Candlesticks -->
-                <div class="candle-container">
-                    <div class="candle down" style="height: 30px;"></div>
-                    <div class="candle down" style="height: 50px;"></div>
-                    <div class="candle up" style="height: 40px;"></div>
-                    <div class="candle up" style="height: 80px;"></div>
-                    <div class="candle down" style="height: 25px;"></div>
-                    <div class="candle up" style="height: 60px;"></div>
-                    <div class="candle up" style="height: 90px;"></div>
-                    <div class="candle down" style="height: 20px;"></div>
-                    <div class="candle up" style="height: 70px;"></div>
-                    <div class="candle up" style="height: 110px;"></div>
-                    <div class="candle down" style="height: 30px;"></div>
-                    <div class="candle up" style="height: 50px;"></div>
-                </div>
-                <!-- Current Price Line -->
-                <div class="current-price-line"></div>
-                <div class="current-price-tag">4175.26</div>
-                <!-- Y-Axis -->
-                <div class="chart-y-axis">
-                    <span>4246.86</span>
-                    <span>4238.76</span>
-                    <span>4230.66</span>
-                    <span>4222.56</span>
-                    <span>4214.46</span>
-                    <span>4206.36</span>
-                    <span>4198.26</span>
-                    <span>4190.16</span>
-                    <span>4182.06</span>
-                    <span>4173.96</span>
-                    <span>4165.86</span>
-                    <span>4157.76</span>
-                    <span>4149.66</span>
-                    <span>4141.56</span>
-                    <span>4133.46</span>
-                    <span>4125.36</span>
-                    <span>4117.26</span>
-                    <span>4109.16</span>
-                </div>
-                <!-- X-Axis -->
+            <div class="chart-area" id="chart-area">
+                <canvas id="chart-canvas"></canvas>
+                
+                <!-- Dynamic Y-Axis Labels -->
+                <div class="chart-y-axis" id="y-axis-labels"></div>
+                <!-- Static X-Axis Labels (Demo) -->
                 <div class="chart-x-axis">
                     <span>14:00</span>
-                    <span>14 Oct 03:00</span>
-                    <span>14 Oct 15:00</span>
-                    <span>15 Oct 04:00</span>
-                    <span>15 Oct 16:00</span>
-                    <span>16 Oct 05:00</span>
-                    <span>16 Oct 17:00</span>
+                    <span>15:00</span>
+                    <span>16:00</span>
+                    <span>17:00</span>
+                    <span>18:00</span>
+                    <span>19:00</span>
+                    <span>20:00</span>
                 </div>
+                
+                <!-- Current Price Line & Tag -->
+                <div class="current-price-line" id="current-line"></div>
+                <div class="current-price-tag" id="current-tag">4175.56</div>
             </div>
         </div>
 
@@ -292,54 +227,13 @@
                 </div>
                 <div class="quote-right">
                     <div class="quote-prices">
-                        <span class="quote-bid">4175.77</span>
-                        <span class="quote-ask">4176.10</span>
+                        <span class="quote-bid" id="quote-bid">4175.77</span>
+                        <span class="quote-ask" id="quote-ask">4176.10</span>
                     </div>
                     <span class="quote-highlow">L: 4 147.15 H: 4 186.26</span>
                 </div>
             </div>
-            <div class="quote-item">
-                <div class="quote-left">
-                    <span class="quote-change positive">+278 0.21%</span>
-                    <span class="quote-symbol">GBPUSD</span>
-                    <span class="quote-time">09:02:37 ≒ 18</span>
-                </div>
-                <div class="quote-right">
-                    <div class="quote-prices">
-                        <span class="quote-bid">1.32951</span>
-                        <span class="quote-ask">1.32969</span>
-                    </div>
-                    <span class="quote-highlow">L: 1.32581 H: 1.33059</span>
-                </div>
-            </div>
-            <div class="quote-item">
-                <div class="quote-left">
-                    <span class="quote-change positive">+97 0.09%</span>
-                    <span class="quote-symbol">UK100.vx</span>
-                    <span class="quote-time">09:02:36 ≒ 50</span>
-                </div>
-                <div class="quote-right">
-                    <div class="quote-prices">
-                        <span class="quote-bid">10824.8</span>
-                        <span class="quote-ask">10829.8</span>
-                    </div>
-                    <span class="quote-highlow">L: 10 801.2 H: 10 842.7</span>
-                </div>
-            </div>
-            <div class="quote-item">
-                <div class="quote-left">
-                    <span class="quote-change positive">+103 0.09%</span>
-                    <span class="quote-symbol">EURUSD.vx</span>
-                    <span class="quote-time">09:02:37 ≒ 14</span>
-                </div>
-                <div class="quote-right">
-                    <div class="quote-prices">
-                        <span class="quote-bid">1.12244</span>
-                        <span class="quote-ask">1.12258</span>
-                    </div>
-                    <span class="quote-highlow">L: 1.12073 H: 1.12403</span>
-                </div>
-            </div>
+            <!-- Additional static quotes omitted for brevity -->
         </div>
 
         <!-- VIEW: Trade -->
@@ -376,59 +270,14 @@
             </div>
         </div>
 
-        <!-- VIEW: Articles / Community -->
+        <!-- VIEW: Articles -->
         <div id="view-articles" class="view">
             <div class="article-item">
-                <div class="article-icon">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
-                </div>
+                <div class="article-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></div>
                 <div class="article-content">
                     <div class="article-title">Algo Trading <span class="text-muted">@MQL5</span></div>
                     <div class="article-desc">MTP (Multi-Indicator Trend Painter) is a trend-following indicator that ...</div>
-                    <div class="article-meta">
-                        <span>07:20</span>
-                        <span>•</span>
-                    </div>
-                </div>
-            </div>
-            <div class="article-item">
-                <div class="article-icon">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
-                </div>
-                <div class="article-content">
-                    <div class="article-title">Articles <span class="text-muted">@MQL5</span></div>
-                    <div class="article-desc">Beyond Clone and Commit: The Advanced Side of MQL5 Algo Forge - ht...</div>
-                    <div class="article-meta">
-                        <span>Thursday</span>
-                        <span>•</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section-title">POPULAR CHANNELS</div>
-            
-            <div class="article-item">
-                <div class="article-icon">📈</div>
-                <div class="article-content">
-                    <div class="article-title">Forecast and Levels</div>
-                    <div class="article-desc">Mini-articles with technical and fundamental analysis on the way as fore...</div>
-                    <div class="article-meta"><span>489.6 k</span></div>
-                </div>
-            </div>
-            <div class="article-item">
-                <div class="article-icon">⚡</div>
-                <div class="article-content">
-                    <div class="article-title">Scalping</div>
-                    <div class="article-desc">Signals • Automation. Built for speed.</div>
-                    <div class="article-meta"><span>4.8 k</span></div>
-                </div>
-            </div>
-            <div class="article-item">
-                <div class="article-icon">📰</div>
-                <div class="article-content">
-                    <div class="article-title">New Gadgets and Game Tech News</div>
-                    <div class="article-desc">New Gadgets and Game Technical News</div>
-                    <div class="article-meta"><span>110.8 k</span></div>
+                    <div class="article-meta"><span>07:20</span><span>•</span></div>
                 </div>
             </div>
         </div>
@@ -458,7 +307,200 @@
 </div>
 
 <script>
-    // --- Navigation Logic ---
+    // ==========================================
+    // 1. CANDLE ENGINE (LIVE SIMULATION)
+    // ==========================================
+    const canvas = document.getElementById('chart-canvas');
+    const ctx = canvas.getContext('2d');
+    const chartArea = document.getElementById('chart-area');
+    
+    let data = [];
+    let basePrice = 4175.00;
+    let currentCandle = null;
+    let ticksInCurrentCandle = 0;
+    const TICKS_PER_CANDLE = 15; // Creates a new candle every 15 ticks
+    const MAX_CANDLES_ON_SCREEN = 40;
+    const CANDLE_WIDTH = 6;
+    const CANDLE_SPACING = 10;
+    const Y_AXIS_WIDTH = 60;
+
+    // Initialize Chart Data
+    function generateInitialData() {
+        data = [];
+        for (let i = 0; i < 50; i++) {
+            let open = basePrice + (Math.random() - 0.5) * 3;
+            let close = open + (Math.random() - 0.5) * 3;
+            let high = Math.max(open, close) + Math.random() * 2;
+            let low = Math.min(open, close) - Math.random() * 2;
+            data.push({ open, high, low, close });
+            basePrice = close;
+        }
+    }
+
+    // Handle Canvas Resizing
+    function resizeCanvas() {
+        canvas.width = chartArea.clientWidth;
+        canvas.height = chartArea.clientHeight;
+        drawChart();
+    }
+
+    // Draw the entire chart
+    function drawChart() {
+        if (data.length === 0) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Determine visible data based on screen width
+        const availableWidth = canvas.width - Y_AXIS_WIDTH;
+        const maxVisible = Math.floor(availableWidth / CANDLE_SPACING);
+        const visibleData = data.slice(-maxVisible);
+
+        // Calculate Y-Axis Scale (Auto-scaling)
+        let minPrice = Math.min(...visibleData.map(d => d.low));
+        let maxPrice = Math.max(...visibleData.map(d => d.high));
+        let priceRange = maxPrice - minPrice;
+        let padding = priceRange * 0.15; // 15% padding top and bottom
+        minPrice -= padding;
+        maxPrice += padding;
+        priceRange = maxPrice - minPrice;
+
+        // Map price to Y pixel coordinate
+        const mapY = (price) => {
+            return canvas.height - ((price - minPrice) / priceRange) * canvas.height;
+        };
+
+        // Draw Grid Lines (Horizontal)
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 1;
+        const gridSteps = 8;
+        for (let i = 1; i < gridSteps; i++) {
+            let y = (canvas.height / gridSteps) * i;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width - Y_AXIS_WIDTH, y);
+            ctx.stroke();
+        }
+
+        // Draw Candles
+        visibleData.forEach((candle, index) => {
+            const x = index * CANDLE_SPACING + 5;
+            const isGreen = candle.close >= candle.open;
+            const color = isGreen ? '#00c853' : '#e53935';
+
+            // Draw Wick
+            ctx.beginPath();
+            ctx.moveTo(x + CANDLE_WIDTH / 2, mapY(candle.high));
+            ctx.lineTo(x + CANDLE_WIDTH / 2, mapY(candle.low));
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Draw Body
+            let yOpen = mapY(candle.open);
+            let yClose = mapY(candle.close);
+            let bodyTop = Math.min(yOpen, yClose);
+            let bodyHeight = Math.max(Math.abs(yOpen - yClose), 1); // Ensure minimum 1px height
+
+            ctx.fillStyle = color;
+            ctx.fillRect(x, bodyTop, CANDLE_WIDTH, bodyHeight);
+        });
+
+        // Update Y-Axis Labels
+        updateYAxisLabels(minPrice, maxPrice, gridSteps);
+        
+        // Update Current Price UI
+        updateCurrentPriceUI(visibleData[visibleData.length - 1].close, mapY);
+    }
+
+    // Update the Y-Axis HTML labels
+    function updateYAxisLabels(min, max, steps) {
+        const yAxisContainer = document.getElementById('y-axis-labels');
+        yAxisContainer.innerHTML = '';
+        for (let i = 0; i <= steps; i++) {
+            let price = max - (i * (max - min) / steps);
+            let span = document.createElement('span');
+            span.innerText = price.toFixed(2);
+            yAxisContainer.appendChild(span);
+        }
+    }
+
+    // Update Current Price Line, Tag, and Top Header
+    function updateCurrentPriceUI(currentPrice, mapY) {
+        const yPos = mapY(currentPrice);
+        
+        // Update Line
+        const line = document.getElementById('current-line');
+        line.style.top = `${yPos}px`;
+
+        // Update Tag
+        const tag = document.getElementById('current-tag');
+        tag.style.top = `${yPos}px`;
+        tag.innerText = currentPrice.toFixed(2);
+
+        // Update Sell/Buy Header
+        const sellPrice = (currentPrice - 0.15).toFixed(2);
+        const buyPrice = (currentPrice + 0.15).toFixed(2);
+        document.getElementById('sell-price').innerText = sellPrice;
+        document.getElementById('buy-price').innerText = buyPrice;
+
+        // Update Quotes View (if visible)
+        const quoteBid = document.getElementById('quote-bid');
+        if(quoteBid) quoteBid.innerText = sellPrice;
+        const quoteAsk = document.getElementById('quote-ask');
+        if(quoteAsk) quoteAsk.innerText = buyPrice;
+    }
+
+    // Simulate a Market Tick (Price movement)
+    function simulateTick() {
+        if (data.length === 0) return;
+
+        // If no current candle, start a new one
+        if (!currentCandle) {
+            let open = data[data.length - 1].close;
+            currentCandle = { open, high: open, low: open, close: open };
+            data.push(currentCandle);
+            ticksInCurrentCandle = 0;
+        }
+
+        // Random price fluctuation
+        let change = (Math.random() - 0.48) * 0.8; // Slight upward bias
+        let newPrice = currentCandle.close + change;
+        
+        // Update Current Candle OHLC
+        currentCandle.close = newPrice;
+        if (newPrice > currentCandle.high) currentCandle.high = newPrice;
+        if (newPrice < currentCandle.low) currentCandle.low = newPrice;
+        
+        ticksInCurrentCandle++;
+        
+        // End of candle period
+        if (ticksInCurrentCandle >= TICKS_PER_CANDLE) {
+            currentCandle = null; // Next tick will create a new candle
+        }
+
+        // Limit data array size to prevent memory leak
+        if (data.length > 150) data.shift();
+
+        // Render the updated chart
+        drawChart();
+    }
+
+    // Initialize and start the engine
+    function initEngine() {
+        generateInitialData();
+        resizeCanvas();
+        // Run simulation every 200ms (5 ticks per second)
+        setInterval(simulateTick, 200); 
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    // Start the engine when page loads
+    window.addEventListener('load', initEngine);
+
+
+    // ==========================================
+    // 2. UI NAVIGATION & LOGIC
+    // ==========================================
+    
     function switchTab(tabName) {
         // Update active class on bottom nav
         document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -469,22 +511,12 @@
         document.getElementById(`view-${tabName}`).classList.add('active');
 
         // Update Top Bar Title
-        const titles = {
-            'quotes': 'Quotes',
-            'charts': 'Charts',
-            'history': 'History',
-            'articles': 'Articles'
-        };
+        const titles = { 'quotes': 'Quotes', 'charts': 'Charts', 'history': 'History', 'articles': 'Articles' };
         document.getElementById('top-title').innerText = titles[tabName] || 'App';
         
         // Update Top Bar Icons based on view
-        const topRight = document.querySelector('.top-right');
-        if (tabName === 'quotes' || tabName === 'articles') {
-            topRight.innerHTML = `
-                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-            `;
-        } else if (tabName === 'charts') {
+        const topRight = document.getElementById('top-right-icons');
+        if (tabName === 'charts') {
             topRight.innerHTML = `
                 <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                 <svg class="icon-sm" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
@@ -492,15 +524,19 @@
                 <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
                 <svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
             `;
-        } else if (tabName === 'history') {
+        } else {
             topRight.innerHTML = `
-                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
-                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                <svg class="icon-sm" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
             `;
+        }
+        
+        // Resize chart when switching back to it to fix canvas rendering issues
+        if (tabName === 'charts') {
+            setTimeout(resizeCanvas, 50);
         }
     }
 
-    // --- Sidebar Logic ---
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
@@ -508,27 +544,19 @@
         overlay.classList.toggle('active');
     }
 
-    // --- History Tabs Logic ---
     function switchHistoryTab(element) {
         document.querySelectorAll('.history-tab').forEach(tab => tab.classList.remove('active'));
         element.classList.add('active');
-        
-        // Update content based on tab (simulated)
         const content = document.querySelector('.history-content p');
         if (element.innerText === 'POSITIONS') content.innerText = 'Empty history';
         if (element.innerText === 'ORDERS') content.innerText = 'No orders found';
         if (element.innerText === 'DEALS') content.innerText = 'No deals found';
     }
 
-    // --- Chart Color Toggle (Demo purpose) ---
     function toggleChartColor(element) {
-        if (element.classList.contains('chart-sell')) {
-            element.style.background = element.style.background === 'blue' ? 'var(--red)' : 'blue';
-        } else {
-            element.style.background = element.style.background === 'blue' ? 'var(--red)' : 'blue';
-        }
+        const currentBg = element.style.background;
+        element.style.background = currentBg === 'var(--red)' || currentBg === '' ? 'var(--blue)' : 'var(--red)';
     }
 </script>
-
 </body>
-          </html>
+</html>
