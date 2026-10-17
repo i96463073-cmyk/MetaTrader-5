@@ -154,7 +154,6 @@ function applyScheme(){
   document.body.classList.toggle('tbl',!!S.tabl);
   if (typeof draw === 'function') draw();
 }
-
 function ocUp(){
   const o=$('#oc');
   if(o){
@@ -536,7 +535,21 @@ async function boot(){
       }
     }
     
-    applyScheme();$('#ocl').value=S.lot;broker=new ADP[S.adapter]();reconnect();ocUp();go('chart');uOc();if(S.lock&&S.pin)lockScr();
+    applyScheme();
+    $('#ocl').value=S.lot;
+    broker=new ADP[S.adapter]();
+    reconnect();
+    ocUp();
+    
+    // Inline GO
+    S.tab='chart';
+    $$('.scr').forEach(x=>x.classList.toggle('on',x.id=='sc-chart'));
+    $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t=='chart'));
+    if(typeof top_ === 'function') top_();
+    setTimeout(rs,0);
+    
+    uOc();
+    if(S.lock&&S.pin)lockScr();
     renderSymbolStrip();
     document.getElementById('loading').style.display='none';
     
