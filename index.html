@@ -162,6 +162,20 @@ function ocUp(){
     setTimeout(rs,0);
   }
 }
+function pxs(id,s,v){
+  const t=(+v).toFixed(SY[s].d), d=SY[s].d, n=d>=3?3:d>=2?2:1, u=d>=3?1:0, e=$(id).children;
+  e[1].textContent=t.slice(0,t.length-n);
+  e[2].textContent=t.slice(t.length-n,t.length-u);
+  e[3].textContent=u?t.slice(-1):'';
+}
+function uOc(){
+  const s=S.sym,q=P[s];
+  pxs('#ocs',s,q.b);
+  pxs('#ocb',s,q.b+SY[s].sp);
+  const pv=uOc.p||q.b, d=q.b>pv?1:q.b<pv?-1:(uOc.d||-1);
+  uOc.p=q.b; uOc.d=d;
+  $('#ocs').style.background=$('#ocb').style.background=d>0?'#3F83F8':'#EF5350';
+}
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const BROKER_ICON=`<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="24" fill="#182024"/><path d="M 24 33 L 51 76 L 59 63 L 37 31 Z" fill="#ffffff" /><path d="M 78 33 L 55 63 L 46 51 L 65 31 Z" fill="#ffffff" /><path d="M 44 26 L 59 48 L 53 58 L 72 77 L 83 62 L 62 41 L 53 26 Z" fill="#22c55e" /></svg>`;
@@ -548,10 +562,13 @@ async function boot(){
     if(typeof top_ === 'function') top_();
     setTimeout(rs,0);
     
+    // Hide loading immediately so we can see the chart!
+    document.getElementById('loading').style.display='none';
+    
+    // Call risky functions after
     uOc();
     if(S.lock&&S.pin)lockScr();
     renderSymbolStrip();
-    document.getElementById('loading').style.display='none';
     
     $('#symbtn').onclick = (e) => {
       e.stopPropagation();
