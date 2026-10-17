@@ -154,6 +154,12 @@ function applyScheme(){
   document.body.classList.toggle('tbl',!!S.tabl);
   if (typeof draw === 'function') draw();
 }
+function ocUp(){
+  const o=$('#oc');
+  o.classList.toggle('on',!!S.oc);
+  o.classList.toggle('bl',S.ocPos=='Below chart');
+  setTimeout(rs,0);
+}
 
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const BROKER_ICON=`<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="24" fill="#182024"/><path d="M 24 33 L 51 76 L 59 63 L 37 31 Z" fill="#ffffff" /><path d="M 78 33 L 55 63 L 46 51 L 65 31 Z" fill="#ffffff" /><path d="M 44 26 L 59 48 L 53 58 L 72 77 L 83 62 L 62 41 L 53 26 Z" fill="#22c55e" /></svg>`;
@@ -585,5 +591,5 @@ window.addEventListener('appinstalled',()=>{
   window._deferredInstall=null;
   toast('MT5 installed to home screen');
 });
-boot();
+setTimeout(boot, 10);
 </script></body></html>
