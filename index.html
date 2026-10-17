@@ -477,18 +477,30 @@ function renderSymbolStrip() {
   };
 }
 async function boot(){
-  // 1. Render UI instantly with local data
-  const local = JSON.parse(localStorage.getItem('mt5_backup') || '{}');
-  if(local.ACC) {
-    ACC = local.ACC;
-    POS = local.POS || [];
-    DL = local.DL || [];
-    ORD = local.ORD || [];
+  let isCloud = false;
+  try {
+    const res = await fetch(`${CLOUDFLARE_API_URL}?user=maxwel_501148369`);
+    const cloudData = await res.json();
+    if(cloudData && cloudData.ACC) {
+      ACC = cloudData.ACC;
+      POS = cloudData.POS || [];
+      DL = cloudData.DL || [];
+      ORD = cloudData.ORD || [];
+      isCloud = true;
+    }
+  } catch(e) { console.log("Cloud sync failed", e); }
+  if(!isCloud) {
+     const local = JSON.parse(localStorage.getItem('mt5_backup') || '{}');
+     if(local.ACC) {
+       ACC = local.ACC;
+       POS = local.POS || [];
+       DL = local.DL || [];
+       ORD = local.ORD || [];
+     }
   }
   if(!ACC || !ACC.bal) ACC = {bal: 10000};
   S.pr=0; S.pm=0; S.manualPr=false;
   if(!SY[S.sym])S.sym='XAUUSD.vx';
-  
   const savedP = localStorage.getItem('mt5_prices');
   if(savedP) {
     try { P = JSON.parse(savedP); } catch(e){}
@@ -498,10 +510,8 @@ async function boot(){
       const p=SY[s].p; P[s]={b:p,o:p,hi:p,lo:p,t:Date.now()}
     }
   }
-  
   applyScheme();$('#ocl').value=S.lot;broker=new ADP[S.adapter]();reconnect();ocUp();go('chart');uOc();if(S.lock&&S.pin)lockScr();
   renderSymbolStrip();
-  
   $('#symbtn').onclick = (e) => {
     e.stopPropagation();
     $('#symstrip').classList.toggle('on');
@@ -511,7 +521,6 @@ async function boot(){
       $('#symstrip').classList.remove('on');
     }
   });
-
   setInterval(()=>{
     const pr=broker.getPrices();
     if(!pr||!pr[S.sym])return;
@@ -526,29 +535,11 @@ async function boot(){
     {const e=$('#npl');if(e){const v=calc().pl;e.textContent=f2(v);e.className='pill '+(v>0?'pu':v<0?'pd':'')}}
     if(S.tab=='quotes')uQuotes();if(S.tab=='trade')uTrade()
   },1000);
-  
   setInterval(draw,80);
   addEventListener('resize',rs);
   addEventListener('orientationchange',()=>setTimeout(rs,200));
   window.visualViewport&&visualViewport.addEventListener('resize',rs);
   window.ResizeObserver&&new ResizeObserver(rs).observe($('#cw'));
-
-  // 2. Fetch Cloud Data in background
-  try {
-    const res = await fetch(`${CLOUDFLARE_API_URL}?user=maxwel_501148369`);
-    const cloudData = await res.json();
-    if(cloudData && cloudData.ACC) {
-      ACC = cloudData.ACC;
-      POS = cloudData.POS || [];
-      DL = cloudData.DL || [];
-      ORD = cloudData.ORD || [];
-      if(S.tab=='trade')rTrade();
-      if(S.tab=='history')rHist();
-      if(S.tab=='quotes')rQuotes();
-      rSet();
-      draw();
-    }
-  } catch(e) { console.log("Cloud sync failed", e); }
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
