@@ -22,14 +22,17 @@ html,body{height:100%;width:100%;margin:0;overscroll-behavior:none;touch-action:
 
 #live{display:none;position:absolute;right:66px;bottom:26px;background:var(--bl);color:#fff;border:0;border-radius:15px;padding:8px 14px;font-size:14px;font-weight:700;z-index:21}
 #tradestack{position:absolute;left:10px;right:10px;bottom:14px;z-index:20;pointer-events:none;display:flex;flex-direction:column;gap:2px;max-height:46vh;overflow:hidden;justify-content:flex-end}
-.trade-notif{display:flex;align-items:center;background:rgba(42,45,51,.96);border-left:5px solid #2962FF;padding:8px 12px;font-size:14px;color:#d0d0d0;font-weight:500;animation:slideup .25s ease-out;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.trade-notif{display:flex;align-items:center;background:rgba(42,45,51,.96);border-left:5px solid #2962FF;padding:14px 18px;font-size:17px;color:#d0d0d0;font-weight:500;animation:slideup .25s ease-out;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .trade-notif .sym{color:#fff;font-weight:700}
 .trade-notif .type{color:#2962FF;font-weight:700;margin-left:12px}
 .trade-notif .vol{margin-left:12px;color:#fff;font-weight:700}
-.trade-notif .state{margin-left:auto;color:#2962FF;font-weight:700;font-size:14px}
-.trade-notif.sell{border-left-color:#F6465D}
-.trade-notif.sell .type{color:#F6465D}
-.trade-notif.sell .state{color:#F6465D}
+.trade-notif .state{margin-left:auto;color:#2962FF;font-weight:700;font-size:16px}
+
+/* Error styling for red left border */
+.trade-notif.error{border-left-color:#F6465D}
+.trade-notif.error .type{color:#F6465D}
+.trade-notif.error .state{color:#F6465D}
+
 @keyframes slideup{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
 nav{height:62px;flex:none;display:flex;background:#000;border-top:1px solid #111}
 nav button{flex:1;background:none;border:0;color:#fff;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;font-weight:500}nav button.on{color:#5b8dff}
@@ -181,21 +184,21 @@ function beep(){
   }catch(e){}
 }
 
-function showTradeNotif(sym,type,vol,state){
-  state=state||'done';
+// STACKED NOTIFICATIONS (BLUE FOR SUCCESS, RED FOR ERROR)
+function showTradeNotif(sym,type,vol,state,isError){
   const c=document.getElementById('tradestack');
   if(!c) return;
   const el=document.createElement('div');
-  el.className='trade-notif'+(type.toLowerCase()==='sell'?' sell':'');
+  el.className='trade-notif'+(isError?' error':'');
   el.innerHTML=`<span class="sym">${sym}</span><span class="type">${type.charAt(0).toUpperCase()+type.slice(1).toLowerCase()}</span><span class="vol">${(+vol).toFixed(2)}</span><span class="state">${state}</span>`;
   c.appendChild(el);
-  while(c.children.length>2) c.removeChild(c.firstChild); // LIMIT TO 2
+  while(c.children.length>8) c.removeChild(c.firstChild); // Stack up to 8 like original
   setTimeout(()=>{
     el.style.transition='opacity .35s,transform .35s';
     el.style.opacity='0';
     el.style.transform='translateY(20px)';
     setTimeout(()=>el.remove(),380);
-  },2500);
+  },3000);
 }
 
 async function syncState() {
@@ -426,27 +429,25 @@ sh.innerHTML=`<div style="padding:14px 16px 0;display:flex;justify-content:space
 const u=()=>{const q=P[s],v=parseFloat($('#tv').value)||0,pp=$('#tpp')?parseFloat($('#tpp').value):q.b+sp;$('#tm').textContent=mrg(s,v,pp||q.b).toFixed(2);$('#tfm').textContent=f2(calc().fm);$('#tq').textContent=fm(s,q.b)+'  '+fm(s,q.b+sp);const x=$('#tpx');if(x)x.textContent='Market'};
 sh.onclick=e=>{const t=e.target.closest('[data-k]');if(t){k=t.dataset.k;return R()}const b=e.target.closest('[data-x]');if(b)exec(b.dataset.x)};sh.oninput=u;iv=setInterval(()=>{document.body.contains(sh)?$('#tq')&&u():clearInterval(iv)},1000);
 const exec=async sd=>{const q=P[s],bid=q.b,ask=q.b+sp,v=parseFloat($('#tv').value),sl=parseFloat($('#tsl').value)||0,tp=parseFloat($('#ttp').value)||0,mk=k==OT[0],pr=mk?(sd=='BUY'?ask:bid):parseFloat($('#tpp').value);
-if(!(v>0))return toast('Invalid volume');if(!(pr>0))return toast('Invalid price');if(mrg(s,v,pr)>calc().fm)return toast('No money');
-if(!mk&&((k=='Buy Limit'&&pr>=ask)||(k=='Sell Limit'&&pr<=bid)||(k=='Buy Stop'&&pr<=ask)||(k=='Sell Stop'&&pr>=bid)))return toast('Invalid price');
-if((sl&&(sd=='BUY'?sl>=pr:sl<=pr))||(tp&&(sd=='BUY'?tp<=pr:tp>=pr)))return toast('Invalid stops');S.lot=v;$('#ocl')&&($('#ocl').value=v.toFixed(2));
-try{if(mk){const p=await broker.placeOrder({sym:s,type:sd,vol:v,open:pr,sl,tp,comm:v*3});POS.push(p);const o={id:p.id,sym:s,type:sd,vol:v,price:pr,time:p.time,state:'Filled'};ORD.push(o);beep();showTradeNotif(s,sd,v,'done');if(S.note)toast(`${sd} ${v.toFixed(2)} ${s} @ ${fm(s,pr)}`)}
-else{const o={id:Math.floor(Date.now()/1000)%1e8*10+Math.floor(Math.random()*10),sym:s,type:sd,kind:k,vol:v,price:pr,sl,tp,time:Date.now(),state:'Placed'};ORD.push(o);beep();showTradeNotif(s,sd,v,'placed');toast(k+' placed @ '+fm(s,pr))}
+if(!(v>0))return toast('Invalid volume');if(!(pr>0))return toast('Invalid price');if(mrg(s,v,pr)>calc().fm)return showTradeNotif(s,sd,v,'No money',true);
+if(!mk&&((k=='Buy Limit'&&pr>=ask)||(k=='Sell Limit'&&pr<=bid)||(k=='Buy Stop'&&pr<=ask)||(k=='Sell Stop'&&pr>=bid)))return showTradeNotif(s,sd,v,'Invalid price',true);
+if((sl&&(sd=='BUY'?sl>=pr:sl<=pr))||(tp&&(sd=='BUY'?tp<=pr:tp>=pr)))return showTradeNotif(s,sd,v,'Invalid stops',true);S.lot=v;$('#ocl')&&($('#ocl').value=v.toFixed(2));
+try{if(mk){const p=await broker.placeOrder({sym:s,type:sd,vol:v,open:pr,sl,tp,comm:v*3});POS.push(p);const o={id:p.id,sym:s,type:sd,vol:v,price:pr,time:p.time,state:'Filled'};ORD.push(o);beep();showTradeNotif(s,sd,v,'done',false);if(S.note)toast(`${sd} ${v.toFixed(2)} ${s} @ ${fm(s,pr)}`)}
+else{const o={id:Math.floor(Date.now()/1000)%1e8*10+Math.floor(Math.random()*10),sym:s,type:sd,kind:k,vol:v,price:pr,sl,tp,time:Date.now(),state:'Placed'};ORD.push(o);beep();showTradeNotif(s,sd,v,'placed',false);toast(k+' placed @ '+fm(s,pr))}
 cl();save();if(S.tab=='trade')rTrade();draw();syncState();}catch(e){toast(e.message)}};R()})}
-function pend(){ORD.forEach(o=>{if(o.state!='Placed')return;const b=P[o.sym].b,a=b+SY[o.sym].sp,k=o.kind;if((k=='Buy Limit'&&a<=o.price)||(k=='Buy Stop'&&a>=o.price)||(k=='Sell Limit'&&b>=o.price)||(k=='Sell Stop'&&b<=o.price)){o.state='Filled';o.time=Date.now();const p={id:o.id,sym:o.sym,type:o.type,vol:o.vol,open:o.price,sl:o.sl,tp:o.tp,comm:o.vol*3,time:o.time};POS.push(p);beep();showTradeNotif(o.sym,o.type,o.vol,'filled');if(S.note)toast(k+' filled @ '+fm(o.sym,o.price));if(S.tab=='trade')rTrade();syncState()}})}
+function pend(){ORD.forEach(o=>{if(o.state!='Placed')return;const b=P[o.sym].b,a=b+SY[o.sym].sp,k=o.kind;if((k=='Buy Limit'&&a<=o.price)||(k=='Buy Stop'&&a>=o.price)||(k=='Sell Limit'&&b>=o.price)||(k=='Sell Stop'&&b<=o.price)){o.state='Filled';o.time=Date.now();const p={id:o.id,sym:o.sym,type:o.type,vol:o.vol,open:o.price,sl:o.sl,tp:o.tp,comm:o.vol*3,time:o.time};POS.push(p);beep();showTradeNotif(o.sym,o.type,o.vol,'filled',false);if(S.note)toast(k+' filled @ '+fm(o.sym,o.price));if(S.tab=='trade')rTrade();syncState()}})}
 
-// INSTANT EXECUTION & OVERLAPPING SOUND
 function closeP(id,reason){
   const p=POS.find(x=>x.id==id);if(!p)return;
   const cp=reason=='sl'?p.sl:reason=='tp'?p.tp:(p.type=='BUY'?P[p.sym].b:P[p.sym].b+SY[p.sym].sp);
   const pl=pnl(p),d={id:p.id,sym:p.sym,type:p.type,vol:p.vol,open:p.open,close:cp,ot:p.time,ct:Date.now(),pnl:pl};
   POS=POS.filter(x=>x!=p);DL.push(d);ACC.bal+=pl;
   
-  beep(); // Instant overlapping sound
-  showTradeNotif(p.sym,p.type=='BUY'?'Sell':'Buy',p.vol,reason||'closed');
-  toast((reason=='sl'?'Stop Loss hit #':reason=='tp'?'Take Profit hit #':'Closed #')+id+': '+pl.toFixed(2));
+  beep(); 
+  showTradeNotif(p.sym,p.type=='BUY'?'Sell':'Buy',p.vol,reason||'closed',false);
   
   if(S.tab=='trade')rTrade();if(S.tab=='history')rHist();draw();
-  syncState(); // Save to Cloudflare
+  syncState(); 
 }
 
 function marginCall(){
@@ -455,7 +456,7 @@ function marginCall(){
     const sorted=[...POS].sort((a,b)=>pnl(a)-pnl(b));
     if(sorted.length){
       const p=sorted[0];
-      toast('Margin call — closing #'+p.id);
+      showTradeNotif(p.sym,p.type=='BUY'?'Sell':'Buy',p.vol,'margin call',true);
       closeP(p.id,'margin');
     }
   }
@@ -569,7 +570,7 @@ function bindBtn(el,type){
 bindBtn($('#ocs'),'SELL');bindBtn($('#ocb'),'BUY');
 $('#ocl').onchange=e=>{S.lot=Math.max(.01,parseFloat(e.target.value)||.1);save()};
 async function quick(type){const s=S.sym,q=P[s],pr=type=='BUY'?q.b+SY[s].sp:q.b,v=Math.max(.01,parseFloat($('#ocl').value)||S.lot);
-if(mrg(s,v,pr)>calc().fm)return toast('No money');try{const p=await broker.placeOrder({sym:s,type,vol:v,open:pr,sl:0,tp:0,comm:v*3});POS.push(p);const o={id:p.id,sym:s,type,vol:v,price:pr,time:p.time,state:'Filled'};ORD.push(o);beep();showTradeNotif(s,type,v,'done');if(S.note)toast(`${type} ${v.toFixed(2)} ${s} @ ${fm(s,pr)}`);if(S.tab=='trade')rTrade();draw();syncState()}catch(e){toast(e.message)}}
+if(mrg(s,v,pr)>calc().fm)return showTradeNotif(s,type,v,'No money',true);try{const p=await broker.placeOrder({sym:s,type,vol:v,open:pr,sl:0,tp:0,comm:v*3});POS.push(p);const o={id:p.id,sym:s,type,vol:v,price:pr,time:p.time,state:'Filled'};ORD.push(o);beep();showTradeNotif(s,type,v,'done',false);if(S.note)toast(`${type} ${v.toFixed(2)} ${s} @ ${fm(s,pr)}`);if(S.tab=='trade')rTrade();draw();syncState()}catch(e){showTradeNotif(s,type,v,e.message,true)}}
 function go(t){S.tab=t;$$('.scr').forEach(s=>s.classList.toggle('on',s.id=='sc-'+(t=='msg'?'msg':t)));$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==t));top_();({quotes:rQuotes,trade:rTrade,history:rHist,msg:rMsg,settings:rSet,acc:rAcc,chart:()=>setTimeout(rs,0)})[t]()}
 $('#sc-quotes').onclick=e=>{const x=e.target.dataset.x;if(x){S.syms=S.syms.filter(s=>s!=x);save();rQuotes();return}const r=e.target.closest('.q');r&&qmenu(r.dataset.s)};
 $('#sc-trade').onclick=e=>{const d=e.target.dataset;if(d.cl)return closeP(+d.cl);if(d.ed)return modP(+d.ed);if(d.nw){S.sym=d.nw;return ticket('BUY')}const r=e.target.closest('[data-e]');if(r){EX=EX==r.dataset.e?0:+r.dataset.e;rTrade()}};
@@ -745,7 +746,6 @@ async function boot(){
   window.visualViewport&&visualViewport.addEventListener('resize',rs);
   window.ResizeObserver&&new ResizeObserver(rs).observe($('#cw'));
 }
-
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('/sw.js').catch(()=>{});
