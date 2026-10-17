@@ -4,6 +4,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;width:100%;margin:0;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;user-select:none;-webkit-user-select:none;background:#000;color:var(--tx);font:500 18px 'Roboto Condensed','Arial Narrow',Roboto,Arial,sans-serif;overflow:hidden}
 #app{position:fixed;inset:0;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+#loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:20px;z-index:9999;}
 #top{height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 6px;border-bottom:1px solid var(--bd)}
 #top .L{display:flex;align-items:center;min-width:0}#top b{color:#fff;font-size:14px;font-weight:700;display:block;white-space:nowrap}#top small{font-size:15px;font-weight:700;color:#9a9ea6;display:block}#top small.bl{color:#4C8DF6}#top small.rd{color:#EF5350}
 .ib{background:none;border:0;color:var(--tx);font-size:20px;min-width:42px;height:44px;border-radius:8px}.ib.on{color:#5b8dff;background:var(--s)}
@@ -131,6 +132,7 @@ body.lt #rad button{background:#e6e8ec;border-color:#d9dce1;color:#000}
 body.lt .radial-btn small{color:#333}
 body.tbl #app{max-width:900px}
 </style></head><body><div id="app">
+<div id="loading">Loading...</div>
 <div id="top"></div>
 <div id="main">
 <div class="scr" id="sc-chart"><div id="oc"><button id="ocs"><small>SELL</small><b></b><i></i><u></u></button><div id="ocv"><span id="ocd">∨</span><input id="ocl" type="number" step="0.01" min="0.01"><span id="ocu">∧</span></div><button id="ocb"><small>BUY</small><b></b><i></i><u></u></button></div><div id="cw"><canvas id="cv"></canvas><div id="symbtn"></div><div id="symstrip"></div><button id="live">● LIVE</button><div id="tradestack"></div></div></div>
@@ -168,6 +170,20 @@ const SAVE=['sym','tf','type','grid','ohlc','vol','bid','ask','last','note','dw'
 const CLOUDFLARE_API_URL = 'https://mt5-api-backend.i96463073.workers.dev';
 let ACC={bal:10000},POS=[],DL=[],ORD=[],P={},CD={},NT={},cx=null,cy=null,ax=null,ay=null,hv='POSITIONS',desc=1,edit=0,qsel=0;
 const SOUND_URL='https://www.myinstants.com/media/sounds/metatrader.mp3';
+const SCH={'Custom':{bg:'#000000',grid:'#333333',tx:'#E0E0E0',up:'#26A69A',dn:'#EF5350',wick:'',sep:'#222222'},'Green on Black':{bg:'#000000',grid:'#2A2A2A',tx:'#00C800',up:'#00C800',dn:'#00C800',wick:'#00C800',sep:'#202020'},'Black on White':{bg:'#FFFFFF',grid:'#D0D0D0',tx:'#000000',up:'#000000',dn:'#000000',wick:'#000000',sep:'#E0E0E0'},'Color on White':{bg:'#FFFFFF',grid:'#D0D0D0',tx:'#000000',up:'#2962FF',dn:'#F6465D',wick:'#787B86',sep:'#E0E0E0'}};
+
+let svT;
+function save(){
+  clearTimeout(svT);
+  svT=setTimeout(()=>{
+    try {
+      const o={};
+      SAVE.forEach(k=>o[k]=S[k]);
+      localStorage.setItem('mt5_settings', JSON.stringify(o));
+    } catch(e){}
+  },150);
+}
+
 function beep(){
   if(S.vib && navigator.vibrate) try{navigator.vibrate(60)}catch(e){}
   if(S.sound===0||S.sound===false) return;
@@ -477,78 +493,83 @@ function renderSymbolStrip() {
   };
 }
 async function boot(){
-  // 1. Render UI instantly with local data
-  const local = JSON.parse(localStorage.getItem('mt5_backup') || '{}');
-  if(local.ACC) {
-    ACC = local.ACC;
-    POS = local.POS || [];
-    DL = local.DL || [];
-    ORD = local.ORD || [];
-  }
-  if(!ACC || !ACC.bal) ACC = {bal: 10000};
-  S.pr=0; S.pm=0; S.manualPr=false;
-  if(!SY[S.sym])S.sym='XAUUSD.vx';
-  
-  const savedP = localStorage.getItem('mt5_prices');
-  if(savedP) {
-    try { P = JSON.parse(savedP); } catch(e){}
-  }
-  for(const s in SY){
-    if(!P[s]) {
-      const p=SY[s].p; P[s]={b:p,o:p,hi:p,lo:p,t:Date.now()}
-    }
-  }
-  
-  applyScheme();$('#ocl').value=S.lot;broker=new ADP[S.adapter]();reconnect();ocUp();go('chart');uOc();if(S.lock&&S.pin)lockScr();
-  renderSymbolStrip();
-  
-  $('#symbtn').onclick = (e) => {
-    e.stopPropagation();
-    $('#symstrip').classList.toggle('on');
-  };
-  document.addEventListener('click', (e) => {
-    if(!e.target.closest('#symstrip') && !e.target.closest('#symbtn')) {
-      $('#symstrip').classList.remove('on');
-    }
-  });
-
-  setInterval(()=>{
-    const pr=broker.getPrices();
-    if(!pr||!pr[S.sym])return;
-    localStorage.setItem('mt5_prices', JSON.stringify(P));
-    upCandles();pend();
-    POS.slice().forEach(p=>{
-      const b=P[p.sym].b,a=b+SY[p.sym].sp;
-      if(p.type=='BUY'?(p.sl&&b<=p.sl):(p.sl&&a>=p.sl))closeP(p.id,'sl');
-      else if(p.type=='BUY'?(p.tp&&b>=p.tp):(p.tp&&a<=p.tp))closeP(p.id,'tp')
-    });
-    marginCall();uOc();
-    {const e=$('#npl');if(e){const v=calc().pl;e.textContent=f2(v);e.className='pill '+(v>0?'pu':v<0?'pd':'')}}
-    if(S.tab=='quotes')uQuotes();if(S.tab=='trade')uTrade()
-  },1000);
-  
-  setInterval(draw,80);
-  addEventListener('resize',rs);
-  addEventListener('orientationchange',()=>setTimeout(rs,200));
-  window.visualViewport&&visualViewport.addEventListener('resize',rs);
-  window.ResizeObserver&&new ResizeObserver(rs).observe($('#cw'));
-
-  // 2. Fetch Cloud Data in background
   try {
-    const res = await fetch(`${CLOUDFLARE_API_URL}?user=maxwel_501148369`);
-    const cloudData = await res.json();
-    if(cloudData && cloudData.ACC) {
-      ACC = cloudData.ACC;
-      POS = cloudData.POS || [];
-      DL = cloudData.DL || [];
-      ORD = cloudData.ORD || [];
-      if(S.tab=='trade')rTrade();
-      if(S.tab=='history')rHist();
-      if(S.tab=='quotes')rQuotes();
-      rSet();
-      draw();
+    // 1. Render UI instantly with local data
+    const local = JSON.parse(localStorage.getItem('mt5_backup') || '{}');
+    if(local.ACC) {
+      ACC = local.ACC;
+      POS = local.POS || [];
+      DL = local.DL || [];
+      ORD = local.ORD || [];
     }
-  } catch(e) { console.log("Cloud sync failed", e); }
+    if(!ACC || !ACC.bal) ACC = {bal: 10000};
+    S.pr=0; S.pm=0; S.manualPr=false;
+    if(!SY[S.sym])S.sym='XAUUSD.vx';
+    
+    const savedP = localStorage.getItem('mt5_prices');
+    if(savedP) {
+      try { P = JSON.parse(savedP); } catch(e){}
+    }
+    for(const s in SY){
+      if(!P[s]) {
+        const p=SY[s].p; P[s]={b:p,o:p,hi:p,lo:p,t:Date.now()}
+      }
+    }
+    
+    applyScheme();$('#ocl').value=S.lot;broker=new ADP[S.adapter]();reconnect();ocUp();go('chart');uOc();if(S.lock&&S.pin)lockScr();
+    renderSymbolStrip();
+    document.getElementById('loading').style.display='none';
+    
+    $('#symbtn').onclick = (e) => {
+      e.stopPropagation();
+      $('#symstrip').classList.toggle('on');
+    };
+    document.addEventListener('click', (e) => {
+      if(!e.target.closest('#symstrip') && !e.target.closest('#symbtn')) {
+        $('#symstrip').classList.remove('on');
+      }
+    });
+
+    setInterval(()=>{
+      const pr=broker.getPrices();
+      if(!pr||!pr[S.sym])return;
+      localStorage.setItem('mt5_prices', JSON.stringify(P));
+      upCandles();pend();
+      POS.slice().forEach(p=>{
+        const b=P[p.sym].b,a=b+SY[p.sym].sp;
+        if(p.type=='BUY'?(p.sl&&b<=p.sl):(p.sl&&a>=p.sl))closeP(p.id,'sl');
+        else if(p.type=='BUY'?(p.tp&&b>=p.tp):(p.tp&&a<=p.tp))closeP(p.id,'tp')
+      });
+      marginCall();uOc();
+      {const e=$('#npl');if(e){const v=calc().pl;e.textContent=f2(v);e.className='pill '+(v>0?'pu':v<0?'pd':'')}}
+      if(S.tab=='quotes')uQuotes();if(S.tab=='trade')uTrade()
+    },1000);
+    
+    setInterval(draw,80);
+    addEventListener('resize',rs);
+    addEventListener('orientationchange',()=>setTimeout(rs,200));
+    window.visualViewport&&visualViewport.addEventListener('resize',rs);
+    window.ResizeObserver&&new ResizeObserver(rs).observe($('#cw'));
+
+    // 2. Fetch Cloud Data in background
+    try {
+      const res = await fetch(`${CLOUDFLARE_API_URL}?user=maxwel_501148369`);
+      const cloudData = await res.json();
+      if(cloudData && cloudData.ACC) {
+        ACC = cloudData.ACC;
+        POS = cloudData.POS || [];
+        DL = cloudData.DL || [];
+        ORD = cloudData.ORD || [];
+        if(S.tab=='trade')rTrade();
+        if(S.tab=='history')rHist();
+        if(S.tab=='quotes')rQuotes();
+        rSet();
+        draw();
+      }
+    } catch(e) { console.log("Cloud sync failed", e); }
+  } catch (err) {
+    alert("Boot error: " + err.message);
+  }
 }
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
@@ -565,5 +586,5 @@ window.addEventListener('appinstalled',()=>{
   window._deferredInstall=null;
   toast('MT5 installed to home screen');
 });
-boot();
+setTimeout(boot, 10);
 </script></body></html>
