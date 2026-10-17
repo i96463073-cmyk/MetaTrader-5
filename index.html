@@ -133,6 +133,63 @@ body.lt .radial-btn{background:#e6e8ec;border-color:#d9dce1;color:#000}
 body.lt #rad button{background:#e6e8ec;border-color:#d9dce1;color:#000}
 body.lt .radial-btn small{color:#333}
 body.tbl #app{max-width:900px;margin:0 auto}
+
+.sumb{padding:6px 0 10px;background:#000}
+.kd{display:flex;align-items:flex-end;padding:5px 18px;font-size:21px;font-weight:700;color:#fff;line-height:1.45}
+.kd i{flex:1;border-bottom:1px dotted #555;margin:0 8px 7px}
+.kd span:last-child{font-family:'Roboto Condensed',monospace}
+.kd .bl{color:#4C8DF6}.kd .rd{color:#EF5350}
+.gh2{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#26292e;color:#8e9299;font-weight:700;font-size:22px}
+.pw{position:relative;overflow:hidden;border-bottom:1px solid #2c2c2c}
+.pw .pr{border-bottom:0;padding:14px 18px 14px 22px}
+.pw .pr b{font-size:23px;font-weight:700}
+.pw .pr small{font-size:22px;color:#9a9ea6;font-weight:700}
+.pw .pv{font-size:28px;font-weight:700}
+.pw .pv.bl{color:#4C8DF6}.pw .pv.rd{color:#EF5350}
+.act{position:absolute;right:0;top:0;bottom:0;width:26%;min-width:150px;background:#0F6FE8;display:flex;align-items:center;justify-content:space-around;padding:0 4px}
+.act button{background:none;border:0;padding:8px 4px;display:flex}
+#sc-history .tr{padding:11px 18px}
+.sh{padding:20px 22px 8px;font-size:21px;font-weight:700;color:#fff;text-transform:uppercase;border-bottom:2px solid #333}
+.si{display:flex;align-items:center;gap:12px;padding:13px 22px;border-bottom:1px solid #222}
+.si .st{flex:1;min-width:0}
+.si b{display:block;color:#fff;font-size:22px;font-weight:500}
+.si small{display:block;color:#9a9ea6;font-size:18px;margin-top:2px;font-weight:400}
+.si .sv{color:#4C8DF6;font-size:20px;font-weight:700}
+.cbx{width:26px;height:26px;border-radius:5px;border:2px solid #777;flex:none;display:flex;align-items:center;justify-content:center}
+.cbx.on{background:#3b82f6;border-color:#3b82f6}
+.cbx.on:after{content:"";width:7px;height:13px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+#rad .ring{position:absolute;border-radius:50%;background:#2e3033;box-shadow:0 4px 16px #000a}
+#rad .rb{position:absolute;width:auto;height:auto;margin:0;border:0;border-radius:0;background:none;box-shadow:none;padding:6px;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center}
+body.lt .kd,body.lt .si b,body.lt .sh{color:#000}
+body.lt .sumb{background:#fff}
+body.lt .gh2{background:#e6e8ec}
+
+.q2{position:relative;display:flex;justify-content:space-between;align-items:center;padding:9px 20px}
+.q2 .ql{flex:1;min-width:0}
+.q2 .ql b{display:block;color:#fff;font-size:21px;font-weight:700;line-height:1.15}
+.q2 .qc{font-size:15px;font-weight:600}
+.q2 .qt{font-size:16px;color:#9a9ea6;font-weight:500;margin-top:2px}
+.q2 .qr{text-align:right}
+.q2 .qp{font-size:22px;font-weight:700;color:#9a9ea6;font-family:'Roboto Condensed',monospace}
+.q2 .qp span+span{margin-left:22px}
+.q2 em{font-style:normal;font-size:1.22em}.q2 sup{font-size:.62em;vertical-align:top}
+.q2 .qh{font-size:16px;color:#9a9ea6;margin-top:2px;font-weight:500}.q2 .qh span+span{margin-left:14px}
+.ptri{position:absolute;left:0;top:0;width:0;height:0;border-top:14px solid #F6465D;border-right:14px solid transparent;display:none}
+.qx{margin-right:10px}
+#sb{background:#000;padding-top:10px}
+#sb .it{gap:22px;padding:14px 24px;font-size:19px;font-weight:700}
+#sb .it svg{stroke:currentColor}
+#sb .it .badge{margin-left:auto;margin-right:10px}
+.ads{font-size:12px;color:#5b8dff;border:1px solid #5b8dff;border-radius:12px;padding:2px 9px;margin-left:12px;font-weight:600}
+.demo-cap{position:absolute;bottom:14px;left:24px;color:#6b6f78;font-size:14px;font-weight:500}
+.sheet.bulksheet{background:#292d33;padding-bottom:6px}
+.bulk .bt{text-align:center;color:#fff;font-size:20px;font-weight:500;padding:20px 16px;border-bottom:1px solid #1a1d21}
+.bulk .bi{color:#fff;font-size:21px;padding:20px 22px;font-weight:400}
+.gh2{background:#1f2125;font-size:20px;padding:10px 18px}
+.kd{font-size:19px}
+.pw .pr{padding:10px 18px 10px 22px}.pw .pr b{font-size:19px;color:#e6e6e6}.pw .pr small{font-size:19px}.pw .pv{font-size:24px}
+body.lt .q2 .ql b{color:#000}
+body.lt #sb{background:#fff}
 </style></head><body><div id="app">
 <div id="loading">Loading...</div>
 <div id="top"></div>
@@ -173,6 +230,7 @@ const CONFIG = {
   axisW: 56,           // price axis width (px)
   maxCandles: 2500,
   chatTitle: 'Messages',
+  mqid: '00000000',
   account: { name: 'Account', company: 'Broker', login: '000000', server: 'Server', host: 'host' }
 };
 const $ = s => document.querySelector(s);
@@ -186,7 +244,14 @@ const clr = v => (v >= 0 ? 'gr' : 'rd');
 const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const fd2 = d => { d = new Date(d); return p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear(); };
 const fdt = t => { const d = new Date(t); return d.getFullYear() + '.' + p2(d.getMonth() + 1) + '.' + p2(d.getDate()) + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()); };
-const newId = () => Math.floor(Date.now() / 1000) % 1e8 * 10 + Math.floor(Math.random() * 10);
+let _idc = 0;
+const newId = () => {
+  let id;
+  do { id = (Date.now() % 1e7) * 1000 + (_idc = (_idc + 1) % 1000); }
+  while ([...POS, ...ORD, ...DL].some(x => x.id == id));
+  return id;
+};
+function fixIds() { const seen = new Set(); POS.forEach(p => { if (seen.has(String(p.id))) p.id = newId(); seen.add(String(p.id)); }); }
 function gauss() { return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(6.2832 * Math.random()); }
 
 const BROKER_ICON = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="24" fill="#182024"/><path d="M 24 33 L 51 76 L 59 63 L 37 31 Z" fill="#ffffff"/><path d="M 78 33 L 55 63 L 46 51 L 65 31 Z" fill="#ffffff"/><path d="M 44 26 L 59 48 L 53 58 L 72 77 L 83 62 L 62 41 L 53 26 Z" fill="#22c55e"/></svg>`;
@@ -237,15 +302,15 @@ const C = { bg:'#131722', grid:'#363A45', tx:'#B2B5BE', up:'#0ECB81', dn:'#F6465
 const S = {
   tab:'chart', sym:'XAUUSD.vx', tf:'H1', type:0,
   grid:1, ohlc:0, vol:0, bid:1, ask:1, last:0, note:1, dw:0, scheme:'Custom', col:{}, adv:1,
-  osound:1, oct:0, vibm:'Silent mode only', ring:'Default', adl:'Wi-Fi only', lock:0, pin:'', lang:'English',
+  osound:1, oct:0, vibm:'Always', ring:'Default', adl:'Always', lock:0, pin:'', lang:'English',
   news:1, theme:'Dark', tabl:0, tfs:[...DEFAULT_TFS], sep:1, pos:1, ord:1, sltp:1, hist:1,
   ocPos:'Above chart', oc:1, cross:0, ind:{ ema20:0, ema50:0, sma20:0, bb:0 }, filter:'All',
-  lot:.01, adapter:'Simulated', conf:1, slip:10, sound:1, vib:1,
+  lot:.01, adapter:'Simulated', conf:1, noConf:0, acct:1, aod:1, slip:10, sound:1, vib:1,
   syms:Object.keys(SY).slice(0, 11), endpoint:'', key:'',
   // chart viewport: vis = bars across the screen, off = bars scrolled back (negative = empty space on the right)
   vis:60, off:0, pm:0, pr:0, manualPr:false, v:4
 };
-const SAVE = ['sym','tf','type','grid','ohlc','vol','bid','ask','last','note','dw','v','scheme','tfs','col','adv','osound','oct','vibm','ring','adl','lock','pin','lang','news','theme','tabl','sep','pos','ord','sltp','hist','ocPos','oc','ind','filter','lot','adapter','conf','slip','sound','vib','syms','endpoint','key','vis'];
+const SAVE = ['sym','tf','type','grid','ohlc','vol','bid','ask','last','note','dw','v','scheme','tfs','col','adv','osound','oct','vibm','ring','adl','lock','pin','lang','news','theme','tabl','sep','pos','ord','sltp','hist','ocPos','oc','ind','filter','lot','adapter','conf','slip','sound','vib','syms','endpoint','key','vis','noConf','acct','aod','vibm','adl'];
 
 let ACC = { bal: 10000 }, POS = [], DL = [], ORD = [];
 let P = {};            // live prices  {sym:{b,o,hi,lo,t}}
@@ -274,7 +339,7 @@ function save() {
 })();
 
 async function syncState() {
-  const state = { ACC, POS, DL, ORD };
+  const state = { ACC, POS, DL, ORD, ts: Date.now() };
   try { localStorage.setItem('mt5_backup', JSON.stringify(state)); } catch (e) {}
   try { await fetch(`${CONFIG.cloudUrl}?user=${CONFIG.userId}`, { method: 'POST', body: JSON.stringify(state) }); }
   catch (e) { console.log('Cloud sync failed', e); }
@@ -524,15 +589,21 @@ function draw() {
   // current price tag + candle countdown
   const rem = Math.ceil((m - Date.now() % m) / 1e3);
   const cd = rem >= 3600 ? Math.floor(rem / 3600) + ':' + p2(Math.floor(rem % 3600 / 60)) + ':' + p2(rem % 60) : p2(Math.floor(rem / 60)) + ':' + p2(rem % 60);
+  if (S.ask) {
+    const aT = clamp(y(b + SY[sy].sp), 8, PH - 8);
+    g.fillStyle = C.askc; g.fillRect(PW, aT - 9, AX, 18);
+    g.fillStyle = '#fff'; g.font = 'bold 11px Roboto,Arial,sans-serif'; g.textAlign = 'center';
+    g.fillText(fm(sy, b + SY[sy].sp), PW + AX / 2, aT);
+  }
   g.fillStyle = '#26A69A'; g.fillRect(PW, by - 13, AX, 26);
   g.fillStyle = '#fff'; g.font = 'bold 11px Roboto,Arial,sans-serif';
   g.fillText(fm(sy, b), PW + 28, by - 5); g.fillText(cd, PW + 28, by + 7);
 
   // header
   g.textAlign = 'left'; g.font = 'bold 13px Roboto,Arial,sans-serif'; g.fillStyle = '#4D9DFF';
-  g.fillText(sy, 6, 16);
-  const sw = g.measureText(sy).width;
-  g.fillStyle = '#fff'; g.fillText(' · ' + S.tf, 6 + sw, 16);
+  g.fillText(sy + ' ▾', 6, 16);
+  const sw = g.measureText(sy + ' ▾').width;
+  g.fillStyle = '#fff'; g.fillText(' ' + S.tf, 6 + sw, 16);
   g.font = '500 12px Roboto,Arial,sans-serif'; g.fillStyle = '#B2B5BE'; g.fillText(SY[sy].n, 6, 32);
   if (S.ohlc) {
     let i = hi;
@@ -794,12 +865,13 @@ function checkPending() {
     }
   });
 }
-function closeP(id, reason) {
+function closeP(id, reason, quiet) {
   const p = POS.find(x => x.id == id); if (!p) return;
   const cp = reason === 'sl' ? p.sl : reason === 'tp' ? p.tp : (p.type === 'BUY' ? P[p.sym].b : P[p.sym].b + SY[p.sym].sp);
   const pl = pnl(p);
   DL.push({ id: p.id, sym: p.sym, type: p.type, vol: p.vol, open: p.open, close: cp, ot: p.time, ct: Date.now(), pnl: pl });
   POS = POS.filter(x => x !== p); ACC.bal += pl;
+  if (quiet) return;
   beep(); showTradeNotif(p.sym, p.type === 'BUY' ? 'Sell' : 'Buy', p.vol, reason || 'closed', false);
   if (S.tab === 'trade') rTrade(); if (S.tab === 'history') rHist();
   draw(); syncState();
@@ -831,42 +903,82 @@ function modifyP(id) {
 
 /* ---------- 9. SCREENS ---------- */
 function rQuotes() {
-  $('#sc-quotes').innerHTML = S.syms.map(s => `<div class="q" data-s="${s}"><div>${edit ? '<button class="cb" data-x="' + s + '" style="margin-right:10px">✕</button>' : ''}<span class="pc mono"></span><b style="margin-left:10px">${s}</b><small class="tm"></small></div><div class="r"><div class="mono"><span class="bl bid"></span>  <span class="rd ask"></span></div><small class="lh"></small></div></div>`).join('') || '<div class="row">No symbols</div>';
+  $('#sc-quotes').innerHTML = S.syms.map(s => `<div class="q2" data-s="${s}"><span class="ptri"></span>${edit ? '<button class="cb qx" data-x="' + s + '">✕</button>' : ''}<div class="ql"><div class="qc"></div><b>${s}</b><div class="qt"></div></div><div class="qr"><div class="qp"><span class="qb"></span><span class="qa"></span></div><div class="qh"></div></div></div>`).join('') || '<div class="row">No symbols</div>';
   uQuotes();
 }
+function priceHTML(s, v) {
+  const d = SY[s].d, t = (+v).toFixed(d);
+  if (d <= 1) return t;
+  if (d === 2) return t.slice(0, -2) + '<em>' + t.slice(-2) + '</em>';
+  return t.slice(0, -3) + '<em>' + t.slice(-3, -1) + '</em><sup>' + t.slice(-1) + '</sup>';
+}
 function uQuotes() {
-  $$('#sc-quotes .q').forEach(r => {
-    const s = r.dataset.s, q = P[s], ch = (q.b / q.o - 1) * 100;
-    const pc = r.querySelector('.pc');
-    pc.textContent = (ch >= 0 ? '+' : '') + ch.toFixed(2) + '%'; pc.className = 'pc mono ' + (ch >= 0 ? 'bl' : 'rd');
-    r.querySelector('.bid').textContent = fm(s, q.b);
-    r.querySelector('.ask').textContent = fm(s, q.b + SY[s].sp);
-    const pp = POS.filter(p => p.sym === s), tm = r.querySelector('.tm');
-    tm.innerHTML = 'Spread ' + Math.round(SY[s].sp * 10 ** SY[s].d) + ' · ' + new Date(q.t).toTimeString().slice(0, 8) +
-      (pp.length ? ' <span style="color:' + (pp.reduce((a, p) => a + pnl(p), 0) >= 0 ? '#2962FF' : '#F6465D') + '">▲</span>' : '');
-    const L = r.querySelector('.lh');
-    L.textContent = 'L: ' + fm(s, q.lo) + ' H: ' + fm(s, q.hi);
-    L.style.display = S.adv ? '' : 'none'; tm.style.display = S.adv ? '' : 'none';
+  $$('#sc-quotes .q2').forEach(r => {
+    const s = r.dataset.s, q = P[s], d = SY[s].d, pts = Math.round((q.b - q.o) * 10 ** d), pct = (q.b / q.o - 1) * 100;
+    r.querySelector('.qc').innerHTML = `<span class="${pct >= 0 ? 'bl' : 'rd'}">${pts >= 0 ? '+' : ''}${pts} ${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%</span>`;
+    r.querySelector('.qt').textContent = new Date(q.t).toTimeString().slice(0, 8) + ' ⊨ ' + Math.round(SY[s].sp * 10 ** d);
+    const bd = r.querySelector('.qb'), ak = r.querySelector('.qa');
+    bd.innerHTML = priceHTML(s, q.b); ak.innerHTML = priceHTML(s, q.b + SY[s].sp);
+    bd.style.color = '#4C8DF6'; ak.style.color = '#EF5350';
+    r.querySelector('.qh').innerHTML = '<span>L: ' + nsp(fm(s, q.lo)) + '</span><span>H: ' + nsp(fm(s, q.hi)) + '</span>';
+    const pp = POS.filter(p => p.sym === s), tri = r.querySelector('.ptri');
+    tri.style.display = pp.length ? 'block' : 'none';
+    if (pp.length) tri.style.borderTopColor = pp.reduce((a, p) => a + pnl(p), 0) >= 0 ? '#2962FF' : '#F6465D';
+    r.querySelector('.qt').style.display = r.querySelector('.qh').style.display = S.adv ? '' : 'none';
   });
 }
 
+const TI = {
+  close: ic("<path d='M6 3h8l4 4v4'/><path d='M6 3v18h6'/><circle cx='17' cy='17' r='4'/><path d='M15 17l1.5 1.5L19 15.5'/>", 26),
+  mod: ic("<path d='M4 20l1-4L16 5l3 3L8 19z'/>", 26),
+  add: ic("<path d='M12 5v14M5 12h14'/>", 26),
+  chart: ic("<path d='M4 4v16h16'/><path d='M7 15l4-5 3 3 5-7'/>", 26)
+};
 function rTrade() {
   const L = [...POS].sort((a, b) => SRT === 'Symbol' ? a.sym.localeCompare(b.sym) : SRT === 'Profit' ? pnl(a) - pnl(b) : SRT === 'Time' ? a.time - b.time : a.id - b.id);
   if (desc) L.reverse();
-  const row = p => `<div class='pr' data-e='${p.id}' style='flex-wrap:wrap'><div><b>${p.sym}</b>, <span class='${p.type === 'BUY' ? 'bl' : 'rd'}'>${p.type.toLowerCase()} ${p.vol.toFixed(2)}</span><small class='mono'>${fm(p.sym, p.open)} → <span data-c='${p.id}'></span></small></div><div class='r mono' data-p='${p.id}'></div>` +
-    (EX == p.id ? `<div style='width:100%;font-size:16px;line-height:1.8;color:#9a9ea6;margin-top:6px'><div style='display:flex;justify-content:space-between'><span>S/L: ${p.sl ? fm(p.sym, p.sl) : '0.00'}</span><span>T/P: ${p.tp ? fm(p.sym, p.tp) : '0.00'}</span></div><div style='display:flex;justify-content:space-between'><span>${new Date(p.time).toISOString().slice(0, 16).replace('T', ' ').replace(/-/g, '.')}</span><span># ${p.id}</span></div><div style='display:flex;gap:8px;margin-top:8px'><button class='cb' data-cl='${p.id}'>Close position</button><button class='cb' data-ed='${p.id}'>Modify</button><button class='cb' data-nw='${p.sym}'>New order</button></div></div>` : '') + '</div>';
-  $('#sc-trade').innerHTML = '<div class="sum"><div><span>Profit, USD:</span><span id="tpl"></span></div><div><span>Balance:</span><span id="tb">0</span></div><div><span>Equity:</span><span id="te"></span></div><div><span>Margin:</span><span id="tmg"></span></div><div><span>Free Margin:</span><span id="tf"></span></div><div><span>Margin level:</span><span id="tl"></span></div></div>' +
+  const kd = (l, id) => `<div class="kd"><span>${l}</span><i></i><span id="${id}"></span></div>`;
+  const row = p => `<div class="pw"><div class="pr" data-e="${p.id}"><div><b>${p.sym}</b>, <span class="${p.type === 'BUY' ? 'bl' : 'rd'}">${p.type.toLowerCase()} ${p.vol.toFixed(2)}</span><small class="mono">${fm(p.sym, p.open)} → <span data-c="${p.id}"></span></small></div><div class="r mono pv" data-p="${p.id}"></div></div>` +
+    (EX == p.id ? `<div class="act"><button data-cl="${p.id}">${TI.close}</button><button data-ed="${p.id}">${TI.mod}</button><button data-nw="${p.sym}">${TI.add}</button><button data-ch="${p.sym}">${TI.chart}</button></div>` : '') + '</div>';
+  $('#sc-trade').innerHTML = '<div class="sumb">' + kd('Balance:', 'tb') + kd('Equity:', 'te') + kd('Margin:', 'tmg') + kd('Free margin:', 'tf') + kd('Margin Level (%):', 'tl') + '</div>' +
+    '<div class="gh2"><span>Positions</span><span data-pm style="padding:0 6px">···</span></div>' +
     (L.length ? L.map(row).join('') : '<div class="row" style="justify-content:center">No open positions</div>');
   uTrade();
 }
 function uTrade() {
   const c = calc(), set = (i, v) => { const e = $('#' + i); if (e) e.textContent = v; };
-  set('tpl', f2(c.pl)); set('tb', f2(ACC.bal)); set('te', f2(c.eq)); set('tmg', f2(c.m)); set('tf', f2(c.fm));
-  set('tl', c.m ? c.ml.toFixed(2) + '%' : '—');
+  set('tb', f2(ACC.bal)); set('te', f2(c.eq)); set('tmg', f2(c.m)); set('tf', f2(c.fm));
+  set('tl', c.m ? f2(c.ml) : '—');
   POS.forEach(p => {
     const a = $('[data-p="' + p.id + '"]'), b = $('[data-c="' + p.id + '"]');
-    if (a) { const v = pnl(p); a.textContent = (v >= 0 ? '+' : '') + f2(v); a.className = 'mono ' + clr(v); }
+    if (a) { const v = pnl(p); a.textContent = f2(v); a.className = 'r mono pv ' + (v >= 0 ? 'bl' : 'rd'); }
     if (b) b.textContent = fm(p.sym, p.type === 'BUY' ? P[p.sym].b : P[p.sym].b + SY[p.sym].sp);
+  });
+  const h = $('#hp'); if (h) { h.textContent = f2(c.pl) + ' USD'; h.className = c.pl >= 0 ? 'bl' : 'rd'; }
+}
+function requestClose(id) {
+  const p = POS.find(x => x.id == id); if (!p) return;
+  EX = null;
+  if (S.noConf) return closeP(id);
+  const pl = pnl(p);
+  sheet(`<h3>Close position #${p.id}</h3><div class="fld"><span>${p.sym}, ${p.type.toLowerCase()} ${p.vol.toFixed(2)}</span><span class="${pl >= 0 ? 'bl' : 'rd'}">${f2(pl)}</span></div><div style="display:flex;gap:10px;padding:8px 16px 0"><button class="go" data-n style="margin:0;background:var(--s2)">Cancel</button><button class="go" data-y style="margin:0;background:var(--bl)">Close</button></div>`, (sh, cl) => {
+    sh.querySelector('[data-n]').onclick = () => { cl(); rTrade(); };
+    sh.querySelector('[data-y]').onclick = () => { cl(); closeP(id); };
+  });
+}
+function positionsMenu() {
+  sheet('<div class="bulk"><div class="bt">Bulk Operations</div><div class="bi" data-b="all">Close All Positions</div><div class="bi" data-b="lose">Close Losing Positions</div></div>', (sh, cl) => {
+    sh.classList.add('bulksheet');
+    sh.onclick = e => {
+      const b = e.target.closest('[data-b]'); if (!b) return;
+      cl();
+      const ids = POS.filter(b.dataset.b === 'all' ? () => true : p => pnl(p) < 0).map(p => p.id);
+      if (!ids.length) return toast('No positions to close');
+      ids.forEach(id => closeP(id, 'closed', true));
+      beep(); toast(ids.length + ' position' + (ids.length > 1 ? 's' : '') + ' closed');
+      if (S.tab === 'trade') rTrade(); if (S.tab === 'history') rHist();
+      draw(); syncState();
+    };
   });
 }
 
@@ -884,18 +996,17 @@ function rHist() {
   if (!HIST_FILTERS.includes(S.filter)) S.filter = 'Today';
   const [s0, n0] = rngOf(S.filter);
   const inRange = t => t >= s0 && t <= n0.getTime() + 1e3, symOk = x => !HSYM || x.sym === HSYM;
-  const kv = (l, v, c) => `<div class='kv'><span>${l}</span><i></i><span class='${c || ''}'>${v}</span></div>`;
-  const tc = t => t === 'BUY' ? 'bl' : 'rd';
+  const kd = (l, v, c) => `<div class="kd"><span>${l}</span><i></i><span class="${c || ''}">${v}</span></div>`;
+  const tc = t => t === 'BUY' ? 'bl' : 'rd', pc = v => v >= 0 ? 'bl' : 'rd';
   let sum = '', h = '';
-
   if (hv === 'POSITIONS') {
     const L = sortBy(DL.filter(d => inRange(d.ct) && symOk(d)), { Symbol: o => o.sym, Deal: o => o.id, Type: o => o.type, Volume: o => o.vol, Time: o => o.ct, Profit: o => o.pnl });
     const tp = L.reduce((a, d) => a + d.pnl, 0);
-    sum = `<div class="sum"><div><span>Profit:</span><span class="${clr(tp)}">${f2(tp)}</span></div><div><span>Deposit:</span><span>0.00</span></div><div><span>Swap:</span><span>0.00</span></div><div><span>Commission:</span><span>0.00</span></div><div><span>Balance:</span><span class="${clr(tp)}">${f2(tp)}</span></div></div>`;
-    h = L.map(d => `<div class='tr'><div><div class='t1'><b>${d.sym}</b>, <span class='${tc(d.type)}'>${d.type.toLowerCase()} ${d.vol.toFixed(2)}</span></div><div class='t2'>${nsp(fm(d.sym, d.open))} → ${nsp(fm(d.sym, d.close))}</div></div><div class='r2'>${fdt(d.ct)}<b class='${d.pnl >= 0 ? 'bl' : 'rd'}'>${f2(d.pnl)}</b></div></div>`).join('');
+    sum = kd('Profit:', f2(tp), pc(tp)) + kd('Deposit:', '0.00') + kd('Swap:', '0.00') + kd('Commission:', '0.00') + kd('Balance:', f2(tp), pc(tp));
+    h = L.map(d => `<div class='tr'><div><div class='t1'><b>${d.sym}</b>, <span class='${tc(d.type)}'>${d.type.toLowerCase()} ${d.vol.toFixed(2)}</span></div><div class='t2'>${nsp(fm(d.sym, d.open))} → ${nsp(fm(d.sym, d.close))}</div></div><div class='r2'>${fdt(d.ct)}<b class='${pc(d.pnl)}'>${f2(d.pnl)}</b></div></div>`).join('');
   } else if (hv === 'ORDERS') {
     const L = sortBy(ORD.filter(o => inRange(o.time) && symOk(o)), { Symbol: o => o.sym, Deal: o => o.id, Type: o => o.type, Volume: o => o.vol, Time: o => o.time, Profit: () => 0 });
-    sum = kv('Filled:', L.length) + kv('Canceled:', 0) + kv('Total:', L.length);
+    sum = kd('Filled:', L.length) + kd('Canceled:', 0) + kd('Total:', L.length);
     h = L.map(o => `<div class='tr'><div><div class='t1'><b>${o.sym}</b>, <span class='${tc(o.type)}'>${o.type.toLowerCase()}</span></div><div class='t2'>${o.vol.toFixed(2)} / ${o.vol.toFixed(2)} at market</div></div><div class='r2'>${fdt(o.time)}<b>${o.state || ''}</b></div></div>`).join('');
   } else {
     const D = [];
@@ -906,10 +1017,10 @@ function rHist() {
     });
     const L = sortBy(D.filter(d => inRange(d.t) && symOk(d)), { Symbol: o => o.sym, Deal: o => o.id, Type: o => o.type, Volume: o => o.vol, Time: o => o.t, Profit: o => o.pl });
     const pf = L.reduce((a, d) => a + d.pl, 0);
-    sum = kv('Profit:', f2(pf), pf >= 0 ? 'bl' : 'rd') + kv('Deposit', f2(0)) + kv('Swap:', f2(0)) + kv('Commission:', f2(0));
-    h = L.map(d => `<div class='tr'><div><div class='t1'><b>${d.sym}</b>, <span class='${tc(d.type)}'>${d.type.toLowerCase()}, ${d.dir}</span></div><div class='t2'>${d.vol.toFixed(2)} at ${nsp(fm(d.sym, d.price))}</div></div><div class='r2'>${fdt(d.t)}${d.dir === 'out' ? `<b class='${d.pl >= 0 ? 'bl' : 'rd'}'>${f2(d.pl)}</b>` : ''}</div></div>`).join('');
+    sum = kd('Profit:', f2(pf), pc(pf)) + kd('Deposit:', '0.00') + kd('Swap:', '0.00') + kd('Commission:', '0.00');
+    h = L.map(d => `<div class='tr'><div><div class='t1'><b>${d.sym}</b>, <span class='${tc(d.type)}'>${d.type.toLowerCase()}, ${d.dir}</span></div><div class='t2'>${d.vol.toFixed(2)} at ${nsp(fm(d.sym, d.price))}</div></div><div class='r2'>${fdt(d.t)}${d.dir === 'out' ? `<b class='${pc(d.pl)}'>${f2(d.pl)}</b>` : ''}</div></div>`).join('');
   }
-  $('#sc-history').innerHTML = '<div class="tabs">' + ['POSITIONS', 'ORDERS', 'DEALS'].map(t => `<div class="${t === hv ? 'on' : ''}">${t}</div>`).join('') + '</div>' + sum + (h || EMPTY);
+  $('#sc-history').innerHTML = '<div class="tabs">' + ['POSITIONS', 'ORDERS', 'DEALS'].map(t => `<div class="${t === hv ? 'on' : ''}">${t}</div>`).join('') + '</div><div class="sumb">' + sum + '</div><div style="border-top:1px solid #333">' + (h || EMPTY) + '</div>';
 }
 
 const CHANNELS = [['Forecast and Levels','Mini-articles with technical and fundamental analysis','489.6 k'],['Scalping','Signals + Automation. Built for speed.','4.8 k'],['New Gadgets and Game Tech News','New Gadgets and Game Technical News','110.8 k'],['Apollo Forex Systems','Trading strategies, indicators, systems, signals.','176.1 k'],['IQ Market Insight','Official MQL5 channel for daily market analysis','9.6 k'],['AI Trading Intelligence','AI trading insights, market facts, trading tips','27.9 k'],['Daily Forex News','Daily news on forex, stocks, gold, crypto.','44.0 k'],['Gold Pivot','AI-created Gold trades with Pivot Point entries','39.1 k'],['Trend Scalper','Trend Scalper','97.4 k'],['AI Forex Analyse','AI analyzes EURUSD, GBPUSD, USDJPY','4.2 k']];
@@ -938,16 +1049,39 @@ function rAcc() {
     </div>`;
 }
 function rSet() {
+  const cb = (k, t, d) => `<div class="si" data-k="${k}"><div class="st"><b>${t}</b><small>${d}</small></div><div class="cbx ${S[k] ? 'on' : ''}"></div></div>`;
+  const tx = (c, t, d, v) => `<div class="si" data-c="${c}"><div class="st"><b>${t}</b><small>${d}</small></div>${v ? `<span class="sv">${v}</span>` : ''}</div>`;
   $('#sc-settings').innerHTML =
-    '<div class="h">Appearance</div>' +
-    '<div class="fld" data-c="theme"><span>Theme</span><span>' + S.theme + '</span></div>' +
-    tgl('tabl', 'Tablet layout') + tgl('adv', 'Advanced quotes') +
-    '<div class="h">Trading</div>' +
-    tgl('oc', 'One-click trading') + tgl('note', 'Trade notifications') + tgl('sound', 'Sound') + tgl('vib', 'Vibration') +
-    '<div class="fld"><span>Default lot</span><input id="setlot" type="number" step="0.01" min="0.01" value="' + S.lot.toFixed(2) + '"></div>' +
-    '<div class="fld"><span>Broker</span><span>' + S.adapter + ' · ' + bstat + '</span></div>' +
-    '<div class="h">Data</div>' +
-    '<div class="fld" data-c="reset"><span class="rd">Reset all local data</span><span>›</span></div>';
+    '<div class="sh">Quotes</div>' +
+    cb('adv', 'Advanced mode', 'In the advanced mode, the quotes window contains spreads, time data, as well as High and Low prices.') +
+    cb('sound', 'Order sounds', 'Play sounds for orders') +
+    cb('oc', 'One Click Trading', 'Allows performing trade operations with a single tap without additional confirmation from the trader') +
+    cb('noConf', 'Confirmation of trades on chart', "Don't show a confirmation dialog when closing positions, modifying or deleting orders from a chart") +
+    cb('acct', 'Account info in bottom menu', 'Show account Balance on the Trade tab when no positions are open, otherwise show floating P/L.') +
+    '<div class="sh">Messages</div>' +
+    tx('mqid', 'MetaQuotes ID', 'Use this ID to send messages to this device via notify service.', CONFIG.mqid) +
+    tx('vib', 'Vibration', S.vibm) +
+    tx('ring', 'Notification ringtone', 'Cosmic Radio') +
+    tx('adl', 'Content auto-download', S.adl) +
+    '<div class="sh">Security</div>' +
+    tx('otp', 'OTP', 'One-time Password Generator') +
+    cb('lock', 'Lock Screen', 'Lock screen when the app is hidden and request pin or biometrics on start') +
+    '<div class="sh">News</div>' +
+    cb('news', 'Enable News', 'Receive news updates') +
+    '<div class="sh">Interface</div>' +
+    tx('lang', 'Language', 'English') +
+    cb('tabl', 'Tablet Interface', 'Enable tablet interface') +
+    cb('aod', 'Always on display', 'Prevent the screen from turning off while the app is active') +
+    tx('theme', 'Choose theme', S.theme === 'Light' ? 'Light' : 'Pure black (Dark)') +
+    '<div class="sh">Data</div>' +
+    tx('reset', 'Reset local data', 'Delete saved settings, positions and history on this device');
+}
+let wakeLock = null;
+function applyWake() {
+  try {
+    if (S.aod && navigator.wakeLock) navigator.wakeLock.request('screen').then(l => { wakeLock = l; }).catch(() => {});
+    else if (!S.aod && wakeLock) { wakeLock.release(); wakeLock = null; }
+  } catch (e) {}
 }
 
 /* ---------- 10. UI CHROME ---------- */
@@ -967,7 +1101,7 @@ function titleHTML() {
   const c = calc().pl;
   const sub = t === 'trade' ? `<small id='hp' class='${c >= 0 ? 'bl' : 'rd'}'>${f2(c)} USD</small>`
     : t === 'history' ? `<small>${HSYM || 'All symbols'}</small>`
-    : t === 'quotes' ? `<small>${f2(ACC.bal)} USD</small>` : '';
+    : '';
   return t === 'history' ? `<div data-a='hsym'><b>History</b>${sub}</div>` : `<div><b>${TITLES[t]}</b>${sub}</div>`;
 }
 function top_() {
@@ -992,7 +1126,7 @@ function go(t) {
 }
 function applyScheme() {
   const s = SCHEMES[S.scheme] || SCHEMES.Custom;
-  Object.assign(C, s, { bull: s.up, bear: s.dn, line: '#2962FF', bidc: '#E57373', askc: '#EF5350', slc: '#F6465D', tpc: '#0ECB81', buyc: '#2962FF', sellc: '#F6465D', volc: '#787B86' }, S.col || {});
+  Object.assign(C, s, { bull: s.up, bear: s.dn, line: '#2962FF', bidc: '#26A69A', askc: '#EF5350', slc: '#F6465D', tpc: '#0ECB81', buyc: '#2962FF', sellc: '#F6465D', volc: '#787B86' }, S.col || {});
   if (S.theme === 'Light') Object.assign(C, { bg: '#FFFFFF', grid: '#D8D8D8', tx: '#333333', sep: '#E8E8E8', up: '#0ECB81', dn: '#F6465D', bull: '#0ECB81', bear: '#F6465D', wick: '#888888', bidc: '#00897B', askc: '#E53935', slc: '#F6465D', tpc: '#0ECB81', buyc: '#2962FF', sellc: '#F6465D', volc: '#B0B0B0' }, S.col || {});
   document.body.classList.toggle('lt', S.theme === 'Light');
   document.body.classList.toggle('tbl', !!S.tabl);
@@ -1015,7 +1149,8 @@ function uOc() {
   pxs('#ocs', s, q.b); pxs('#ocb', s, q.b + SY[s].sp);
   const pv = uOc.p || q.b, d = q.b > pv ? 1 : q.b < pv ? -1 : (uOc.d || -1);
   uOc.p = q.b; uOc.d = d;
-  $('#ocs').style.background = $('#ocb').style.background = d > 0 ? '#3F83F8' : '#EF5350';
+  $('#ocs').style.background = d > 0 ? '#3F83F8' : '#EF5350';
+  $('#ocb').style.background = d > 0 ? '#EF5350' : '#3F83F8';
 }
 
 let toastTimer;
@@ -1050,12 +1185,30 @@ function lockScr() {
 }
 function sideMenu() {
   const o = document.createElement('div'); o.className = 'ov';
-  const it = (g2, l) => `<div class="it" data-g="${g2}">${l}</div>`;
-  o.innerHTML = `<div id="sb"><div class="hd"><span class="av-wrap">${BROKER_ICON}</span><div><b>MetaTrader 5</b><br><small>Demo / simulated</small></div></div>` +
-    it('acc', 'Trade accounts') + it('quotes', 'Quotes') + it('chart', 'Charts') + it('trade', 'Trade') + it('history', 'History') + it('msg', 'Messages') + it('settings', 'Settings') + '</div>';
+  const sv = p => `<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+  const M = [
+    ['trade', 'Trade', sv('<path d="M3 17l5-6 4 3 6-8"/><circle cx="19" cy="6" r="1.6"/>')],
+    ['news', 'News', sv('<path d="M8 4h11a1 1 0 011 1v14H7a3 3 0 01-3-3V8h4z"/><path d="M11 8h6M11 12h6M11 16h4"/>')],
+    ['msg', 'Mailbox', sv('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'), '<span class="badge">67</span>'],
+    ['journal', 'Journal', sv('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16M6 9h3M6 13h3M15 9h3M15 13h3"/>')],
+    ['settings', 'Settings', sv("<circle cx='12' cy='12' r='3'/><path d='M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1'/>")],
+    ['calendar', 'Economic calendar', sv("<rect x='3' y='5' width='18' height='16' rx='2'/><path d='M8 3v4M16 3v4M3 10h18'/>"), '<span class="ads">Ads</span>'],
+    ['community', 'Traders Community', sv('<circle cx="7" cy="6" r="1.6"/><circle cx="17" cy="6" r="1.6"/><path d="M4 12v4a3 3 0 006 0v-4zM14 12v4a3 3 0 006 0v-4z"/>')],
+    ['algo', 'MQL5 Algo Trading', sv('<path d="M21 3L3 10l7 3 3 7z"/><path d="M10 13L21 3"/>')],
+    ['guide', 'User guide', sv('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 115 0c0 1.6-2.5 2-2.5 4M12 17h.01"/>')],
+    ['about', 'About', sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>')]
+  ];
+  o.innerHTML = '<div id="sb">' + M.map(m => `<div class="it" data-g="${m[0]}">${m[2]}<span>${m[1]}</span>${m[3] || ''}</div>`).join('') + '<div class="demo-cap" data-g="acc">Demo / simulated</div></div>';
   $('#app').appendChild(o);
   const cl = () => { o.classList.remove('on'); setTimeout(() => o.remove(), 330); };
-  o.onclick = e => { if (e.target === o) return cl(); const i = e.target.closest('[data-g]'); if (i) { cl(); go(i.dataset.g); } };
+  o.onclick = e => {
+    if (e.target === o) return cl();
+    const i = e.target.closest('[data-g]'); if (!i) return;
+    cl();
+    const g2 = i.dataset.g;
+    if (['trade', 'msg', 'settings', 'acc'].includes(g2)) go(g2);
+    else toast(i.textContent.replace(/\d+$|Ads$/, '').trim() + ' is not available');
+  };
   requestAnimationFrame(() => requestAnimationFrame(() => o.classList.add('on')));
 }
 function addSym() {
@@ -1125,19 +1278,27 @@ function tfSetup() {
 }
 function radial(px, py) {
   const ar = $('#app').getBoundingClientRect(), r = document.createElement('div'); r.id = 'rad'; $('#app').appendChild(r);
-  const x = clamp(px - ar.left, 90, ar.width - 90), y = clamp(py - ar.top, 140, ar.height - 140);
+  const RO = 86, RI = 50, RM = 68;
+  const x = clamp(px - ar.left, RO + 4, ar.width - RO - 4), y = clamp(py - ar.top, RO + 60, ar.height - RO - 4);
+  const ring = document.createElement('div'); ring.className = 'ring';
+  ring.style.cssText = `left:${x - RO}px;top:${y - RO}px;width:${RO * 2}px;height:${RO * 2}px;-webkit-mask:radial-gradient(circle at center,transparent ${RI}px,#000 ${RI + 1}px);mask:radial-gradient(circle at center,transparent ${RI}px,#000 ${RI + 1}px)`;
+  r.appendChild(ring);
+  const si = (p) => `<svg viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='#fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'>${p}</svg>`;
   const items = [
-    ['▤', 'Window', () => { S.type = (S.type + 1) % 4; toast(CHART_TYPES[S.type]); save(); draw(); }],
-    ['✎', 'Objects', () => toast('Objects: drawing tools')],
-    ['⌖', 'Cross', () => { S.cross ^= 1; cx = null; top_(); draw(); }],
-    ['fx', 'Indic.', indSheet], [S.tf, 'TF', tfSheet], ['⚙', 'Settings', chartSettings]
+    ...['M1', 'M5', 'M15', 'M30', 'H1', 'H4', 'D1', 'W1', 'MN'].map(t => ({ t, f: () => setTF(t) })),
+    { i: si("<path d='M3 15c3-8 5-8 7-3s4 5 6-1 3-4 5-2'/>"), f: indSheet },
+    { i: si("<path d='M12 3v6M12 15v6M3 12h6M15 12h6'/>"), f: () => { S.cross ^= 1; cx = null; top_(); draw(); } },
+    { i: si("<path d='M4 6h16M4 12h16M4 18h16'/><circle cx='9' cy='6' r='2' fill='#2a2c2f'/><circle cx='15' cy='12' r='2' fill='#2a2c2f'/><circle cx='8' cy='18' r='2' fill='#2a2c2f'/>"), f: chartSettings },
+    { i: si("<path d='M3 20l6-11 6 11z'/><circle cx='17' cy='7' r='3.5'/>"), f: () => toast('Objects: drawing tools') },
+    { i: si("<rect x='4' y='9' width='11' height='11' rx='2'/><path d='M9 9V6a2 2 0 012-2h7a2 2 0 012 2v7a2 2 0 01-2 2h-3'/>"), f: () => { S.type = (S.type + 1) % 4; toast(CHART_TYPES[S.type]); save(); draw(); } }
   ];
-  [-90, -30, 30, 90, 150, 210].forEach((ang, i) => {
-    const b = document.createElement('button');
-    b.style.left = x + Math.cos(ang * Math.PI / 180) * 82 + 'px';
-    b.style.top = y + Math.sin(ang * Math.PI / 180) * 82 + 'px';
-    b.innerHTML = items[i][0] + '<br><span style="font-size:9px">' + items[i][1] + '</span>';
-    b.onclick = e => { e.stopPropagation(); r.remove(); items[i][2](); };
+  items.forEach((it, n) => {
+    const ang = -141 + 25.8 * n, rad = ang * Math.PI / 180;
+    const b = document.createElement('button'); b.className = 'rb';
+    b.style.left = x + Math.cos(rad) * RM + 'px'; b.style.top = y + Math.sin(rad) * RM + 'px';
+    if (it.t) { b.textContent = it.t; b.style.transform = `translate(-50%,-50%) rotate(${ang + 90}deg)`; if (it.t === S.tf) b.style.color = '#8a8d91'; }
+    else { b.innerHTML = it.i; b.style.transform = 'translate(-50%,-50%)'; }
+    b.onclick = e => { e.stopPropagation(); r.remove(); it.f(); };
     r.appendChild(b);
   });
   r.onclick = () => r.remove();
@@ -1186,25 +1347,38 @@ $('#top').addEventListener('click', e => {
 $('#sc-quotes').onclick = e => {
   const x = e.target.closest('[data-x]');
   if (x) { S.syms = S.syms.filter(s => s !== x.dataset.x); save(); renderSymbolStrip(); return rQuotes(); }
-  const q = e.target.closest('.q'); if (q && !edit) setSym(q.dataset.s);
+  const q = e.target.closest('.q2'); if (q && !edit) setSym(q.dataset.s);
 };
+let swX = null, swId = null, swiped = false;
+$('#sc-trade').addEventListener('pointerdown', e => { const r = e.target.closest('[data-e]'); swX = e.clientX; swId = r ? r.dataset.e : null; swiped = false; });
+$('#sc-trade').addEventListener('pointerup', e => {
+  if (swId == null) return;
+  const dx = e.clientX - swX;
+  if (Math.abs(dx) > 40) { swiped = true; EX = dx < 0 ? swId : null; rTrade(); }
+  swId = null;
+});
 $('#sc-trade').onclick = e => {
-  const c = e.target.closest('[data-cl]'); if (c) { EX = null; return closeP(c.dataset.cl); }
-  const m = e.target.closest('[data-ed]'); if (m) return modifyP(m.dataset.ed);
-  const n = e.target.closest('[data-nw]'); if (n) { S.sym = n.dataset.nw; return ticket(); }
+  if (swiped) { swiped = false; return; }
+  const c = e.target.closest('[data-cl]'); if (c) return requestClose(c.dataset.cl);
+  const m = e.target.closest('[data-ed]'); if (m) { EX = null; return modifyP(m.dataset.ed); }
+  const n = e.target.closest('[data-nw]'); if (n) { S.sym = n.dataset.nw; EX = null; return ticket(); }
+  const ch = e.target.closest('[data-ch]'); if (ch) { EX = null; return setSym(ch.dataset.ch); }
+  if (e.target.closest('[data-pm]')) return positionsMenu();
   const r = e.target.closest('[data-e]'); if (r) { const id = r.dataset.e; EX = EX == id ? null : id; rTrade(); }
 };
 $('#sc-history').onclick = e => { const t = e.target.closest('.tabs div'); if (!t) return; hv = t.textContent.trim(); rHist(); };
 $('#sc-settings').onclick = e => {
-  const f = e.target.closest('.fld'); if (!f) return;
-  if (f.dataset.k) { S[f.dataset.k] ^= 1; save(); applyScheme(); ocUp(); rSet(); }
-  else if (f.dataset.c === 'theme') { S.theme = S.theme === 'Dark' ? 'Light' : 'Dark'; save(); applyScheme(); rSet(); }
-  else if (f.dataset.c === 'reset' && confirm('Delete all local data?')) { localStorage.clear(); location.reload(); }
+  const f = e.target.closest('.si'); if (!f) return;
+  const k = f.dataset.k, c = f.dataset.c;
+  if (k) {
+    if (k === 'lock' && !S.lock && !S.pin) { const p = prompt('Set a PIN'); if (!p) return; S.pin = p; }
+    S[k] = S[k] ? 0 : 1; save(); applyScheme(); ocUp(); if (k === 'aod') applyWake(); rSet();
+  } else if (c === 'theme') { S.theme = S.theme === 'Dark' ? 'Light' : 'Dark'; save(); applyScheme(); rSet(); }
+  else if (c === 'vib') { S.vibm = cyc(['Always', 'Silent mode only', 'Never'], S.vibm); S.vib = S.vibm === 'Never' ? 0 : 1; save(); rSet(); }
+  else if (c === 'adl') { S.adl = cyc(['Always', 'Wi-Fi only', 'Never'], S.adl); save(); rSet(); }
+  else if (c === 'otp') toast('OTP is not available');
+  else if (c === 'reset' && confirm('Delete all local data?')) { localStorage.clear(); location.reload(); }
 };
-$('#sc-settings').onchange = e => {
-  if (e.target.id === 'setlot') { const v = parseFloat(e.target.value); if (v > 0) { S.lot = v; $('#ocl').value = v.toFixed(2); save(); } }
-};
-
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window._deferredInstall = e; const btn = $('#installBtn'); if (btn) btn.style.display = 'block'; });
 window.addEventListener('appinstalled', () => { window._deferredInstall = null; toast('MT5 installed to home screen'); });
 
@@ -1212,7 +1386,9 @@ window.addEventListener('appinstalled', () => { window._deferredInstall = null; 
 async function boot() {
   try {
     const local = JSON.parse(localStorage.getItem('mt5_backup') || '{}');
+    const hadLocal = !!local.ACC, localTs = local.ts || 0;
     if (local.ACC) { ACC = local.ACC; POS = local.POS || []; DL = local.DL || []; ORD = local.ORD || []; }
+    fixIds();
     if (!ACC || !ACC.bal) ACC = { bal: 10000 };
     resetView();
     if (!SY[S.sym]) S.sym = 'XAUUSD.vx';
@@ -1221,6 +1397,7 @@ async function boot() {
     for (const s in SY) if (!P[s] || !(P[s].b > 0)) { const p = SY[s].p; P[s] = { b: p, o: p, hi: p, lo: p, t: Date.now() }; }
 
     applyScheme();
+    applyWake();
     $('#ocl').value = S.lot;
     reconnect();
     ocUp();
@@ -1246,7 +1423,11 @@ async function boot() {
       try { localStorage.setItem('mt5_prices', JSON.stringify(P)); } catch (e) {}
       updateCandles(); checkPending(); checkStops(); marginCall(); uOc();
       const e = $('#npl');
-      if (e) { const v = calc().pl; e.textContent = f2(v); e.className = 'pill ' + (v > 0 ? 'pu' : v < 0 ? 'pd' : ''); }
+      if (e) {
+        const v = calc().pl, flat = !POS.length;
+        e.textContent = f2(flat && S.acct ? ACC.bal : v);
+        e.className = 'pill ' + (flat ? '' : v > 0 ? 'pu' : v < 0 ? 'pd' : '');
+      }
       if (S.tab === 'quotes') uQuotes();
       if (S.tab === 'trade') uTrade();
     }, 1000);
@@ -1260,11 +1441,13 @@ async function boot() {
     try {
       const res = await fetch(`${CONFIG.cloudUrl}?user=${CONFIG.userId}`);
       const cloud = await res.json();
-      if (cloud && cloud.ACC) {
+      // only take the cloud copy if it is NEWER than this device's copy (stale cloud data used to bring closed trades back)
+      if (cloud && cloud.ACC && ((cloud.ts || 0) > localTs || !hadLocal)) {
         ACC = cloud.ACC; POS = cloud.POS || []; DL = cloud.DL || []; ORD = cloud.ORD || [];
+        fixIds();
         if (S.tab === 'trade') rTrade(); if (S.tab === 'history') rHist(); if (S.tab === 'quotes') rQuotes();
         draw();
-      }
+      } else if (hadLocal) syncState();
     } catch (e) { console.log('Cloud sync failed', e); }
   } catch (err) {
     console.error(err);
