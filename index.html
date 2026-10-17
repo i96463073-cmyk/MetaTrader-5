@@ -13,7 +13,6 @@ html,body{height:100%;width:100%;margin:0;overscroll-behavior:none;touch-action:
 #oc button{flex:1;border:0;border-radius:0;background:#EF5350;color:#fff;padding:0 12px;position:relative;font-family:Roboto,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center}#oc button small{position:absolute;top:4px;left:8px;font-size:11px;font-weight:700}#oc button b{font-size:18px;font-weight:500}#oc button i{font-size:24px;font-weight:700;font-style:normal}#oc button u{font-size:14px;text-decoration:none;align-self:flex-start;margin-top:11px}#ocv{width:34%;display:flex;align-items:center;justify-content:space-between;padding:0 10px;color:#fff;font-size:15px}#ocv span{padding:10px;cursor:pointer;font-size:20px}#ocv input{width:80px;background:none;border:0;color:#fff;text-align:center;font-size:22px;font-weight:700;-moz-appearance:textfield}#ocv input::-webkit-inner-spin-button{display:none}
 #cw{flex:1;position:relative;min-height:0;touch-action:none}#cv{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
 
-/* Centered transparent button for symbol selection */
 #symbtn{position:absolute;top:0;left:0;width:200px;height:60px;z-index:15;background:transparent;cursor:pointer;}
 
 #symstrip{display:none;position:absolute;left:10px;top:70px;max-height:400px;overflow-y:auto;flex-direction:column;gap:6px;padding:10px;z-index:20;background:rgba(30,34,45,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px;border:1px solid #333;box-shadow:0 8px 24px rgba(0,0,0,0.6);}
@@ -28,7 +27,6 @@ html,body{height:100%;width:100%;margin:0;overscroll-behavior:none;touch-action:
 .trade-notif .vol{margin-left:12px;color:#fff;font-weight:700}
 .trade-notif .state{margin-left:auto;color:#2962FF;font-weight:700;font-size:16px}
 
-/* Error styling for red left border */
 .trade-notif.error{border-left-color:#F6465D}
 .trade-notif.error .type{color:#F6465D}
 .trade-notif.error .state{color:#F6465D}
@@ -169,7 +167,6 @@ const TFS={M1:1,M2:2,M3:3,M4:4,M5:5,M6:6,M10:10,M12:12,M15:15,M20:20,M30:30,H1:6
 const S={tab:'chart',sym:'XAUUSD.vx',tf:'H1',type:0,grid:1,ohlc:0,vol:0,bid:1,ask:1,last:0,note:1,dw:0,scheme:'Custom',col:{},adv:1,osound:1,oct:0,vibm:'Silent mode only',ring:'Default',adl:'Wi-Fi only',lock:0,pin:'',lang:'English',news:1,theme:'Dark',tabl:0,tfs:['M1','M5','M15','M30','H1','H4','D1','W1','MN'],sep:1,pos:1,ord:1,sltp:1,hist:1,ocPos:'Above chart',oc:1,cross:0,ind:{ema20:0,ema50:0,sma20:0,bb:0},filter:'All',lot:.01,adapter:'Simulated',conf:1,slip:10,sound:1,vib:1,syms:Object.keys(SY).slice(0,11),endpoint:'',key:'',vis:60,off:0,pm:0,pr:0,manualPr:false,v:4};
 const SAVE=['sym','tf','type','grid','ohlc','vol','bid','ask','last','note','dw','v','scheme','tfs','col','adv','osound','oct','vibm','ring','adl','lock','pin','lang','news','theme','tabl','sep','pos','ord','sltp','hist','ocPos','oc','ind','filter','lot','adapter','conf','slip','sound','vib','syms','endpoint','key','vis','v'];
 
-// CLOUDFLARE MEMORY
 const CLOUDFLARE_API_URL = 'https://mt5-api-backend.i96463073.workers.dev';
 let ACC={bal:10000},POS=[],DL=[],ORD=[],P={},CD={},NT={},cx=null,cy=null,ax=null,ay=null,hv='POSITIONS',desc=1,edit=0,qsel=0;
 const SOUND_URL='https://www.myinstants.com/media/sounds/metatrader.mp3';
@@ -184,7 +181,6 @@ function beep(){
   }catch(e){}
 }
 
-// STACKED NOTIFICATIONS (BLUE FOR SUCCESS, RED FOR ERROR)
 function showTradeNotif(sym,type,vol,state,isError){
   const c=document.getElementById('tradestack');
   if(!c) return;
@@ -192,7 +188,7 @@ function showTradeNotif(sym,type,vol,state,isError){
   el.className='trade-notif'+(isError?' error':'');
   el.innerHTML=`<span class="sym">${sym}</span><span class="type">${type.charAt(0).toUpperCase()+type.slice(1).toLowerCase()}</span><span class="vol">${(+vol).toFixed(2)}</span><span class="state">${state}</span>`;
   c.appendChild(el);
-  while(c.children.length>8) c.removeChild(c.firstChild); // Stack up to 8 like original
+  while(c.children.length>8) c.removeChild(c.firstChild); 
   setTimeout(()=>{
     el.style.transition='opacity .35s,transform .35s';
     el.style.opacity='0';
@@ -213,7 +209,6 @@ async function syncState() {
 }
 
 function gauss(){return Math.sqrt(-2*Math.log(1-Math.random()))*Math.cos(6.2832*Math.random())}
-// 24/7 MARKET - No session checks
 function step(s){
   const c=SY[s],q=P[s];
   let r=c.v*.08*gauss();if(Math.random()<.01)r+=c.v*(Math.random()-.5)*1.2;
@@ -282,7 +277,6 @@ function draw(){
   g.textAlign='center';const k=Math.max(1,Math.round(W*.133/bw));for(let i=lo;i<=last;i++)if(i%k==0)g.fillText(ft(a[i].t),xi(i),PH+9);
   const tm=TFS[S.tf]*6e4,rem=Math.ceil((tm-Date.now()%tm)/1e3),cd=rem>=3600?Math.floor(rem/3600)+':'+p2(Math.floor(rem%3600/60))+':'+p2(rem%60):p2(Math.floor(rem/60))+':'+p2(rem%60);g.fillStyle='#26A69A';g.fillRect(PW,by-13,56,26);g.fillStyle='#fff';g.font='bold 11px Roboto,Arial,sans-serif';g.fillText(fm(sy,b),PW+28,by-5);g.fillText(cd,PW+28,by+7);
   
-  // LEFT-ALIGNED SYMBOL HEADER
   g.textAlign='left';
   g.font='bold 13px Roboto,Arial,sans-serif';g.fillStyle='#4D9DFF';
   g.fillText(sy, 6, 16);
@@ -298,7 +292,6 @@ function draw(){
   $('#live').style.display=S.off>0?'block':'none';
 }
 
-/* ═══ Chart interaction ═══ */
 const ptr=new Map();let drag=null,pd0=0,lastTap=0;
 function isOnPriceScale(x,r){return (x - r.left) >= (W - 100)}
 cv.onpointerdown=e=>{
