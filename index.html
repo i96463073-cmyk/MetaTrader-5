@@ -1,10 +1,10 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>MetaTrader 5</title><meta name="theme-color" content="#000000"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="manifest" href="/manifest.json"><link rel="icon" type="image/png" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="apple-mobile-web-app-title" content="MT5"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content"><title>MetaTrader 5</title><meta name="theme-color" content="#000000"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="manifest" href="/manifest.json"><link rel="icon" type="image/png" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="apple-mobile-web-app-title" content="MT5"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap">
 <style>
 :root{--bg:#000;--s:#141414;--s2:#222;--bd:#1c1c1c;--tx:#d0d0d0;--tb:#fff;--bl:#2962FF;--rd:#F6465D;--gr:#0ECB81;color-scheme:dark;box-sizing:border-box}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;width:100%;margin:0;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%;user-select:none;-webkit-user-select:none;background:#000;color:var(--tx);font:500 18px 'Roboto Condensed','Arial Narrow',Roboto,Arial,sans-serif;overflow:hidden}
 #app{position:fixed;inset:0;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
-#loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:20px;z-index:9999;}
+#loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:20px;z-index:9999;text-align:center;padding:0 20px;width:100%}
 #top{height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 6px;border-bottom:1px solid var(--bd)}
 #top .L{display:flex;align-items:center;min-width:0}#top b{color:#fff;font-size:14px;font-weight:700;display:block;white-space:nowrap}#top small{font-size:15px;font-weight:700;color:#9a9ea6;display:block}#top small.bl{color:#4C8DF6}#top small.rd{color:#EF5350}
 .ib{background:none;border:0;color:var(--tx);font-size:20px;min-width:42px;height:44px;border-radius:8px}.ib.on{color:#5b8dff;background:var(--s)}
@@ -28,6 +28,7 @@ html,body{height:100%;width:100%;margin:0;overscroll-behavior:none;touch-action:
 .trade-notif.error .type{color:#F6465D}
 .trade-notif.error .state{color:#F6465D}
 @keyframes slideup{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media (prefers-reduced-motion:reduce){.trade-notif{animation:none}}
 nav{height:62px;flex:none;display:flex;background:#000;border-top:1px solid #111}
 nav button{flex:1;background:none;border:0;color:#fff;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;font-weight:500}nav button.on{color:#5b8dff}
 nav svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8}.bdg{position:absolute;top:6px;left:55%;background:var(--rd);color:#fff;border-radius:9px;font-size:10px;padding:1px 6px;font-weight:700}
@@ -68,6 +69,7 @@ input{user-select:text;-webkit-user-select:text}
 @media(min-width:700px){#top b{font-size:15px}.sheet{max-width:600px;margin:0 auto}}
 body.lt{--bg:#fff;--s:#f2f3f5;--s2:#e6e8ec;--bd:#d9dce1;--tx:#111}
 body.lt #app{background:#fff;color:#111}
+body.lt #loading{color:#111}
 body.lt #top{background:#fff;border-bottom-color:#d9dce1}
 body.lt #top b{color:#000}
 body.lt #top small{color:#666}
@@ -130,7 +132,7 @@ body.lt #toast{background:#333;color:#fff}
 body.lt .radial-btn{background:#e6e8ec;border-color:#d9dce1;color:#000}
 body.lt #rad button{background:#e6e8ec;border-color:#d9dce1;color:#000}
 body.lt .radial-btn small{color:#333}
-body.tbl #app{max-width:900px}
+body.tbl #app{max-width:900px;margin:0 auto}
 </style></head><body><div id="app">
 <div id="loading">Loading...</div>
 <div id="top"></div>
@@ -139,14 +141,17 @@ body.tbl #app{max-width:900px}
 <div class="scr" id="sc-quotes"></div><div class="scr" id="sc-trade"></div><div class="scr" id="sc-history"></div><div class="scr" id="sc-msg"></div><div class="scr" id="sc-settings"></div><div class="scr" id="sc-acc"></div>
 </div>
 <nav id="nav"></nav><div id="toast"></div></div>
+<noscript><p style="position:fixed;top:40%;width:100%;text-align:center;color:#fff">JavaScript is required to run this app.</p></noscript>
 
-<script src="script.js?v=2"></script>
+<script src="script.js?v=3"></script>
 <script>
-  // Diagnostic check: If script.js didn't load or was cut off, show a red error
+  // Diagnostic: if script.js failed to load, show a message on the page instead of an alert
   setTimeout(function(){
     if(!document.getElementById('nav').innerHTML){
-      alert("Error: script.js was not loaded correctly. Please make sure you created script.js in the same folder as index.html and pasted the full code.");
+      var l=document.getElementById('loading');
+      l.style.display='block';
+      l.textContent='script.js did not load. Put it in the same folder as index.html and paste the full code.';
     }
-  }, 1000);
+  }, 1500);
 </script>
 </body></html>
