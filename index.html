@@ -139,5 +139,14 @@ body.tbl #app{max-width:900px}
 <div class="scr" id="sc-quotes"></div><div class="scr" id="sc-trade"></div><div class="scr" id="sc-history"></div><div class="scr" id="sc-msg"></div><div class="scr" id="sc-settings"></div><div class="scr" id="sc-acc"></div>
 </div>
 <nav id="nav"></nav><div id="toast"></div></div>
-<script src="script.js"></script>
+
+<script src="script.js?v=2"></script>
+<script>
+  // Diagnostic check: If script.js didn't load or was cut off, show a red error
+  setTimeout(function(){
+    if(!document.getElementById('nav').innerHTML){
+      alert("Error: script.js was not loaded correctly. Please make sure you created script.js in the same folder as index.html and pasted the full code.");
+    }
+  }, 1000);
+</script>
 </body></html>
