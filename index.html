@@ -479,84 +479,22 @@ async function syncState() {
 }
 
 /* ---------- 3. MARKET DATA ---------- */
-// ============================================================
-// BLIND SMC ENGINE  —  5% WIN-RATE VARIANT
-// The engine has NO knowledge of the Take Profit. It only knows
-// a hidden trend (the direction of the open positions) and an
-// internal swing counter that produces slow Up/Down legs, so the
-// chart always looks like real market structure (red & green
-// candles, wicks, pullbacks). The TP is just where the price
-// happens to walk into, and the SMC leg is biased toward the
-// trend at 5% per tick (very slow) so that:
-//   • The price still hits the TP eventually
-//   • The chart looks organic, not a magnet/spike
-//   • The safety net forces the closing push if the trade lingers
-// ============================================================
-const SMC = {
-  _state: {},
+// Pure, unbiased random walk. No win-rate, no magnetic pull, no fake trends.
+// The market moves exactly as a real chart would, based purely on volatility
+// and the Gaussian random noise.
+function stepPrice(s) {
+  const c = SY[s], q = P[s];
+  
+  let r = c.v * .08 * gauss();
+  
+  // Occasional volatility spike (news event / liquidity grab)
+  if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
 
-  // Probability per tick that the leg is aligned with the trade.
-  // 0.05 = 5% win rate  ->  very slow, very organic trend.
-  TREND_PROB: 0.05,
-  // Number of ticks the final safety push is allowed to run before it
-  // will drag the price the remaining distance to TP.
-  SAFETY_AGE: 240,
-  // The maximum single-tick movement, as a multiplier of SY.v.
-  MAX_TICK: 1.0,
-
-  reset(s) { this._state[s] = { trend: 0, legDir: 1, legLen: 0, age: 0 }; },
-
-  step(s, c) {
-    const q = P[s];
-    const st = this._state[s] || (this._state[s] = { trend: 0, legDir: 1, legLen: 0, age: 0 });
-
-    // Base random noise (the market's heartbeat)
-    let r = c.v * .06 * gauss();
-    if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
-
-    const mine = POS.filter(p => p.sym === s);
-    if (mine.length) {
-      let netDir = 0;
-      mine.forEach(p => { netDir += (p.type === 'BUY' ? 1 : -1); });
-      st.trend = Math.sign(netDir) || 0;
-      st.age++;
-
-      if (st.trend !== 0) {
-        // Start a new leg?
-        if (st.legLen <= 0) {
-          // Pick the leg direction with a 5% trend-alignment bias.
-          const withTrend = Math.random() < this.TREND_PROB;
-          st.legDir = withTrend ? st.trend : -st.trend;
-          // Counter legs are short (pullback), trend legs are longer
-          st.legLen = withTrend
-            ? 4 + Math.floor(Math.random() * 6)   // 4..9 ticks with trend
-            : 2 + Math.floor(Math.random() * 3);  // 2..4 ticks against
-        }
-        st.legLen--;
-
-        // One tick of the leg - hard-capped so a spike can never happen.
-        const step = c.v * Math.min(this.MAX_TICK, 0.9);
-        r += st.legDir * step;
-
-        // SAFETY: if the trade hasn't closed after SAFETY_AGE ticks,
-        // add a small extra nudge toward the trend each tick. This
-        // still moves one small unit at a time, so no spike either.
-        if (st.age > this.SAFETY_AGE) {
-          if (Math.random() < 0.4) r += st.trend * c.v * 0.7;
-        }
-      }
-    } else {
-      st.trend = 0; st.legDir = 1; st.legLen = 0; st.age = 0;
-    }
-
-    const prev = q.b;
-    q.b *= Math.exp(r);
-    q.dir = q.b > prev ? 1 : q.b < prev ? -1 : (q.dir || -1);
-    q.hi = Math.max(q.hi, q.b); q.lo = Math.min(q.lo, q.b); q.t = Date.now();
-  }
-};
-
-function stepPrice(s) { SMC.step(s, SY[s]); }
+  const prev = q.b;
+  q.b *= Math.exp(r);
+  q.dir = q.b > prev ? 1 : q.b < prev ? -1 : (q.dir || -1);
+  q.hi = Math.max(q.hi, q.b); q.lo = Math.min(q.lo, q.b); q.t = Date.now();
+}
 const fm = (s, v) => (+v).toFixed(SY[s].d);
 
 /* ---------- 4. BROKER ADAPTERS ---------- */
@@ -588,6 +526,7 @@ function reconnect() {
 /* ---------- 5. CANDLE ENGINE ---------- */
 const curKey = () => S.sym + '|' + S.tf;
 
+// Build history ending in the CURRENT time bucket (last candle = candle still forming).
 function genCandles(s, tf) {
   const c = SY[s], n = 2000, out = [], m = TFS[tf] * 6e4;
   const sg = c.v * .35 * Math.sqrt(TF_VOL[tf]) / Math.sqrt(8);
@@ -975,7 +914,6 @@ async function openMarket({ s, sd, v, pr, sl = 0, tp = 0 }) {
   const p = await broker.placeOrder({ sym: s, type: sd, vol: v, open: pr, sl, tp, comm: v * 3 });
   POS.push(p);
   ORD.push({ id: p.id, sym: s, type: sd, vol: v, price: pr, time: p.time, state: 'Filled' });
-  SMC.reset(s);
   return p;
 }
 
@@ -1062,7 +1000,6 @@ function checkPending() {
     if ((k === 'Buy Limit' && a <= o.price) || (k === 'Buy Stop' && a >= o.price) || (k === 'Sell Limit' && b >= o.price) || (k === 'Sell Stop' && b <= o.price)) {
       o.state = 'Filled'; o.time = Date.now();
       POS.push({ id: o.id, sym: o.sym, type: o.type, vol: o.vol, open: o.price, sl: o.sl, tp: o.tp, comm: o.vol * 3, time: o.time });
-      SMC.reset(o.sym);
       beep(); showTradeNotif(o.sym, o.type, o.vol, 'filled', false);
       if (S.note) toast(k + ' filled @ ' + fm(o.sym, o.price));
       if (S.tab === 'trade') rTrade();
@@ -1076,7 +1013,6 @@ function closeP(id, reason, quiet) {
   const pl = pnl(p);
   DL.push({ id: p.id, sym: p.sym, type: p.type, vol: p.vol, open: p.open, close: cp, ot: p.time, ct: Date.now(), pnl: pl });
   POS = POS.filter(x => x !== p); ACC.bal += pl;
-  SMC.reset(p.sym);
   if (quiet) return;
   beep(); showTradeNotif(p.sym, p.type === 'BUY' ? 'Sell' : 'Buy', p.vol, reason || 'closed', false);
   if (S.tab === 'trade') rTrade(); if (S.tab === 'history') rHist();
