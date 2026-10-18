@@ -202,7 +202,7 @@ body.lt #sb{background:#fff}
 .shr b{display:block;color:#fff;font-size:20px;font-weight:500}
 .shr small{display:block;color:#9a9ea6;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
 .mng{color:#5b8dff;font-size:19px;text-align:center;margin-top:14px;font-weight:500}
-.ribbon{position:absolute;top:0;right:0;width:84px;height:84px;overflow:hidden;pointer-events:none}
+.ribbon{position:absolute;top:0;right:0;width:84px;height:84px;overflow:hidden;pointer-events:none;display:none}
 .ribbon span{position:absolute;top:14px;right:-26px;width:104px;text-align:center;background:#2fa84f;color:#fff;font-size:12px;font-weight:700;transform:rotate(45deg);padding:2px 0}
 body.lt .shr b{color:#000}
 
@@ -305,7 +305,7 @@ body.lt .exact .ac-qr, body.lt .exact .ac-bell, body.lt .exact .ac-num-info { st
 body.lt .exact .ac-broker { color: #2f6fed; }
 body.lt .exact .ac-bal small { color: #777; }
 /* Broker Icon SVG sizing */
-.lgo.btc { width: 52px; height: 52px; background: #141517; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; box-shadow: none; }
+.lgo.btc { width: 52px; height: 52px; background: #141517; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; box-shadow: none; overflow: hidden; }
 body.lt .lgo.btc { background: #e8e8e8; }
 </style></head><body><div id="app">
 <div id="loading">Loading...</div>
@@ -374,11 +374,19 @@ const newId = () => {
 function fixIds() { const seen = new Set(); POS.forEach(p => { if (seen.has(String(p.id))) p.id = newId(); seen.add(String(p.id)); }); }
 function gauss() { return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(6.2832 * Math.random()); }
 
-const BROKER_ICON = `<svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-  <path d="M24 28 L46 53 L34 67 L11 39 Z" fill="#ffffff" />
-  <path d="M41 23 L63 48 L49 65 L28 38 Z" fill="#22c55e" />
-  <path d="M72 27 L87 45 L76 57 L62 40 Z" fill="#ffffff" />
-</svg>`;
+// Helper to get uploaded logo or default
+const getLogo = () => {
+  const uploaded = localStorage.getItem('mt5_custom_logo');
+  if (uploaded) {
+    return `<img src="${uploaded}" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+  }
+  return `<svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <path d="M24 28 L46 53 L34 67 L11 39 Z" fill="#ffffff" />
+    <path d="M41 23 L63 48 L49 65 L28 38 Z" fill="#22c55e" />
+    <path d="M72 27 L87 45 L76 57 L62 40 Z" fill="#ffffff" />
+  </svg>`;
+};
+
 const ic = (p, w) => `<svg viewBox='0 0 24 24' width='${w || 22}' height='${w || 22}' fill='none' stroke='#fff' stroke-width='1.8'>${p}</svg>`;
 const IC = {
   sort: ic("<path d='M8 20V5M4 9l4-4 4 4M16 4v15M12 15l4 4 4-4'/>"),
@@ -1168,7 +1176,7 @@ function rAcc() {
   
   $('#sc-acc').innerHTML = `
     <div class="ac big exact">
-      <div style="margin: 0 auto 4px; display: inline-flex;" class="lgo btc">${BROKER_ICON}</div>
+      <div style="margin: 0 auto 4px; display: inline-flex;" class="lgo btc">${getLogo()}</div>
       <div class="ac-title">${A.name}</div>
       <div class="ac-broker">${A.company}</div>
       <div class="ac-line">${A.login} — ${A.server} <span class="ac-num-info">i</span></div>
@@ -1204,7 +1212,9 @@ function rSet() {
     cb('aod', 'Always on display', 'Prevent the screen from turning off while the app is active') +
     tx('theme', 'Choose theme', S.theme === 'Light' ? 'Pure black (Light)' : 'Pure black (Dark)') +
     '<div class="sh">Data</div>' +
-    tx('reset', 'Reset local data', 'Delete saved settings, positions and history on this device');
+    tx('reset', 'Reset local data', 'Delete saved settings, positions and history on this device') +
+    '<div class="sh">Branding</div>' +
+    `<div class="si" data-c="upload"><div class="st"><b>Upload Broker Logo</b><small>Change the icon shown in the accounts section</small></div><span class="sv">Select</span><input type="file" id="logoUpload" accept="image/*" style="display:none"></div>`;
 }
 let wakeLock = null;
 function applyWake() {
@@ -1329,7 +1339,7 @@ function sideMenu() {
     ['about', 'About', sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>')]
   ];
   const A = CONFIG.account;
-  const head = `<div class="sh2" data-g="acc"><div class="ribbon"><span>Demo</span></div><div class="shr"><span class="lgo">${BROKER_ICON}</span><div class="shi"><b>${A.name}</b><small>${A.login} - ${A.server}</small></div></div><div class="mng">Manage accounts</div></div>`;
+  const head = `<div class="sh2" data-g="acc"><div class="shr"><span class="lgo">${getLogo()}</span><div class="shi"><b>${A.name}</b><small>${A.login} - ${A.server}</small></div></div><div class="mng">Manage accounts</div></div>`;
   o.innerHTML = '<div id="sb">' + head + M.map(m => `<div class="it" data-g="${m[0]}">${m[2]}<span>${m[1]}</span>${m[3] || ''}</div>`).join('') + '</div>';
   $('#app').appendChild(o);
   const cl = () => { o.classList.remove('on'); setTimeout(() => o.remove(), 330); };
@@ -1509,8 +1519,25 @@ $('#sc-settings').onclick = e => {
   else if (c === 'vib') { S.vibm = cyc(['Always', 'Silent mode only', 'Never'], S.vibm); S.vib = S.vibm === 'Never' ? 0 : 1; save(); rSet(); }
   else if (c === 'adl') { S.adl = cyc(['Always', 'Wi-Fi only', 'Never'], S.adl); save(); rSet(); }
   else if (c === 'otp') toast('OTP is not available');
+  else if (c === 'upload') { $('#logoUpload').click(); }
   else if (c === 'reset' && confirm('Delete all local data?')) { localStorage.clear(); location.reload(); }
 };
+// Handle Logo File Upload
+$('#sc-settings').addEventListener('change', e => {
+  if (e.target.id !== 'logoUpload') return;
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      localStorage.setItem('mt5_custom_logo', ev.target.result);
+      toast('Logo updated successfully');
+    } catch (err) {
+      toast('Image too large to save locally');
+    }
+  };
+  reader.readAsDataURL(file);
+});
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window._deferredInstall = e; const btn = $('#installBtn'); if (btn) btn.style.display = 'block'; });
 window.addEventListener('appinstalled', () => { window._deferredInstall = null; toast('MT5 installed to home screen'); });
 
