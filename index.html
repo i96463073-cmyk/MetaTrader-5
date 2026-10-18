@@ -374,13 +374,10 @@ const newId = () => {
 function fixIds() { const seen = new Set(); POS.forEach(p => { if (seen.has(String(p.id))) p.id = newId(); seen.add(String(p.id)); }); }
 function gauss() { return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(6.2832 * Math.random()); }
 
-const BROKER_ICON = `<svg viewBox="0 0 40 40" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-  <g stroke-linecap="round" stroke-linejoin="round">
-    <path d="M10 9L20 24 L24 18 L14 4 Z" fill="#22c55e" />
-    <path d="M10 9 L20 24 L24 18 L14 4 Z" fill="none" stroke="#22c55e" stroke-width="1.5"/>
-    <path d="M30 31L20 16 L16 22 L26 36 Z" fill="#ffffff" />
-    <path d="M30 31 L20 16 L16 22 L26 36 Z" fill="none" stroke="#ffffff" stroke-width="1.5"/>
-  </g>
+const BROKER_ICON = `<svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+  <path d="M24 28 L46 53 L34 67 L11 39 Z" fill="#ffffff" />
+  <path d="M41 23 L63 48 L49 65 L28 38 Z" fill="#22c55e" />
+  <path d="M72 27 L87 45 L76 57 L62 40 Z" fill="#ffffff" />
 </svg>`;
 const ic = (p, w) => `<svg viewBox='0 0 24 24' width='${w || 22}' height='${w || 22}' fill='none' stroke='#fff' stroke-width='1.8'>${p}</svg>`;
 const IC = {
