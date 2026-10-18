@@ -479,39 +479,65 @@ async function syncState() {
 }
 
 /* ---------- 3. MARKET DATA ---------- */
-// Directional bias: while you hold a position, the tick generator leans the
-// price toward your Take Profit (or just your profit side if no TP is set).
-// `BIAS.strength` = how aggressively to steer (0 = off, 1 = strong).
-const BIAS = { on: true, strength: 0.55 };
+// Smart Money Bias Engine
+const BIAS = { 
+  on: true, 
+  strength: 0.65,   // Probability of the tick going in your direction (0.5 = 50/50, 0.9 = 90% win rate per tick)
+  pullback: 0.15    // Chance of a forced counter-trend move even when bias is active
+};
 
 function stepPrice(s) {
   const c = SY[s], q = P[s];
   let r = c.v * .08 * gauss();
+
   if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
 
-  // Steer price toward open positions on this symbol.
+  // --- SMART MONEY BIAS ---
   if (BIAS.on) {
     const mine = POS.filter(p => p.sym === s);
     if (mine.length) {
-      let push = 0;
-      for (const p of mine) {
+      // We average the directional needs of all open positions on this symbol
+      let totalDir = 0;
+      let totalDist = 0;
+
+      mine.forEach(p => {
         const dir = p.type === 'BUY' ? 1 : -1;
-        let aim;
-        if (p.tp) {
-          aim = Math.log(p.tp / q.b);          // distance to TP in log space
-        } else {
-          aim = dir * c.v * 0.5;               // no TP: small constant drift toward profit
-        }
-        aim = clamp(aim * dir, 0, c.v * 3);    // 0 .. 3 ticks worth, never overshoot
-        push += dir * aim;
+        // If no TP, we just aim slightly in the profit direction
+        const target = p.tp ? p.tp : (p.type === 'BUY' ? q.b * 1.002 : q.b * 0.998); 
+        
+        // Calculate distance as a percentage
+        const dist = Math.abs(target - q.b) / q.b;
+        
+        totalDir += dir;
+        totalDist += dist;
+      });
+
+      if (totalDir !== 0) {
+        const avgDir = Math.sign(totalDir);
+        const avgDist = totalDist / mine.length;
+
+        // The closer we get to the target, the stronger the pull (forces TP hit)
+        // But if we are far away, we allow more noise and pullbacks.
+        const proximity = clamp(1 - (avgDist * 100), 0.2, 1.0); 
+        
+        // MASSIVE FIX: Instead of a straight line, we use a probability roll
+        const roll = Math.random();
+        
+        if (roll < BIAS.strength * proximity) {
+          // WIN TICK: Force price in trade direction
+          r += avgDir * (c.v * 0.4);
+        } else if (roll > 1 - BIAS.pullback) {
+          // PULLBACK TICK: Force price AGAINST trade direction (Creates the red candles in an uptrend)
+          r -= avgDir * (c.v * 0.6);
+        } 
+        // If roll is between (strength+proximity) and (1-pullback), we just let the random noise happen.
       }
-      r += (push / mine.length) * BIAS.strength;
     }
   }
 
   const prev = q.b;
   q.b *= Math.exp(r);
-  q.dir = q.b > prev ? 1 : q.b < prev ? -1 : (q.dir || -1);   // last tick direction (drives quote colours)
+  q.dir = q.b > prev ? 1 : q.b < prev ? -1 : (q.dir || -1);   
   q.hi = Math.max(q.hi, q.b); q.lo = Math.min(q.lo, q.b); q.t = Date.now();
 }
 const fm = (s, v) => (+v).toFixed(SY[s].d);
@@ -560,7 +586,30 @@ function genCandles(s, tf) {
   out.forEach(x => { x.o *= k; x.h *= k; x.l *= k; x.c *= k; });
   return out;
 }
-const cands = () => CD[curKey()] || (CD[curKey()] = genCandles(S.sym, S.tf));
+
+const cands = () => {
+  const key = curKey();
+  if (CD[key]) return CD[key];
+  try {
+    const saved = JSON.parse(localStorage.getItem('mt5_candles_' + key) || 'null');
+    if (saved && Array.isArray(saved) && saved.length > 10) {
+      const m = TFS[S.tf] * 6e4, lastT = saved[saved.length - 1].t;
+      // If the last candle is older than 3 timeframes, market "moved while away" - rebuild
+      if (Date.now() - lastT < m * 3) { CD[key] = saved; return saved; }
+    }
+  } catch (e) {}
+  CD[key] = genCandles(S.sym, S.tf);
+  persistCandles(key);
+  return CD[key];
+};
+
+function persistCandles(key) {
+  if (!key || !CD[key]) return;
+  try {
+    const trimmed = CD[key].slice(-500);
+    localStorage.setItem('mt5_candles_' + key, JSON.stringify(trimmed));
+  } catch (e) { /* quota - fail silently */ }
+}
 
 // Candles are closed by the clock, not by tick count: when a timeframe period ends the
 // forming candle is frozen (final close) and a new one opens at that close.
@@ -1606,7 +1655,7 @@ async function boot() {
       const pr = broker.getPrices();
       if (!pr || !pr[S.sym]) return;
       try { localStorage.setItem('mt5_prices', JSON.stringify(P)); } catch (e) {}
-      updateCandles(); checkPending(); checkStops(); marginCall(); uOc();
+      updateCandles(); persistCandles(curKey()); checkPending(); checkStops(); marginCall(); uOc();
       const e = $('#npl');
       if (e) {
         const v = calc().pl, flat = !POS.length;
