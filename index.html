@@ -434,8 +434,9 @@ function save() {
 async function syncState() {
   const state = { ACC, POS, DL, ORD, ts: Date.now() };
   try { localStorage.setItem('mt5_backup', JSON.stringify(state)); } catch (e) {}
+  if (!CONFIG.cloudUrl) return;
   try { await fetch(`${CONFIG.cloudUrl}?user=${CONFIG.userId}`, { method: 'POST', body: JSON.stringify(state) }); }
-  catch (e) { console.log('Cloud sync failed', e); }
+  catch (e) { /* cloud is optional: fail silently */ }
 }
 
 /* ---------- 3. MARKET DATA ---------- */
@@ -1420,4 +1421,151 @@ $('#ocb').onclick = () => ocTrade('BUY');
 $('#ocd').onclick = () => lotStep(-.01);
 $('#ocu').onclick = () => lotStep(.01);
 
-// history-specific top-bar actions (captur
+// history-specific top-bar actions (capture phase so they pre-empt the generic handler)
+$('#top').addEventListener('click', e => {
+  const b = e.target.closest('[data-a]'); if (!b || S.tab !== 'history') return;
+  const a = b.dataset.a;
+  if (a === 'sort') {
+    e.stopImmediatePropagation();
+    pop(['Symbol', 'Deal', 'Type', 'Volume', 'Time', 'Profit'].map(k => `<div data-v='${k}'>${k}${HS.k === k ? ` <span class='bl'>${HS.a ? '↑' : '↓'}</span>` : ''}</div>`).join(''), 7, v => { if (HS.k === v) HS.a ^= 1; else { HS.k = v; HS.a = 1; } rHist(); });
+  } else if (a === 'date') {
+    e.stopImmediatePropagation();
+    pop(HIST_FILTERS.map(k => { const [s, n] = rngOf(k); return `<div data-v='${k}' class='dr'>${CALI}<span><b style='font-size:18px'>${k}</b><small>${k === 'Today' ? fd2(n) : k === 'Custom period' ? '' : fd2(s) + ' - ' + fd2(n)}</small></span>${S.filter === k ? "<span class='bl' style='margin-left:auto'>✓</span>" : ''}</div>`; }).join(''), 2, v => { S.filter = v; save(); rHist(); });
+  } else if (a === 'hsym') {
+    e.stopImmediatePropagation();
+    pop([['', 'All symbols'], ...Object.keys(SY).map(s => [s, s])].map(x => `<div data-v='${x[0]}'>${x[1]}</div>`).join(''), 12, v => { HSYM = v; go('history'); });
+  } else if (a === 'href') { e.stopImmediatePropagation(); rHist(); }
+}, true);
+
+// generic top-bar actions
+$('#top').addEventListener('click', e => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const a = b.dataset.a;
+  if (a === 'menu') sideMenu();
+  else if (a === 'cross') { S.cross ^= 1; cx = null; save(); top_(); draw(); }
+  else if (a === 'ind') indSheet();
+  else if (a === 'tf') tfSheet();
+  else if (a === 'cs') chartSettings();
+  else if (a === 'oc') { S.oc ^= 1; save(); top_(); ocUp(); }
+  else if (a === 'add') addSym();
+  else if (a === 'edit') { edit ^= 1; rQuotes(); }
+  else if (a === 'new') ticket();
+  else if (a === 'sort' && S.tab === 'trade') {
+    pop(['Symbol', 'Profit', 'Time', 'Ticket'].map(k => `<div data-v="${k}">${k}${SRT === k ? ' <span class="bl">' + (desc ? '↓' : '↑') + '</span>' : ''}</div>`).join(''), 7, v => { if (SRT === v) desc ^= 1; else { SRT = v; desc = 1; } rTrade(); });
+  }
+});
+$('#sc-quotes').onclick = e => {
+  const x = e.target.closest('[data-x]');
+  if (x) { S.syms = S.syms.filter(s => s !== x.dataset.x); save(); renderSymbolStrip(); return rQuotes(); }
+  const q = e.target.closest('.q2'); if (q && !edit) setSym(q.dataset.s);
+};
+let swX = null, swId = null, swiped = false;
+$('#sc-trade').addEventListener('pointerdown', e => { const r = e.target.closest('[data-e]'); swX = e.clientX; swId = r ? r.dataset.e : null; swiped = false; });
+$('#sc-trade').addEventListener('pointerup', e => {
+  if (swId == null) return;
+  const dx = e.clientX - swX;
+  if (Math.abs(dx) > 40) { swiped = true; EX = dx < 0 ? swId : null; rTrade(); }
+  swId = null;
+});
+$('#sc-trade').onclick = e => {
+  if (swiped) { swiped = false; return; }
+  const c = e.target.closest('[data-cl]'); if (c) return requestClose(c.dataset.cl);
+  const m = e.target.closest('[data-ed]'); if (m) { EX = null; return modifyP(m.dataset.ed); }
+  const n = e.target.closest('[data-nw]'); if (n) { S.sym = n.dataset.nw; EX = null; return ticket(); }
+  const ch = e.target.closest('[data-ch]'); if (ch) { EX = null; return setSym(ch.dataset.ch); }
+  if (e.target.closest('[data-pm]')) return positionsMenu();
+  const r = e.target.closest('[data-e]'); if (r) { const id = r.dataset.e; EX = EX == id ? null : id; rTrade(); }
+};
+$('#sc-history').onclick = e => { const t = e.target.closest('.tabs div'); if (!t) return; hv = t.textContent.trim(); rHist(); };
+$('#sc-settings').onclick = e => {
+  const f = e.target.closest('.si'); if (!f) return;
+  const k = f.dataset.k, c = f.dataset.c;
+  if (k) {
+    if (k === 'lock' && !S.lock && !S.pin) { const p = prompt('Set a PIN'); if (!p) return; S.pin = p; }
+    S[k] = S[k] ? 0 : 1; save(); applyScheme(); ocUp(); if (k === 'aod') applyWake(); rSet();
+  } else if (c === 'theme') { S.theme = S.theme === 'Dark' ? 'Light' : 'Dark'; save(); applyScheme(); rSet(); }
+  else if (c === 'vib') { S.vibm = cyc(['Always', 'Silent mode only', 'Never'], S.vibm); S.vib = S.vibm === 'Never' ? 0 : 1; save(); rSet(); }
+  else if (c === 'adl') { S.adl = cyc(['Always', 'Wi-Fi only', 'Never'], S.adl); save(); rSet(); }
+  else if (c === 'otp') toast('OTP is not available');
+  else if (c === 'reset' && confirm('Delete all local data?')) { localStorage.clear(); location.reload(); }
+};
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window._deferredInstall = e; const btn = $('#installBtn'); if (btn) btn.style.display = 'block'; });
+window.addEventListener('appinstalled', () => { window._deferredInstall = null; toast('MT5 installed to home screen'); });
+
+/* ---------- 11. BOOT ---------- */
+async function boot() {
+  try {
+    const local = JSON.parse(localStorage.getItem('mt5_backup') || '{}');
+    const hadLocal = !!local.ACC, localTs = local.ts || 0;
+    if (local.ACC) { ACC = local.ACC; POS = local.POS || []; DL = local.DL || []; ORD = local.ORD || []; }
+    fixIds();
+    if (!ACC || !ACC.bal) ACC = { bal: 10000 };
+    resetView();
+    if (!SY[S.sym]) S.sym = 'XAUUSD.vx';
+
+    try { const sp = localStorage.getItem('mt5_prices'); if (sp) P = JSON.parse(sp); } catch (e) {}
+    for (const s in SY) if (!P[s] || !(P[s].b > 0)) { const p = SY[s].p; P[s] = { b: p, o: p, hi: p, lo: p, t: Date.now() }; }
+
+    applyScheme();
+    applyWake();
+    $('#ocl').value = S.lot;
+    reconnect();
+    ocUp();
+
+    S.tab = 'chart';
+    $$('.scr').forEach(x => x.classList.toggle('on', x.id === 'sc-chart'));
+    $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.t === 'chart'));
+    top_();
+    setTimeout(resizeChart, 0);
+    $('#loading').style.display = 'none';
+
+    uOc();
+    if (S.lock && S.pin) lockScr();
+    renderSymbolStrip();
+
+    $('#symbtn').onclick = e => { e.stopPropagation(); $('#symstrip').classList.toggle('on'); };
+    document.addEventListener('click', e => { if (!e.target.closest('#symstrip') && !e.target.closest('#symbtn')) $('#symstrip').classList.remove('on'); });
+
+    // 1-second market loop
+    setInterval(() => {
+      const pr = broker.getPrices();
+      if (!pr || !pr[S.sym]) return;
+      try { localStorage.setItem('mt5_prices', JSON.stringify(P)); } catch (e) {}
+      updateCandles(); checkPending(); checkStops(); marginCall(); uOc();
+      const e = $('#npl');
+      if (e) {
+        const v = calc().pl, flat = !POS.length;
+        e.textContent = f2(flat && S.acct ? ACC.bal : v);
+        e.className = 'pill ' + (flat ? '' : v > 0 ? 'pu' : v < 0 ? 'pd' : '');
+      }
+      if (S.tab === 'quotes') uQuotes();
+      if (S.tab === 'trade') uTrade();
+    }, 1000);
+
+    setInterval(draw, 80);
+    addEventListener('resize', resizeChart);
+    addEventListener('orientationchange', () => setTimeout(resizeChart, 200));
+    if (window.visualViewport) visualViewport.addEventListener('resize', resizeChart);
+    if (window.ResizeObserver) new ResizeObserver(resizeChart).observe($('#cw'));
+
+    try {
+      if (!CONFIG.cloudUrl) throw 0;
+      const res = await fetch(`${CONFIG.cloudUrl}?user=${CONFIG.userId}`);
+      const cloud = await res.json();
+      // only take the cloud copy if it is NEWER than this device's copy (stale cloud data used to bring closed trades back)
+      if (cloud && cloud.ACC && ((cloud.ts || 0) > localTs || !hadLocal)) {
+        ACC = cloud.ACC; POS = cloud.POS || []; DL = cloud.DL || []; ORD = cloud.ORD || [];
+        fixIds();
+        if (S.tab === 'trade') rTrade(); if (S.tab === 'history') rHist(); if (S.tab === 'quotes') rQuotes();
+        draw();
+      } else if (hadLocal) syncState();
+    } catch (e) { /* cloud is optional: fail silently */ }
+  } catch (err) {
+    console.error(err);
+    const l = $('#loading'); l.style.display = 'block'; l.textContent = 'Boot error: ' + err.message;
+  }
+}
+setTimeout(boot, 10);
+
+</script>
+</body></html>
