@@ -280,11 +280,17 @@ body.lt .sh{color:#000;border-bottom-color:#ddd}
 body.lt .si{border-bottom-color:#e6e6e6}body.lt .si b{color:#000}body.lt .si small{color:#888}
 body.lt .cbx{border-color:#888}body.lt .cbx.on{border-color:#3b82f6}body.lt .si .sv{color:#1a73e8}
 body.lt .ch .cm b{color:#000}body.lt .ch .cm span{color:#111}body.lt .ch .cr{color:#777}body.lt .ph{color:#000}
+
+body.lt #oc{background:#fff;border-bottom:1px solid #ddd}
+body.lt #ocv{color:#000}
+body.lt #ocv span{color:#666}
+body.lt #ocv input{color:#000}
+#live{display:none!important}
 </style></head><body><div id="app">
 <div id="loading">Loading...</div>
 <div id="top"></div>
 <div id="main">
-<div class="scr" id="sc-chart"><div id="oc"><button id="ocs"><small>SELL</small><b></b><i></i><u></u></button><div id="ocv"><span id="ocd">∨</span><input id="ocl" type="number" step="0.01" min="0.01"><span id="ocu">∧</span></div><button id="ocb"><small>BUY</small><b></b><i></i><u></u></button></div><div id="cw"><canvas id="cv"></canvas><div id="symbtn"></div><div id="symstrip"></div><button id="live">● LIVE</button><div id="tradestack"></div></div></div>
+<div class="scr" id="sc-chart"><div id="oc"><button id="ocs"><small>SELL</small><b></b><i></i><u></u></button><div id="ocv"><span id="ocd">∨</span><input id="ocl" type="number" step="0.01" min="0.01"><span id="ocu">∧</span></div><button id="ocb"><small>BUY</small><b></b><i></i><u></u></button></div><div id="cw"><canvas id="cv"></canvas><div id="symbtn"></div><div id="symstrip"></div><div id="tradestack"></div></div></div>
 <div class="scr" id="sc-quotes"></div><div class="scr" id="sc-trade"></div><div class="scr" id="sc-history"></div><div class="scr" id="sc-msg"></div><div class="scr" id="sc-settings"></div><div class="scr" id="sc-acc"></div>
 </div>
 <nav id="nav"></nav><div id="toast"></div></div>
@@ -649,8 +655,7 @@ function draw() {
   // trade levels
   const tags = [];
   const hline = (p, col, label, tcol, dash, tag) => {
-    if (p < vmn || p > vmx) return;
-    const yy = y(p);
+    const yy = clamp(y(p), 8, PH - 8);     // pinned to the edge when the price is scrolled out of view
     g.strokeStyle = col; g.setLineDash(dash || [5, 3]); g.beginPath(); g.moveTo(0, yy); g.lineTo(PW, yy); g.stroke(); g.setLineDash([]);
     g.fillStyle = tcol || col; g.textAlign = 'left'; g.font = '9.5px Roboto,Arial,sans-serif'; g.fillText(label, 6, yy - 6);
     if (tag) tags.push({ yy, col, txt: fm(sy, p) });
@@ -662,7 +667,7 @@ function draw() {
   });
   if (S.ord) ORD.filter(o => o.state === 'Placed' && o.sym === sy).forEach(o => {
     hline(o.price, '#2962FF', o.kind.toUpperCase() + ' ' + o.vol.toFixed(2));
-    g.fillStyle = '#2962FF'; g.beginPath(); g.arc(PW - 15, y(o.price), 6, 0, 7); g.fill();
+    if (o.price >= vmn && o.price <= vmx) { g.fillStyle = '#2962FF'; g.beginPath(); g.arc(PW - 15, y(o.price), 6, 0, 7); g.fill(); }
   });
   // bid / ask lines
   const b = P[sy].b, by = clamp(y(b), 8, PH - 8);
@@ -735,7 +740,6 @@ function draw() {
     g.fillStyle = bg; g.fillRect(clamp(cx - 35, 0, PW - 70), PH + 1, 70, 17);
     g.fillStyle = fg; g.fillText(fmtTime(timeAt(idxAt(cx))), clamp(cx, 35, PW - 35), PH + 9);
   }
-  $('#live').style.display = (S.off > 0 || S.manualPr) ? 'block' : 'none';
 }
 
 /* ---------- 7. CHART INTERACTION ---------- */
@@ -835,7 +839,6 @@ cv.onwheel = e => {
   S.vis = clamp(Math.round(S.vis * (e.deltaY > 0 ? 1.1 : .9)), 15, 250);
   draw();
 };
-$('#live').onclick = () => { resetView(); draw(); };
 
 /* ---------- 8. TRADING ---------- */
 const OT = ['Market Execution', 'Buy Limit', 'Sell Limit', 'Buy Stop', 'Sell Stop'];
