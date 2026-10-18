@@ -1,1315 +1,223 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Valetax Demo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Valetax</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&display=swap" rel="stylesheet">
 <style>
-:root {
-    --bg: #f8f9fc;
-    --card: #ffffff;
-    --text: #1e2329;
-    --text-secondary: #848e9c;
-    --text-light: #b7bdc6;
-    --primary: #00b86b;
-    --primary-light: #e6f9f0;
-    --border: #eaebef;
-    --purple-bg: #eff1ff;
-    --purple-text: #5c5eff;
-    --blue-bg: #e6f0ff;
-    --blue-text: #3b82f6;
-    --orange-text: #f59e0b;
-    --red: #ef4444;
-    --nav-bg: #ffffff;
-    --nav-shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-    font-family: 'Inter', sans-serif;
-}
-
-body {
-    background-color: var(--bg);
-    color: var(--text);
-    font-size: 15px;
-    line-height: 1.4;
-    display: flex;
-    justify-content: center;
-}
-
-#app {
-    width: 100%;
-    max-width: 480px;
-    min-height: 100vh;
-    background: var(--bg);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 100px;
-}
-
-/* Typography */
-h1, h2, h3, h4 { font-weight: 700; color: var(--text); }
-.text-muted { color: var(--text-secondary); font-size: 13px; }
-.text-sm { font-size: 12px; }
-.text-green { color: var(--primary); }
-.text-red { color: var(--red); }
-.fw-600 { font-weight: 600; }
-.fw-700 { font-weight: 700; }
-
-/* Utilities */
-.row { display: flex; align-items: center; }
-.space-between { justify-content: space-between; }
-.flex-1 { flex: 1; }
-.text-right { text-align: right; }
-.mt-1 { margin-top: 4px; }
-.mt-2 { margin-top: 8px; }
-.mt-3 { margin-top: 12px; }
-.mt-4 { margin-top: 16px; }
-.mt-5 { margin-top: 24px; }
-.mb-2 { margin-bottom: 8px; }
-.mb-3 { margin-bottom: 12px; }
-.mb-4 { margin-bottom: 16px; }
-.px-3 { padding-left: 16px; padding-right: 16px; }
-.py-2 { padding-top: 8px; padding-bottom: 8px; }
-.hidden { display: none !important; }
-
-/* Icons */
-.material-symbols-rounded {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    font-size: 24px;
-    color: var(--text);
-}
-
-/* Header */
-.header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px;
-    background: var(--bg);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-.header .title { font-size: 18px; font-weight: 700; flex: 1; text-align: center; }
-.header-btn {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: var(--card);
-    display: flex; align-items: center; justify-content: center;
-    border: none; cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-}
-.header-btn.transparent { background: transparent; box-shadow: none; }
-.bell-badge {
-    position: absolute; top: 12px; right: 12px;
-    background: var(--red); color: white;
-    font-size: 10px; font-weight: 700;
-    padding: 2px 5px; border-radius: 10px;
-    border: 2px solid var(--bg);
-}
-
-/* Home Header (Transparent) */
-.home-header {
-    padding: 16px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    background: linear-gradient(180deg, #e6f9f0 0%, var(--bg) 100%);
-    padding-bottom: 24px;
-}
-.home-header .total-funds { text-align: center; flex: 1; margin-top: 4px; }
-.home-header .total-funds h1 { font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 4px; }
-.home-header .total-funds .material-symbols-rounded { font-size: 20px; color: var(--text-secondary); }
-
-/* Bottom Nav */
-.bottom-nav {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 40px);
-    max-width: 440px;
-    background: var(--card);
-    border-radius: 30px;
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-    box-shadow: var(--nav-shadow);
-    z-index: 100;
-}
-.bottom-nav button {
-    background: none; border: none; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    color: var(--text-secondary); font-size: 11px; font-weight: 500;
-}
-.bottom-nav button.active { color: var(--primary); }
-.bottom-nav button.active .material-symbols-rounded { font-variation-settings: 'FILL' 1; color: var(--primary); }
-
-/* Cards & Containers */
-.card {
-    background: var(--card);
-    border-radius: 16px;
-    padding: 16px;
-    margin: 0 16px 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-}
-.card-group {
-    background: var(--card);
-    border-radius: 16px;
-    margin: 0 16px 16px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-}
-.list-item {
-    display: flex; align-items: center; padding: 16px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer; background: var(--card);
-}
-.list-item:last-child { border-bottom: none; }
-.list-item .icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; margin-right: 12px; color: var(--text-secondary); }
-.list-item .content { flex: 1; font-weight: 600; font-size: 15px; }
-.list-item .chevron { color: var(--text-light); }
-
-/* Badges */
-.badge {
-    display: inline-block; padding: 4px 8px; border-radius: 6px;
-    font-size: 11px; font-weight: 700; text-transform: uppercase;
-}
-.badge.purple { background: var(--purple-bg); color: var(--purple-text); }
-.badge.blue { background: var(--blue-bg); color: var(--blue-text); }
-.badge.green { background: var(--primary-light); color: var(--primary); }
-.badge.outline { border: 1px solid var(--border); color: var(--text-secondary); }
-.badge.red-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); padding: 0; }
-
-/* Buttons */
-.btn {
-    background: var(--primary); color: white;
-    border: none; border-radius: 12px;
-    padding: 14px 20px; font-size: 15px; font-weight: 600;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%;
-}
-.btn.small { padding: 8px 16px; font-size: 13px; width: auto; border-radius: 10px; }
-.btn.outline { background: white; color: var(--text); border: 1px solid var(--border); }
-.btn.dark { background: #2c3038; }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* Home Action Buttons */
-.actions-row { display: flex; justify-content: space-between; padding: 16px; margin: 0 16px; }
-.action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; }
-.action-btn .icon-circle {
-    width: 56px; height: 56px; border-radius: 50%;
-    background: var(--card); display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-}
-.action-btn .icon-circle.primary { background: var(--primary); color: white; }
-.action-btn .icon-circle.primary .material-symbols-rounded { color: white; }
-.action-btn span { font-size: 12px; font-weight: 600; color: var(--text); }
-
-/* Promo Banners */
-.banner {
-    border-radius: 16px; padding: 16px; margin: 0 16px 16px;
-    position: relative; overflow: hidden;
-    display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
-}
-.banner h3 { font-size: 16px; }
-.banner p { font-size: 13px; color: var(--text-secondary); max-width: 70%; }
-.banner .btn { background: white; color: var(--text); width: auto; padding: 8px 16px; font-size: 13px; margin-top: 4px; z-index: 1; }
-.banner .banner-icon { position: absolute; right: 10px; bottom: 10px; width: 80px; height: 80px; background-size: cover; }
-
-/* Tabs */
-.tabs { display: flex; margin: 0 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
-.tabs button {
-    padding: 12px 16px; background: none; border: none; cursor: pointer;
-    font-size: 14px; font-weight: 600; color: var(--text-secondary);
-    border-bottom: 2px solid transparent; margin-bottom: -1px;
-}
-.tabs button.active { color: var(--primary); border-bottom-color: var(--primary); }
-
-/* Transactions */
-.tx-card { background: var(--card); border-radius: 16px; padding: 12px 16px; margin: 0 16px 8px; display: flex; align-items: center; gap: 12px; }
-.tx-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); display: flex; align-items: center; justify-content: center; }
-.tx-details { flex: 1; }
-.tx-amount { font-weight: 700; font-size: 16px; }
-
-/* Copy Trading List */
-.strategy-item { display: flex; align-items: center; padding: 16px; border-bottom: 1px solid var(--border); gap: 12px; }
-.strategy-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--border); object-fit: cover; }
-.strategy-info { flex: 1; min-width: 0; }
-.strategy-info h4 { font-size: 15px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.strategy-meta { display: flex; gap: 8px; font-size: 11px; color: var(--text-secondary); }
-.strategy-growth { text-align: right; }
-.strategy-chart { width: 60px; height: 30px; }
-
-/* Forms & Inputs */
-.input-group { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border); }
-.input-group input { border: none; outline: none; font-size: 24px; font-weight: 700; flex: 1; background: transparent; }
-.input-group input::placeholder { color: var(--text-light); }
-
-/* Stepper */
-.stepper { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; margin-bottom: 16px; position: relative; }
-.stepper::before { content: ''; position: absolute; top: 32px; left: 40px; right: 40px; height: 2px; background: var(--border); z-index: 0; }
-.step { display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 1; background: var(--bg); padding: 0 8px; }
-.step .circle { width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-.step.active .circle { background: var(--primary); }
-.step.completed .circle { background: var(--primary); }
-.step span { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-align: center; line-height: 1.2; }
-.step.active span { color: var(--text); }
-
-/* Bottom Sheet */
-.sheet-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5); z-index: 1000;
-    display: flex; flex-direction: column; justify-content: flex-end;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s;
-}
-.sheet-overlay.open { opacity: 1; pointer-events: auto; }
-.sheet {
-    background: var(--card); border-radius: 24px 24px 0 0;
-    padding: 24px 16px; width: 100%; max-width: 480px;
-    margin: 0 auto; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    padding-bottom: env(safe-area-inset-bottom, 24px);
-}
-.sheet-overlay.open .sheet { transform: translateY(0); }
-.sheet-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
-.sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.sheet-header h2 { font-size: 18px; }
-
-/* Specific elements */
-.sparkline { fill: none; stroke: var(--primary); stroke-width: 2; }
-.flag { width: 16px; height: 16px; border-radius: 50%; display: inline-block; background: #eee; }
-.market-card { min-width: 200px; height: 120px; border-radius: 16px; padding: 12px; color: white; position: relative; overflow: hidden; margin-right: 12px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent), url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&q=80&w=400') center/cover; }
-.market-card h4 { font-size: 14px; margin-bottom: 4px; color: white; z-index: 1; position: relative; }
-.market-card p { font-size: 11px; color: #ddd; z-index: 1; position: relative; }
-.market-card .impact { color: var(--orange-text); font-weight: 600; }
-
-/* Toast */
-#toast {
-    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-    background: #2c3038; color: white; padding: 12px 24px; border-radius: 30px;
-    font-size: 14px; font-weight: 500; z-index: 2000;
-    opacity: 0; transition: opacity 0.3s; pointer-events: none;
-    white-space: nowrap;
-}
-#toast.show { opacity: 1; }
-
-</style>
-</head>
-<body>
-
-<div id="app">
-    <!-- Content Area -->
-    <main id="view-container"></main>
-    
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav" id="bottom-nav">
-        <button onclick="go('home')" id="nav-home">
-            <span class="material-symbols-rounded">home</span> Home
-        </button>
-        <button onclick="go('funds')" id="nav-funds">
-            <span class="material-symbols-rounded">account_balance_wallet</span> Funds
-        </button>
-        <button onclick="go('promos')" id="nav-promos">
-            <span class="material-symbols-rounded">percent</span> Promotions
-        </button>
-        <button onclick="go('copy')" id="nav-copy">
-            <span class="material-symbols-rounded">content_copy</span> CopyTrade
-        </button>
-    </nav>
-</div>
-
-<!-- Global Overlay for Bottom Sheets -->
-<div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet(event)">
-    <div class="sheet" id="sheet-content" onclick="event.stopPropagation()">
-        <!-- Content injected here -->
-    </div>
-</div>
-
-<!-- Toast -->
-<div id="toast">Message</div>
-
+:root{--bg:#fff;--c:#f0f3f8;--t:#232b38;--m:#6b7482;--l:#b7bdc6;--p:#1f9d6b;--bd:#e4e7ec;--pb:#dfe4ff;--pt:#2447b5;--gb:#c9f0dd;--gt:#0d6b45;--red:#e03131;--or:#ef8a30;--nav:#ebecee;--dk:#262d3a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{color-scheme:light}i,em{font-style:normal}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;font-family:Inter,system-ui,sans-serif}
+body{background:var(--bg);color:var(--t);font-size:15px;font-weight:600;display:flex;justify-content:center}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+#app{width:100%;max-width:480px;min-height:100vh;padding-bottom:110px;position:relative}
+#app.gr{background:linear-gradient(180deg,rgba(31,157,107,.28),transparent 330px)}
+.ms{font-family:'Material Symbols Rounded';font-weight:400;font-size:24px;line-height:1;font-feature-settings:'liga';font-variation-settings:'FILL' 0;display:inline-block;vertical-align:middle}
+.f{font-variation-settings:'FILL' 1}
+.row{display:flex;align-items:center}.sb{justify-content:space-between}.g8{gap:8px}
+.mu{color:var(--m)}.gn{color:var(--p)}.sm{font-size:13px}.b8{font-weight:800}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.hd h1{font-size:18px;font-weight:800;flex:1;text-align:center}
+.ib{width:42px;height:42px;border-radius:50%;border:0;background:transparent;color:var(--t);display:grid;place-items:center;cursor:pointer;position:relative}
+.ib.w{background:rgba(255,255,255,.7);color:#232b38}
+.bg{position:absolute;top:-2px;right:-4px;background:var(--red);color:#fff;font-size:12px;font-weight:800;padding:1px 7px;border-radius:12px}
+.card{background:var(--c);border-radius:16px;padding:16px;margin:0 16px 12px}
+.wc{background:#fff;color:#232b38}
+.tag{display:inline-block;padding:4px 10px;border-radius:12px;font-size:13px;font-weight:800;background:var(--pb);color:var(--pt)}
+.tag.g{background:var(--gb);color:var(--gt)}
+.btn{background:var(--p);color:#fff;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:800;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn.s{width:auto;padding:9px 14px;font-size:15px;border-radius:10px}.btn.dk{background:var(--dk)}.btn.off{background:#cbd0da;pointer-events:none}.btn.pl{background:#fff;color:#232b38;width:auto;padding:9px 14px;font-size:15px;border-radius:8px}
+.fix{position:fixed;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));padding:0 16px;max-width:480px;margin:auto}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));width:calc(100% - 32px);max-width:448px;background:var(--nav);border-radius:30px;display:flex;justify-content:space-around;padding:10px 0 8px;box-shadow:0 6px 24px rgba(0,0,0,.18);z-index:50}
+.nav button{background:none;border:0;color:var(--m);font-size:13px;font-weight:500;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;min-width:70px}
+.nav button.on{color:var(--p)}.nav .ms{font-variation-settings:'FILL' 1}
+.acts{display:flex;justify-content:space-between;padding:6px 20px 0;margin-bottom:22px}
+.act{background:none;border:0;color:var(--t);font-size:17px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.act i{width:66px;height:66px;border-radius:50%;background:rgba(255,255,255,.75);color:#232b38;display:grid;place-items:center}
+.act.pr i{background:var(--p);color:#fff}
+.car{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;padding:0 16px;scrollbar-width:none}.car::-webkit-scrollbar{display:none}
+.car>*{flex:0 0 100%;scroll-snap-align:center}
+.dots{display:flex;justify-content:center;gap:5px;margin:10px 0 14px}.dots i{width:7px;height:7px;border-radius:50%;background:var(--bd)}.dots i.on{background:var(--m)}
+.ban{border-radius:18px;padding:16px;min-height:186px;position:relative;color:#232b38;overflow:hidden}
+.ban h3{font-size:20px;font-weight:800}.ban p{font-size:15px;color:#5a6472;max-width:66%;margin:4px 0 12px;font-weight:600}
+.ban .ico{position:absolute;right:14px;top:22px;width:92px;height:92px;border-radius:26px;background:rgba(255,255,255,.5);display:grid;place-items:center;color:#1f9d6b}
+.ban .ico .ms{font-size:56px}.cnt{position:absolute;right:14px;bottom:14px;background:rgba(255,255,255,.85);border-radius:16px;padding:4px 12px;font-weight:800}
+.sec{display:flex;justify-content:space-between;align-items:baseline;padding:0 16px;margin:12px 0 10px}.sec h2{font-size:22px;font-weight:800}.sec a{color:var(--m);font-weight:800;cursor:pointer;font-size:17px}
+.mc{flex:0 0 calc(50% - 5px);height:236px;border-radius:14px;padding:12px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;font-weight:800;font-size:19px;line-height:1.2}
+.mc .fl{align-self:flex-start;background:#fff;color:#232b38;border-radius:20px;padding:4px 10px 4px 6px;font-size:14px;display:flex;align-items:center;gap:6px;margin-bottom:auto}
+.mc .r{display:flex;justify-content:space-between;font-size:17px;margin-top:4px}.mc .r b{font-weight:800}
+.flag{width:20px;height:20px;border-radius:50%;background:linear-gradient(#b22234 0 14%,#fff 14% 28%,#b22234 28% 42%,#fff 42% 56%,#b22234 56% 70%,#fff 70% 84%,#b22234 84%);position:relative}
+.flag::after{content:"";position:absolute;left:0;top:0;width:55%;height:55%;background:#3c3b6e;border-radius:10px 0 0 0}
+.tabs{display:flex;border-bottom:1px solid var(--bd);margin:0 16px 14px}
+.tabs button{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--m);padding:12px 4px;font-size:17px;font-weight:800;cursor:pointer;white-space:nowrap}
+.tabs button.on{color:var(--t);border-color:var(--t)}.tabs.gt button.on{border-color:var(--p)}
+.li{display:flex;align-items:center;gap:14px;padding:18px 16px;cursor:pointer}.li .ms:first-child{color:var(--m)}.li b{flex:1;font-size:19px;font-weight:800}.li .ch{color:var(--l)}
+.ln{border-bottom:1px solid var(--bd);margin-left:56px}
+.ci{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none}
+.tx{background:var(--c);border-radius:16px;padding:12px;margin:0 16px 10px;display:flex;align-items:center;gap:12px}
+.tx .ci{background:var(--bg);color:var(--m)}.tx .d{flex:1}.tx .d b{font-size:20px;font-weight:800}
+.dh{margin:16px 16px 10px;font-size:20px;font-weight:800}
+.st{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--bd)}
+.av{width:42px;height:42px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:20px}
+.st b{display:block;font-size:20px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.st .gw{flex:1;text-align:center;font-size:19px;font-weight:700;color:#21a56f}
+.pg{display:flex;justify-content:space-between;align-items:center;padding:14px 16px}.pg button{width:38px;height:38px;border-radius:50%;border:0;background:var(--c);color:var(--t);font-weight:800;font-size:17px}.pg .on{background:var(--bd)}
+.step{display:flex;justify-content:space-between;padding:6px 20px 16px;text-align:center}.step div{flex:1;font-size:17px;font-weight:700;color:var(--m)}.step div.on{color:var(--t)}
+.step i{display:block;margin:0 auto 6px;width:30px;height:30px;border-radius:50%;background:var(--l);color:#fff;font-style:normal}.step .on i{background:var(--p)}
+.meth h4{padding:12px 16px 8px;font-size:20px;font-weight:800}
+.mi{display:flex;align-items:center;gap:14px;background:var(--c);border-radius:14px;padding:14px 16px;margin:0 16px 12px;border:1.5px solid transparent;cursor:pointer;font-size:19px;font-weight:800}
+.mi.on{border-color:var(--p)}.mi .ms{margin-left:auto;background:var(--bd);border-radius:50%;font-size:20px;padding:3px}
+.lg{width:66px;height:34px;border-radius:5px;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
+.fld{margin:0 16px 14px}.fld label{display:block;color:var(--m);font-size:18px;margin-bottom:8px;font-weight:700}
+.inp{width:100%;background:transparent;border:0;border-bottom:1px solid var(--bd);font-size:28px;font-weight:600;color:var(--t);outline:0;padding:4px 0}
+.sel{background:var(--c);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.sel .ci{background:var(--bg);color:var(--m);width:40px;height:40px}.sel .ms:last-child{margin-left:auto;background:var(--bd);border-radius:50%;font-size:20px;padding:3px}
+.kv{display:flex;justify-content:space-between;margin:0 16px 12px;font-size:19px;font-weight:700;color:var(--m)}.kv b{color:var(--t);font-weight:700}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}.ov.o{opacity:1;pointer-events:auto}
+.sh{background:var(--bg);width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:12px 16px calc(24px + env(safe-area-inset-bottom,0px));transform:translateY(100%);transition:transform .3s}.ov.o .sh{transform:none}
+.sh .hl{width:44px;height:4px;border-radius:2px;background:var(--l);margin:0 auto 14px}.sh h2{text-align:center;font-size:21px;font-weight:800;margin-bottom:12px}
+.sh .x{position:absolute;right:20px;margin-top:-6px;width:40px;height:40px;border-radius:50%;background:var(--c);border:0;color:var(--t);cursor:pointer}
+.sr{display:flex;align-items:center;gap:16px;padding:12px 6px;font-size:20px;font-weight:800;cursor:pointer}.sr .ci{width:48px;height:48px;background:var(--c);color:var(--t)}
+.pick{background:var(--c);border-radius:14px;padding:14px;margin-bottom:12px;cursor:pointer;font-weight:700;color:var(--m);position:relative}.pick.on{box-shadow:inset 0 0 0 0}.pick b{font-size:20px;font-weight:800;color:var(--t)}.pick .ck{position:absolute;right:14px;top:50%;margin-top:-12px;color:var(--p)}
+.nr{padding:18px 16px;border-bottom:1px solid var(--bd);cursor:pointer}.nr b{font-size:19px;font-weight:800}.nr p{display:none;color:var(--m);font-weight:500;margin-top:8px}.nr.o p{display:block}
+.nr .dt{display:inline-block;width:7px;height:7px;border-radius:50%;background:#f0506e;margin-left:6px}
+.nd{padding:14px 16px 4px;color:var(--m);font-size:19px;font-weight:800}
+#toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:var(--dk);color:#fff;padding:12px 22px;border-radius:30px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}#toast.o{opacity:1}
+svg.sp{width:112px;height:56px;flex:none}
+.hd{background:var(--bg)}#app.gr .hd{position:static;background:transparent}[style*="rgba(31,157,107,.28)"] .hd{background:transparent}@media(min-width:520px){body{background:#e9edf3}#app{background:var(--bg);box-shadow:0 0 40px rgba(0,0,0,.08)}}:focus-visible{outline:2px solid var(--p);outline-offset:2px}html{-webkit-text-size-adjust:100%}.rc{border:1px solid var(--bd);border-radius:22px;padding:16px;margin:0 16px 12px}.rc .r{display:flex;justify-content:space-between;padding:6px 0;font-size:19px;color:var(--m)}.rc .r b{color:var(--t);font-weight:800}.rc .r .ms{color:var(--p);font-size:20px;margin-right:8px}.tg{width:48px;height:28px;border-radius:14px;background:var(--l);position:relative;display:inline-block;flex:none}.tg i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}.tg.on{background:var(--dk)}.tg.on i{left:23px}.chip{background:var(--c);border-radius:10px;padding:10px 14px;font-size:19px;font-weight:800;display:flex;gap:4px;align-items:center}
+</style></head><body>
+<div id="app"></div>
+<nav class="nav" id="nav"></nav>
+<div class="ov" id="ov" onclick="if(event.target==this)cs()"><div class="sh" id="sh"></div></div>
+<div id="toast"></div>
 <script>
-// --- State Management ---
-const state = {
-    view: 'home',
-    tab: 0,
-    depositStep: 1,
-    depositMethod: 'Mobile Money',
-    depositAmount: '',
-    transferAmount: '',
-    funds: { wallet: 0.00, trading: 0.52 },
-    account: { name: 'Isaac', number: '581022950', type: 'BOOSTER · MT5', balance: 0.00, leverage: '1:2000', platform: 'MT5' }
-};
-
-// --- Utility Functions ---
-const $ = s => document.querySelector(s);
-const app = $('#view-container');
-const toastEl = $('#toast');
-
-function toast(msg) {
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    setTimeout(() => toastEl.classList.remove('show'), 2500);
-}
-
-function go(view) {
-    state.view = view;
-    state.tab = 0;
-    render();
-    window.scrollTo(0, 0);
-}
-
-function openSheet(html) {
-    $('#sheet-content').innerHTML = `<div class="sheet-handle"></div>${html}`;
-    $('#sheet-overlay').classList.add('open');
-}
-
-function closeSheet(e) {
-    if (e && e.target !== e.currentTarget) return;
-    $('#sheet-overlay').classList.remove('open');
-}
-
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard'));
-}
-
-// Generate sparkline SVG
-function sparkline(seed, pos) {
-    let v = 10, p = [];
-    for (let i = 0; i < 20; i++) {
-        seed = (seed * 9301 + 49297) % 233280;
-        v += (seed / 233280 - 0.45) * 5;
-        v = Math.max(5, Math.min(25, v));
-        p.push(`${i * 3},${30 - v}`);
-    }
-    return `<svg viewBox="0 0 60 30" class="strategy-chart"><polyline points="${p.join(' ')}" class="sparkline" stroke="${pos ? 'var(--primary)' : 'var(--red)'}" /></svg>`;
-}
-
-// --- Views ---
-
-const views = {
-    // 1. Profile View
-    profile: () => `
-        <header class="header">
-            <button class="header-btn transparent" onclick="go('home')"><span class="material-symbols-rounded">arrow_back_ios_new</span></button>
-            <div class="title">Profile</div>
-            <button class="header-btn transparent"><span class="flag" style="background: url('https://flagcdn.com/w20/gb.png') center/cover"></span> <span class="material-symbols-rounded" style="font-size:16px; margin-left:4px;">expand_more</span></button>
-        </header>
-        
-        <div style="text-align: center; margin: 20px 0 24px;">
-            <div style="position: relative; display: inline-block;">
-                <div style="width: 80px; height: 80px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: var(--text);">MK</div>
-                <div style="position: absolute; bottom: 0; right: 0; background: var(--primary); width: 24px; height: 24px; border-radius: 50%; border: 3px solid var(--bg); display: flex; align-items: center; justify-content: center;">
-                    <span class="material-symbols-rounded" style="color: white; font-size: 14px;">check</span>
-                </div>
-            </div>
-            <h1 style="font-size: 20px; margin-top: 12px; text-transform: uppercase;">MAXWEL KIPRONO YEGON</h1>
-            <p class="text-muted" style="font-size: 14px;">borrose607@gmail.com</p>
-        </div>
-
-        <div class="banner" style="background: #e6f9f0; padding: 20px;">
-            <h3 style="font-size: 18px;">Invite and earn</h3>
-            <p style="font-size: 13px; color: var(--text); max-width: 60%;">Share Valetax with friends and get rewarded for every referral</p>
-            <button class="btn" style="background: white; color: var(--text); width: auto; padding: 10px 20px;">Invite now</button>
-            <!-- Placeholder for 3D graphic -->
-            <div style="position: absolute; right: 10px; bottom: 10px; width: 100px; height: 100px; background: url('https://cdn3d.iconscout.com/3d/premium/thumb/gift-box-4065590-3373098.png') center/contain no-repeat;"></div>
-        </div>
-
-        <div class="card-group">
-            ${['Partnership Section', 'Analysis', 'VXclusive'].map(item => `
-                <div class="list-item" onclick="toast('${item} placeholder')">
-                    <div class="icon"><span class="material-symbols-rounded">group</span></div>
-                    <div class="content">${item}</div>
-                    <div class="chevron"><span class="material-symbols-rounded">chevron_right</span></div>
-                </div>
-            `).join('')}
-        </div>
-
-        <div class="card-group">
-            ${['Contests', 'My Manager', 'Support Chat', 'Tickets'].map(item => `
-                <div class="list-item" onclick="toast('${item} placeholder')">
-                    <div class="icon"><span class="material-symbols-rounded">${item === 'Contests' ? 'emoji_events' : item === 'My Manager' ? 'person' : item === 'Support Chat' ? 'help' : 'receipt_long'}</span></div>
-                    <div class="content">${item}</div>
-                    <div class="chevron"><span class="material-symbols-rounded">chevron_right</span></div>
-                </div>
-            `).join('')}
-        </div>
-
-        <div class="card-group">
-            <div class="list-item" onclick="toast('Settings placeholder')">
-                <div class="icon"><span class="material-symbols-rounded">settings</span></div>
-                <div class="content">Profile Settings</div>
-                <div class="chevron"><span class="material-symbols-rounded">chevron_right</span></div>
-            </div>
-            <div class="list-item" onclick="go('home')">
-                <div class="icon"><span class="material-symbols-rounded">logout</span></div>
-                <div class="content">Log Out</div>
-                <div class="chevron"><span class="material-symbols-rounded">chevron_right</span></div>
-            </div>
-        </div>
-    `,
-
-    // 2. Notifications View
-    notifications: () => `
-        <header class="header">
-            <button class="header-btn transparent" onclick="go('home')"><span class="material-symbols-rounded">arrow_back_ios_new</span></button>
-            <div class="title">Notifications</div>
-            <div style="width: 40px;"></div>
-        </header>
-        
-        <div class="tabs" style="justify-content: center; gap: 40px; margin-top: 10px;">
-            <button class="active" style="font-size: 16px;">Notifications</button>
-            <button style="font-size: 16px;">Voice messages</button>
-        </div>
-
-        <div class="px-3 pb-4">
-            <h4 class="text-muted fw-700 mt-3 mb-2">16 October 2026</h4>
-            <div class="card mb-2 row space-between">
-                <span class="fw-700">Join the 5 Day Wondervault Sprint...</span>
-                <span class="material-symbols-rounded text-muted">expand_more</span>
-            </div>
-            
-            <h4 class="text-muted fw-700 mt-4 mb-2">15 October 2026</h4>
-            <div class="card mb-2 row space-between">
-                <span class="fw-700">Webinar: Master Moving Averages</span>
-                <span class="material-symbols-rounded text-muted">expand_more</span>
-            </div>
-            <div class="card mb-2 row space-between">
-                <span class="fw-700">Coins have been Credited</span>
-                <span class="material-symbols-rounded text-muted">expand_more</span>
-            </div>
-
-            <h4 class="text-muted fw-700 mt-4 mb-2">14 October 2026</h4>
-            <div class="card mb-2 row space-between">
-                <span class="fw-700">Coins have been Credited</span>
-                <span class="material-symbols-rounded text-muted">expand_more</span>
-            </div>
-            <div class="card mb-2 row space-between">
-                <span class="fw-700">Trading Account Created</span>
-                <span class="material-symbols-rounded text-muted">expand_more</span>
-            </div>
-            <div class="card mb-2 row space-between">
-                <span class="fw-700">Deposit will be Credited</span>
-                <span class="badge red-dot"></span>
-                <span class="material-symbols-rounded text-muted">expand_more</span>
-            </div>
-
-            <h4 class="text-muted fw-700 mt-4 mb-2">13 October 2026</h4>
-            <div class="card mb-2 row space-between">
-                <span class="fw-700">Live Webinar: Seeing Through the ...</span>
-                <span class="badge red-dot"></span>
-                <span class="material-symbols-rounded text-muted">expand_more</span>
-            </div>
-        </div>
-    `,
-
-    // 3. Copy Trading View
-    copy: () => {
-        const strategies = [
-            { name: 'Multi bo...', followers: 5514, min: 1, growth: '+1654.81%', pos: true, seed: 1, img: 'https://i.pravatar.cc/100?img=11' },
-            { name: 'Kucing M...', followers: 3737, min: 5, growth: '+186.13%', pos: true, seed: 2, img: 'https://i.pravatar.cc/100?img=12' },
-            { name: 'Go to mo...', followers: 3648, min: 1, growth: '+192.32%', pos: true, seed: 3, img: 'https://i.pravatar.cc/100?img=13' },
-            { name: 'Low Risk ...', followers: 3502, min: 1, growth: '+743.06%', pos: true, seed: 4, img: 'https://i.pravatar.cc/100?img=14' },
-            { name: 'Trade 00X', followers: 3147, min: 1, growth: '+360.21%', pos: true, seed: 5, img: 'https://i.pravatar.cc/100?img=15' },
-            { name: 'Apex Glo...', followers: 3048, min: 25, growth: '+418.3%', pos: true, seed: 6, img: 'https://i.pravatar.cc/100?img=16' },
-            { name: 'ACM Gold', followers: 2679, min: 5, growth: '+246.74%', pos: true, seed: 7, img: 'https://i.pravatar.cc/100?img=17' },
-        ];
-        return `
-        <header class="header">
-            <button class="header-btn transparent"><span class="material-symbols-rounded">menu</span></button>
-            <div class="title">Copy Trading</div>
-            <div style="position: relative;">
-                <button class="header-btn transparent"><span class="material-symbols-rounded">notifications</span></button>
-                <span class="bell-badge">33</span>
-            </div>
-        </header>
-
-        <div class="tabs" style="margin-top: 10px;">
-            <button class="active">Available strategies</button>
-            <button>Investment results</button>
-            <button>For more</button>
-        </div>
-
-        <div style="padding: 0 16px 16px;">
-            <div class="card row" style="padding: 10px 16px; background: #f1f3f7;">
-                <span class="material-symbols-rounded text-muted">search</span>
-                <input type="text" placeholder="Search" style="border:none; background:transparent; padding: 8px; flex:1; outline:none; font-size:14px;">
-                <span class="material-symbols-rounded text-muted">tune</span>
-            </div>
-        </div>
-
-        <div class="row space-between px-3 mb-2 text-muted text-sm fw-600">
-            <span>Strategy</span>
-            <div class="row" style="gap: 40px;"><span>Growth</span><span>Chart</span></div>
-        </div>
-
-        <div>
-            ${strategies.map((s, i) => `
-                <div class="strategy-item" onclick="toast('Strategy details')">
-                    <img src="${s.img}" class="strategy-avatar">
-                    <div class="strategy-info">
-                        <h4>${s.name}</h4>
-                        <div class="strategy-meta">
-                            <span class="row"><span class="material-symbols-rounded" style="font-size:14px; margin-right:2px;">group</span> ${s.followers}</span>
-                            <span class="row"><span class="material-symbols-rounded" style="font-size:14px; margin-right:2px;">attach_money</span> Min. $ ${s.min}</span>
-                        </div>
-                    </div>
-                    <div class="strategy-growth text-green fw-700" style="font-size: 15px;">${s.growth}</div>
-                    ${sparkline(s.seed * 77 + 13, s.pos)}
-                </div>
-            `).join('')}
-        </div>
-
-        <div class="row space-between px-3 py-4 text-muted">
-            <span class="fw-600">20</span>
-            <div class="row" style="gap: 8px;">
-                <button class="header-btn" style="width:32px;height:32px;background:#f1f3f7;"><span class="material-symbols-rounded" style="font-size:18px;">chevron_left</span></button>
-                <button style="width:32px;height:32px;border-radius:50%;background:var(--primary);color:white;border:none;font-weight:600;">1</button>
-                <button style="width:32px;height:32px;border-radius:50%;background:#f1f3f7;border:none;font-weight:600;">2</button>
-                <button style="width:32px;height:32px;border-radius:50%;background:#f1f3f7;border:none;font-weight:600;">3</button>
-                <span>...</span>
-                <button style="width:32px;height:32px;border-radius:50%;background:#f1f3f7;border:none;font-weight:600;">238</button>
-                <button class="header-btn" style="width:32px;height:32px;background:#f1f3f7;"><span class="material-symbols-rounded" style="font-size:18px;">chevron_right</span></button>
-            </div>
-        </div>
-        `;
-    },
-
-    // 4. Promotions View
-    promos: () => `
-        <header class="header">
-            <button class="header-btn transparent"><span class="material-symbols-rounded">menu</span></button>
-            <div class="title">Promotions</div>
-            <div style="position: relative;">
-                <button class="header-btn transparent"><span class="material-symbols-rounded">notifications</span></button>
-                <span class="bell-badge">33</span>
-            </div>
-        </header>
-
-        <div style="height: 160px; background: #e6f9f0 url('https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=600') center/cover;"></div>
-        
-        <div class="card mt-4">
-            <div class="row space-between mb-3">
-                <h3 class="fw-700" style="font-size:16px;">Activate promo code or voucher</h3>
-                <span class="badge green" style="border-radius: 20px; text-transform: none; padding: 4px 10px;">New</span>
-            </div>
-            <div class="row" style="background: #f1f3f7; border-radius: 8px; padding: 4px;">
-                <input type="text" placeholder="Your promocode" style="flex:1; border:none; background:transparent; padding: 10px; outline:none; font-size:14px; font-weight:600;">
-                <button class="btn dark small" style="border-radius: 6px;">Apply</button>
-            </div>
-        </div>
-
-        <div class="tabs" style="justify-content: center; gap: 80px; margin-top: 24px;">
-            <button class="active">Active</button>
-            <button>Archived</button>
-        </div>
-        
-        <div style="text-align: center; color: var(--text-light); margin-top: 60px;">
-            <span class="material-symbols-rounded" style="font-size: 48px; margin-bottom: 16px;">inbox</span>
-            <p>No active promotions</p>
-        </div>
-    `,
-
-    // 5. Funds View
-    funds: () => `
-        <header class="header">
-            <button class="header-btn transparent"><span class="material-symbols-rounded">menu</span></button>
-            <div class="title">Funds Summary</div>
-            <div style="position: relative;">
-                <button class="header-btn transparent"><span class="material-symbols-rounded">notifications</span></button>
-                <span class="bell-badge">33</span>
-            </div>
-        </header>
-
-        <div class="row space-between px-3 mt-2 mb-4">
-            <div>
-                <h1 class="fw-800" style="font-size: 28px;">$ 0.52</h1>
-                <p class="text-muted fw-600">Total Funds</p>
-            </div>
-            <button class="btn small" onclick="go('deposit')"><span class="material-symbols-rounded" style="font-size: 18px;">download</span> Deposit</button>
-        </div>
-
-        <div class="tabs" style="justify-content: space-between;">
-            <button class="active" style="flex:1;">Overview</button>
-            <button style="flex:1;">Accounts</button>
-            <button style="flex:1;">Transactions</button>
-        </div>
-
-        <div class="card" style="background: #f1f3f7; border: none; padding: 16px;">
-            <div class="row mb-3">
-                <div class="icon-circle" style="width:40px;height:40px;background:#3b82f6;color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
-                    <span class="material-symbols-rounded" style="font-size:20px;">account_balance_wallet</span>
-                </div>
-                <div>
-                    <h3 class="fw-700">$ 0.00</h3>
-                    <p class="text-muted text-sm fw-600">Wallet Balance</p>
-                </div>
-            </div>
-            <div class="row mb-3">
-                <div class="icon-circle" style="width:40px;height:40px;background:var(--primary);color:white;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;">
-                    <span class="material-symbols-rounded" style="font-size:20px;">trending_up</span>
-                </div>
-                <div>
-                    <h3 class="fw-700">$ 0.52</h3>
-                    <p class="text-muted text-sm fw-600">Withdrawable Trading Balance</p>
-                </div>
-            </div>
-            <div class="row space-between" style="border-top: 1px solid #e2e8f0; padding-top: 12px;">
-                <span class="fw-600 text-muted">Total withdrawable balance</span>
-                <span class="fw-800" style="font-size:16px;">$ 0.52</span>
-            </div>
-        </div>
-
-        <div class="row space-between px-3 mt-4 mb-2">
-            <h3 class="fw-700" style="font-size: 18px;">Trading Accounts</h3>
-            <span class="text-muted fw-600" style="font-size: 14px;">See all</span>
-        </div>
-
-        <div class="card mb-4" onclick="go('accounts')">
-            <div class="row space-between mb-2">
-                <span class="badge purple">BOOSTER · MT5</span>
-                <span class="material-symbols-rounded text-muted" style="font-size:18px;">chevron_right</span>
-            </div>
-            <div class="row mb-3">
-                <span class="fw-700" style="font-size:16px;">581022950</span>
-                <span class="text-muted" style="margin: 0 8px;">|</span>
-                <span class="text-muted fw-500">Isaac</span>
-            </div>
-            <div class="row space-between">
-                <span class="text-muted fw-600">Balance</span>
-                <span class="fw-700">$ 0.00</span>
-            </div>
-            <div class="row space-between">
-                <span class="text-muted fw-600">Available for withdrawal</span>
-                <span class="fw-700">$ 0.00</span>
-            </div>
-        </div>
-
-        <div class="row space-between px-3 mt-4 mb-2">
-            <div class="row" style="gap: 8px;">
-                <h3 class="fw-700" style="font-size: 18px;">Transactions</h3>
-                <span class="badge outline" style="text-transform: uppercase;">RECENT</span>
-            </div>
-            <span class="text-muted fw-600" style="font-size: 14px;">See all</span>
-        </div>
-
-        <h4 class="text-muted fw-700 px-3 mb-2">18 October, 2026</h4>
-        <div class="tx-card">
-            <div class="tx-icon">
-                <span class="material-symbols-rounded text-muted">download</span>
-            </div>
-            <div class="tx-details">
-                <div class="row" style="gap: 6px;">
-                    <span class="fw-700">Deposit</span>
-                    <span class="material-symbols-rounded" style="font-size:16px;color:var(--red);">cancel</span>
-                </div>
-                <span class="text-muted text-sm">ID: 45003435</span>
-            </div>
-            <div class="text-right">
-                <div class="tx-amount text-green">+ $9.87</div>
-                <div class="text-muted text-sm">18.10.2026 08:47</div>
-            </div>
-        </div>
-
-        <h4 class="text-muted fw-700 px-3 mt-3 mb-2">14 October, 2026</h4>
-        <div class="tx-card">
-            <div class="tx-icon">
-                <span class="material-symbols-rounded text-muted">download</span>
-            </div>
-            <div class="tx-details">
-                <div class="row" style="gap: 6px;">
-                    <span class="fw-700">Deposit</span>
-                    <span class="material-symbols-rounded" style="font-size:16px;color:var(--primary);">check_circle</span>
-                </div>
-                <span class="text-muted text-sm">ID: 44447591</span>
-            </div>
-            <div class="text-right">
-                <div class="tx-amount text-green">+ $9.87</div>
-                <div class="text-muted text-sm">14.10.2026 11:50</div>
-            </div>
-        </div>
-    `,
-
-    // 6. Accounts View
-    accounts: () => `
-        <header class="header">
-            <button class="header-btn transparent" onclick="go('home')"><span class="material-symbols-rounded">arrow_back_ios_new</span></button>
-            <div class="title">Accounts</div>
-            <div style="width: 40px;"></div>
-        </header>
-
-        <div class="px-3">
-            <!-- Account Carousel Placeholder -->
-            <div class="card" style="background: white; border: none; padding: 20px; margin: 0 0 16px;">
-                <span class="badge purple mb-2">BOOSTER · MT5</span>
-                <h2 class="fw-700" style="font-size: 18px; margin-bottom: 16px;">Isaac</h2>
-                <div class="row space-between">
-                    <span class="fw-700" style="font-size: 18px;">581022950</span>
-                    <span class="fw-700" style="font-size: 18px;">$ 0.00</span>
-                </div>
-            </div>
-            <div class="row" style="justify-content: center; gap: 4px; margin-bottom: 20px;">
-                <div style="width:6px;height:6px;border-radius:50%;background:var(--text);"></div>
-                <div style="width:6px;height:6px;border-radius:50%;background:var(--border);"></div>
-                <div style="width:6px;height:6px;border-radius:50%;background:var(--border);"></div>
-            </div>
-
-            <div class="row space-between mb-4" style="padding: 0 10px;">
-                <button class="action-btn" onclick="toast('Deposit')">
-                    <div class="icon-circle primary"><span class="material-symbols-rounded">download</span></div>
-                    <span>Deposit</span>
-                </button>
-                <button class="action-btn" onclick="toast('Withdrawal')">
-                    <div class="icon-circle"><span class="material-symbols-rounded">upload</span></div>
-                    <span>Withdrawal</span>
-                </button>
-                <button class="action-btn" onclick="toast('Transfer')">
-                    <div class="icon-circle"><span class="material-symbols-rounded">sync_alt</span></div>
-                    <span>Transfer</span>
-                </button>
-                <button class="action-btn" onclick="openMoreSheet()">
-                    <div class="icon-circle"><span class="material-symbols-rounded">more_vert</span></div>
-                    <span>More</span>
-                </button>
-            </div>
-        </div>
-
-        <div class="row space-between px-3 mb-3">
-            <div>
-                <h1 class="fw-800" style="font-size: 22px;">581022950</h1>
-                <p class="text-muted fw-600">Isaac</p>
-            </div>
-            <button class="btn small" onclick="openTradeSheet()"><span class="material-symbols-rounded" style="font-size: 18px;">show_chart</span> Trade</button>
-        </div>
-
-        <div class="card-group">
-            <div class="list-item">
-                <div class="icon" style="background:var(--primary);color:white;border-radius:50%;width:36px;height:36px;">
-                    <span class="material-symbols-rounded" style="font-size:20px;color:white;">database</span>
-                </div>
-                <div class="content">
-                    <div class="fw-700">$ 0.00</div>
-                    <div class="text-muted text-sm">Balance</div>
-                </div>
-                <span class="material-symbols-rounded text-muted">expand_more</span>
-            </div>
-            <div class="list-item">
-                <div class="icon" style="background:#3b82f6;color:white;border-radius:50%;width:36px;height:36px;">
-                    <span class="material-symbols-rounded" style="font-size:20px;color:white;">description</span>
-                </div>
-                <div class="content">
-                    <div class="fw-700">Booster</div>
-                    <div class="text-muted text-sm">Account type</div>
-                </div>
-            </div>
-            <div class="list-item">
-                <div class="icon" style="background:#f59e0b;color:white;border-radius:50%;width:36px;height:36px;">
-                    <span class="material-symbols-rounded" style="font-size:20px;color:white;">api</span>
-                </div>
-                <div class="content">
-                    <div class="fw-700">1:2000</div>
-                    <div class="text-muted text-sm">Leverage</div>
-                </div>
-                <span class="material-symbols-rounded text-muted">edit</span>
-            </div>
-            <div class="list-item">
-                <div class="icon" style="background:#8b5cf6;color:white;border-radius:50%;width:36px;height:36px;">
-                    <span class="material-symbols-rounded" style="font-size:20px;color:white;">computer</span>
-                </div>
-                <div class="content">
-                    <div class="fw-700">MT5</div>
-                    <div class="text-muted text-sm">Trading platform</div>
-                </div>
-                <span class="material-symbols-rounded text-muted">expand_more</span>
-            </div>
-        </div>
-    `,
-
-    // 7. Home View
-    home: () => `
-        <header class="home-header">
-            <button class="header-btn transparent" onclick="go('profile')"><span class="material-symbols-rounded">menu</span></button>
-            <div class="total-funds">
-                <h1>$ 0.52 <span class="material-symbols-rounded">expand_more</span></h1>
-                <p class="text-muted text-sm fw-600">Total Funds</p>
-            </div>
-            <div style="position: relative;">
-                <button class="header-btn transparent" onclick="go('notifications')"><span class="material-symbols-rounded">notifications</span></button>
-                <span class="bell-badge">33</span>
-            </div>
-        </header>
-
-        <div class="row space-between px-3 mb-3">
-            <button class="btn outline small" style="border-radius:20px; padding: 6px 12px; font-size: 13px;">Real Accounts <span class="material-symbols-rounded" style="font-size:16px; margin-left:4px;">expand_more</span></button>
-            <button class="btn small"><span class="material-symbols-rounded" style="font-size:16px; margin-right:4px;">add</span> Add Account</button>
-        </div>
-
-        <div class="card" style="background: white; border: none; padding: 20px;">
-            <div class="row space-between mb-2">
-                <span class="badge purple">BOOSTER · MT5</span>
-                <span class="fw-700" style="font-size:18px;">$ 0.00</span>
-            </div>
-            <h3 class="fw-700" style="font-size: 16px; margin-bottom: 12px;">Isaac</h3>
-            <div class="row space-between">
-                <div class="row" style="gap:4px;">
-                    <span class="fw-700" style="font-size: 16px;">581022950</span>
-                    <span class="material-symbols-rounded text-muted" style="font-size:16px; cursor:pointer;" onclick="copyToClipboard('581022950')">content_copy</span>
-                </div>
-                <div class="text-muted fw-600" onclick="go('accounts')">Details <span class="material-symbols-rounded" style="font-size:14px; vertical-align:middle;">chevron_right</span></div>
-            </div>
-        </div>
-        
-        <div class="row" style="justify-content: center; gap: 4px; margin-bottom: 20px; margin-top: -8px;">
-            <div style="width:6px;height:6px;border-radius:50%;background:var(--border);"></div>
-            <div style="width:6px;height:6px;border-radius:50%;background:var(--text);"></div>
-            <div style="width:6px;height:6px;border-radius:50%;background:var(--border);"></div>
-        </div>
-
-        <div class="row space-between mb-4" style="padding: 0 24px;">
-            <button class="action-btn" onclick="go('deposit')">
-                <div class="icon-circle primary"><span class="material-symbols-rounded">download</span></div>
-                <span>Deposit</span>
-            </button>
-            <button class="action-btn" onclick="go('transfer')">
-                <div class="icon-circle"><span class="material-symbols-rounded">sync_alt</span></div>
-                <span>Transfer</span>
-            </button>
-            <button class="action-btn" onclick="openTradeSheet()">
-                <div class="icon-circle"><span class="material-symbols-rounded">show_chart</span></div>
-                <span>Trade</span>
-            </button>
-            <button class="action-btn" onclick="openMoreSheet()">
-                <div class="icon-circle"><span class="material-symbols-rounded">more_vert</span></div>
-                <span>More</span>
-            </button>
-        </div>
-
-        <!-- Banner Carousel -->
-        <div class="banner" style="background: #e6f9f0;">
-            <h3 style="font-size: 18px;">Join Contest</h3>
-            <p style="color: var(--text); font-weight:500;">Explore contests, compete with other traders, and win exclusive rewards</p>
-            <button class="btn" style="background: white; color: var(--text); width: auto; padding: 8px 16px;">Open Contests</button>
-            <div style="position: absolute; right: 10px; bottom: 10px; font-size: 60px; color: var(--primary); line-height: 1;">
-                <span class="material-symbols-rounded" style="font-size: 64px;">emoji_events</span>
-            </div>
-            <span style="position: absolute; right: 16px; bottom: 16px; background: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 700;">3 / 4</span>
-        </div>
-
-        <div class="row space-between px-3 mt-4 mb-2">
-            <h3 class="fw-700" style="font-size: 18px;">Market Companion</h3>
-            <span class="text-muted fw-600" style="font-size: 14px;">See all</span>
-        </div>
-
-        <div class="row" style="overflow-x: auto; padding: 0 16px 16px; scrollbar-width: none;">
-            <div class="market-card" style="background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1554469384-e58fac16e23a?auto=format&fit=crop&q=80&w=400') center/cover;">
-                <span class="badge" style="background:white; color:var(--text); margin-bottom:8px; font-size:10px;"><span class="flag" style="background: url('https://flagcdn.com/w20/us.png') center/cover; width:12px; height:12px; margin-right:4px;"></span> US</span>
-                <h4>Event: Housing Starts MoM (USAH...</h4>
-                <p class="mt-1">Impact <span class="impact">Medium</span></p>
-                <p class="mt-1">Event at <span style="color:white;">Oct 20</span></p>
-            </div>
-            <div class="market-card" style="background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1501466140162-13b29f6bcdce?auto=format&fit=crop&q=80&w=400') center/cover;">
-                <span class="badge" style="background:white; color:var(--text); margin-bottom:8px; font-size:10px;"><span class="flag" style="background: url('https://flagcdn.com/w20/us.png') center/cover; width:12px; height:12px; margin-right:4px;"></span> US</span>
-                <h4>Event: Building Permits MoM Prel for the Unit...</h4>
-                <p class="mt-1">Impact <span class="impact">Medium</span></p>
-                <p class="mt-1">Event at <span style="color:white;">Oct 20</span></p>
-            </div>
-        </div>
-    `,
-
-    // 12. Internal Transfer View
-    transfer: () => `
-        <header class="header">
-            <button class="header-btn transparent" onclick="go('home')"><span class="material-symbols-rounded">arrow_back_ios_new</span></button>
-            <div class="title">Internal Transfer</div>
-            <div style="width: 40px;"></div>
-        </header>
-
-        <div class="px-3 mt-2">
-            <p class="fw-600 text-muted mb-2">From</p>
-            <div class="card row space-between" onclick="openAccountSelect()">
-                <div class="row">
-                    <div class="icon-circle" style="width:32px;height:32px;background:#f1f3f7;margin-right:12px;"><span class="material-symbols-rounded" style="font-size:18px;">upload</span></div>
-                    <span class="fw-700" style="font-size: 16px;">Select</span>
-                </div>
-                <span class="material-symbols-rounded text-muted">expand_more</span>
-            </div>
-
-            <div style="text-align: center; margin: 20px 0;">
-                <button class="header-btn" style="background:#f1f3f7;"><span class="material-symbols-rounded">swap_vert</span></button>
-            </div>
-
-            <p class="fw-600 text-muted mb-2">To</p>
-            <div class="card row space-between" onclick="openAccountSelect()">
-                <div class="row">
-                    <div class="icon-circle" style="width:32px;height:32px;background:#f1f3f7;margin-right:12px;"><span class="material-symbols-rounded" style="font-size:18px;">download</span></div>
-                    <div>
-                        <div class="fw-700" style="font-size: 16px;">581022950</div>
-                        <div class="text-muted text-sm fw-600">Isaac</div>
-                    </div>
-                </div>
-                <span class="material-symbols-rounded text-muted">expand_more</span>
-            </div>
-
-            <div class="row mb-4" style="gap: 8px;">
-                <span class="fw-600 text-muted">Balance</span>
-                <span class="fw-700 text-green">0.00 USD</span>
-            </div>
-
-            <p class="fw-600 text-muted mb-2">Amount</p>
-            <div class="input-group" style="border: none; padding: 0; margin-bottom: 24px;">
-                <input type="number" placeholder="0" style="font-size: 28px;">
-                <span class="fw-700 text-muted" style="font-size: 18px;">USD</span>
-            </div>
-        </div>
-
-        <div style="position: fixed; bottom: 100px; left: 0; right: 0; padding: 0 16px; max-width: 480px; margin: 0 auto;">
-            <button class="btn" style="background: #cbd5e1; color: white; pointer-events: none;">Transfer</button>
-        </div>
-    `,
-
-    // 13-16. Deposit Flow
-    deposit: () => {
-        let content = '';
-        if (state.depositStep === 1) {
-            content = `
-                <h4 class="fw-700 mb-2 mt-3 px-3">Credit/Debit Cards</h4>
-                <div class="card-group mb-4">
-                    <div class="list-item" onclick="state.depositMethod='CCJenapay No_Fee'; state.depositStep=2; render();">
-                        <div class="icon" style="width: 40px; background: #f1f3f7; border-radius: 6px;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" style="width: 24px;"></div>
-                        <div class="content fw-700">CCJenapay No_Fee</div>
-                        <span class="material-symbols-rounded text-muted">expand_more</span>
-                    </div>
-                </div>
-                
-                <h4 class="fw-700 mb-2 mt-3 px-3">Crypto</h4>
-                <div class="card-group mb-4">
-                    <div class="list-item" onclick="state.depositMethod='USDT TRC20'; state.depositStep=2; render();">
-                        <div class="icon" style="width: 40px; background: #f1f3f7; border-radius: 6px;"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" style="width: 24px;"></div>
-                        <div class="content fw-700">USDT TRC20</div>
-                        <span class="material-symbols-rounded text-muted">expand_more</span>
-                    </div>
-                    <div class="list-item" onclick="state.depositMethod='USDT BEP20'; state.depositStep=2; render();">
-                        <div class="icon" style="width: 40px; background: #f1f3f7; border-radius: 6px;"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" style="width: 24px;"></div>
-                        <div class="content fw-700">USDT BEP20</div>
-                        <span class="material-symbols-rounded text-muted">expand_more</span>
-                    </div>
-                    <div class="list-item" onclick="state.depositMethod='Binance Pay'; state.depositStep=2; render();">
-                        <div class="icon" style="width: 40px; background: #f1f3f7; border-radius: 6px;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Binance_Logo.svg/1200px-Binance_Logo.svg.png" style="width: 24px;"></div>
-                        <div class="content fw-700">Binance Pay</div>
-                        <span class="material-symbols-rounded text-muted">expand_more</span>
-                    </div>
-                </div>
-
-                <h4 class="fw-700 mb-2 mt-3 px-3">E-Wallet</h4>
-                <div class="card-group mb-4">
-                    <div class="list-item">
-                        <div class="icon" style="width: 40px; background: #f1f3f7; border-radius: 6px;"><span class="fw-700 text-green" style="font-size: 10px;">M-PESA</span></div>
-                        <div class="content fw-700 text-muted">Mobile Money MPESA and more</div>
-                        <span class="material-symbols-rounded text-muted">expand_more</span>
-                    </div>
-                    <div class="list-item" style="border: 1px solid var(--primary); border-radius: 12px; margin: 0 12px 8px; background: var(--card);">
-                        <div class="icon" style="width: 40px; background: #f1f3f7; border-radius: 6px;"><span class="fw-700 text-green" style="font-size: 10px;">M-PESA</span></div>
-                        <div class="content fw-700">Mobile Money</div>
-                        <span class="material-symbols-rounded text-muted">expand_more</span>
-                    </div>
-                    <div class="list-item">
-                        <div class="icon" style="width: 40px; background: #f1f3f7; border-radius: 6px;"><span class="fw-700" style="font-size: 10px; color: purple;">Skrill</span></div>
-                        <div class="content fw-700 text-muted">Skrill EUR</div>
-                        <span class="material-symbols-rounded text-muted">expand_more</span>
-                    </div>
-                </div>
-
-                <div style="position: fixed; bottom: 100px; left: 0; right: 0; padding: 0 16px; max-width: 480px; margin: 0 auto;">
-                    <button class="btn dark" onclick="state.depositStep=2; render();">Next</button>
-                </div>
-            `;
-        } else if (state.depositStep === 2) {
-            content = `
-                <div class="px-3 mt-2">
-                    <p class="fw-700 text-muted mb-2">Deposit to</p>
-                    <div class="card row space-between mb-4" style="padding: 12px 16px;">
-                        <div class="row">
-                            <div class="icon-circle" style="width:32px;height:32px;background:#f1f3f7;margin-right:12px;"><span class="material-symbols-rounded" style="font-size:18px;">download</span></div>
-                            <div>
-                                <div class="fw-700" style="font-size: 16px;">581022950</div>
-                                <div class="text-muted text-sm fw-600">Isaac</div>
-                            </div>
-                        </div>
-                        <span class="material-symbols-rounded text-muted">expand_more</span>
-                    </div>
-
-                    <div class="row mb-4" style="gap: 8px;">
-                        <span class="fw-700 text-muted">Balance</span>
-                        <span class="fw-700 text-green">0.00 USD</span>
-                    </div>
-
-                    <p class="fw-700 text-muted mb-2">Amount to deposit</p>
-                    <div class="row space-between" style="border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 16px;">
-                        <input type="number" placeholder="0" style="border:none; font-size:32px; font-weight:700; outline:none; background:transparent; width: 100%;">
-                        <span class="fw-700 text-muted" style="font-size: 18px;">KES</span>
-                    </div>
-                    
-                    <p class="text-sm fw-600 mb-4">In account currency <span class="text-green fw-700">0.00 USD</span></p>
-
-                    <p class="fw-700 text-muted mb-2">Phone number</p>
-                    <div class="card mb-2" style="padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border);">
-                        <input type="text" value="254796681162" style="border:none; outline:none; background:transparent; width:100%; font-size: 16px; font-weight: 500;">
-                    </div>
-                    <p class="text-sm fw-600 mb-4">Default phone number. To change it, contact support.</p>
-
-                    <div class="row space-between mb-2">
-                        <span class="fw-700 text-muted">Payment method</span>
-                        <span class="fw-700">Mobile Money</span>
-                    </div>
-                    <div class="row space-between mb-2">
-                        <span class="fw-700 text-muted">Deposit fees</span>
-                        <span class="fw-700">0.00 USD</span>
-                    </div>
-                    <div class="row space-between mb-4">
-                        <span class="fw-700 text-muted">Will be deposited</span>
-                        <span class="fw-700">0.00 USD</span>
-                    </div>
-
-                    <p class="fw-700 text-green mb-4" onclick="toast('Promocode')">Have a promocode?</p>
-                </div>
-
-                <div style="position: fixed; bottom: 100px; left: 0; right: 0; padding: 0 16px; max-width: 480px; margin: 0 auto;">
-                    <button class="btn" style="background: #cbd5e1; color: white; pointer-events: none;">Summary</button>
-                </div>
-            `;
-        } else if (state.depositStep === 3) {
-            content = `
-                <div class="px-3 mt-4">
-                    <div class="row space-between mb-4">
-                        <span class="fw-700 text-muted" style="font-size:16px;">Payment method</span>
-                        <span class="fw-700" style="font-size:16px;">Mobile Money</span>
-                    </div>
-                    <div class="row space-between mb-4">
-                        <span class="fw-700 text-muted" style="font-size:16px;">Deposit to</span>
-                        <span class="fw-700" style="font-size:16px;">Isaac (581022950)</span>
-                    </div>
-                    <div class="row space-between mb-4">
-                        <span class="fw-700 text-muted" style="font-size:16px;">Amount to deposit</span>
-                        <span class="fw-700" style="font-size:16px;">1,300.00 KES</span>
-                    </div>
-                    <div class="row space-between mb-4">
-                        <span class="fw-700 text-muted" style="font-size:16px;">Deposit fees</span>
-                        <span class="fw-700" style="font-size:16px;">0.00 USD</span>
-                    </div>
-                    <div class="row space-between mb-4">
-                        <span class="fw-700 text-muted" style="font-size:16px;">Phone number</span>
-                        <span class="fw-700" style="font-size:16px;">254796681162</span>
-                    </div>
-                    
-                    <div style="border-top: 1px dashed var(--border); margin: 24px 0;"></div>
-                    
-                    <div class="row space-between mb-4">
-                        <span class="fw-700 text-muted" style="font-size:16px;">Will be deposited</span>
-                        <span class="fw-700" style="font-size:16px;">9.87 USD</span>
-                    </div>
-
-                    <div class="card row mb-4" style="background: #f1f3f7; border-radius: 12px; padding: 16px;">
-                        <span class="material-symbols-rounded text-green" style="margin-right: 12px;">info</span>
-                        <span class="fw-600" style="font-size: 13px; line-height: 1.5;">Please transfer <span class="text-green fw-700">the exact amount</span> as shown in the payment website. Incorrect amount may cause processing delay.</span>
-                    </div>
-                </div>
-
-                <div style="position: fixed; bottom: 100px; left: 0; right: 0; padding: 0 16px; max-width: 480px; margin: 0 auto;">
-                    <button class="btn dark" onclick="openSTKSheet()">Complete</button>
-                </div>
-            `;
-        }
-
-        return `
-        <header class="header">
-            <button class="header-btn transparent" onclick="${state.depositStep > 1 ? 'state.depositStep--; render();' : 'go(\'home\')'}"><span class="material-symbols-rounded">arrow_back_ios_new</span></button>
-            <div class="title">Deposit</div>
-            <div style="width: 40px;"></div>
-        </header>
-
-        <div class="stepper">
-            <div class="step ${state.depositStep === 1 ? 'active' : 'completed'}">
-                <div class="circle">${state.depositStep > 1 ? '<span class="material-symbols-rounded" style="font-size:16px;">check</span>' : '1'}</div>
-                <span>Deposit method</span>
-            </div>
-            <div class="step ${state.depositStep === 2 ? 'active' : state.depositStep > 2 ? 'completed' : ''}">
-                <div class="circle">${state.depositStep > 2 ? '<span class="material-symbols-rounded" style="font-size:16px;">check</span>' : '2'}</div>
-                <span>Specify the amount</span>
-            </div>
-            <div class="step ${state.depositStep === 3 ? 'active' : ''}">
-                <div class="circle">3</div>
-                <span>Payment Summary</span>
-            </div>
-        </div>
-
-        ${content}
-        `;
-    }
-};
-
-// --- Render Logic ---
-function render() {
-    // Update bottom nav
-    document.querySelectorAll('.bottom-nav button').forEach(btn => btn.classList.remove('active'));
-    const navMap = { 'home': 'nav-home', 'funds': 'nav-funds', 'promos': 'nav-promos', 'copy': 'nav-copy' };
-    if (navMap[state.view]) {
-        $(`#${navMap[state.view]}`).classList.add('active');
-        $('#bottom-nav').style.display = 'flex';
-    } else if (state.view === 'profile' || state.view === 'notifications') {
-        // Keep nav visible but no active tab for these sub-pages
-        $('#bottom-nav').style.display = 'flex';
-        $('#nav-home').classList.add('active'); // Or hide nav entirely depending on exact requirement
-    } else {
-        // Hide nav for full screen flows like deposit/transfer/accounts
-        $('#bottom-nav').style.display = 'none';
-    }
-
-    // Render view
-    if (views[state.view]) {
-        app.innerHTML = views[state.view]();
-    } else {
-        app.innerHTML = views['home']();
-    }
-}
-
-// --- Bottom Sheets ---
-
-function openMoreSheet() {
-    openSheet(`
-        <div class="sheet-header">
-            <h2>Your Account</h2>
-            <button class="header-btn transparent" onclick="closeSheet()"><span class="material-symbols-rounded">close</span></button>
-        </div>
-        <div class="list-item" onclick="closeSheet(); toast('Edit')">
-            <div class="icon"><span class="material-symbols-rounded" style="font-size:20px; background:#f1f3f7; padding:6px; border-radius:50%;">edit</span></div>
-            <div class="content">Edit</div>
-        </div>
-        <div class="list-item" onclick="closeSheet(); toast('Withdraw')">
-            <div class="icon"><span class="material-symbols-rounded" style="font-size:20px; background:#f1f3f7; padding:6px; border-radius:50%;">upload</span></div>
-            <div class="content">Withdraw</div>
-        </div>
-        <div class="list-item" onclick="closeSheet(); toast('Payment History')">
-            <div class="icon"><span class="material-symbols-rounded" style="font-size:20px; background:#f1f3f7; padding:6px; border-radius:50%;">history</span></div>
-            <div class="content">Payment History</div>
-        </div>
-        <div class="list-item" onclick="closeSheet(); toast('Trades History')">
-            <div class="icon"><span class="material-symbols-rounded" style="font-size:20px; background:#f1f3f7; padding:6px; border-radius:50%;">sync_alt</span></div>
-            <div class="content">Trades History</div>
-        </div>
-        <div class="list-item" onclick="closeSheet(); toast('Change password')">
-            <div class="icon"><span class="material-symbols-rounded" style="font-size:20px; background:#f1f3f7; padding:6px; border-radius:50%;">lock</span></div>
-            <div class="content">Change password</div>
-        </div>
-        <div class="list-item" onclick="closeSheet(); toast('Delete account')" style="color:var(--red);">
-            <div class="icon"><span class="material-symbols-rounded" style="font-size:20px; background:#fee2e2; color:var(--red); padding:6px; border-radius:50%;">delete</span></div>
-            <div class="content" style="color:var(--red);">Delete account</div>
-        </div>
-    `);
-}
-
-function openTradeSheet() {
-    openSheet(`
-        <div class="sheet-header">
-            <h2>Trade</h2>
-            <button class="header-btn transparent" onclick="closeSheet()"><span class="material-symbols-rounded">close</span></button>
-        </div>
-        <div class="card row mb-2" style="background:#f8f9fc; margin: 0 0 12px; padding: 16px;">
-            <div style="width:40px;height:40px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:12px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/MetaTrader_5_Logo.svg/1200px-MetaTrader_5_Logo.svg.png" style="width:24px;">
-            </div>
-            <div>
-                <div class="fw-700" style="font-size:16px;">Trade in MT5</div>
-                <div class="text-muted text-sm">Trade in MT5 mobile app</div>
-            </div>
-        </div>
-        <div class="card row" style="background:#f8f9fc; margin: 0 0 12px; padding: 16px;">
-            <div style="width:40px;height:40px;background:#1e2329;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-right:12px;">
-                <span class="material-symbols-rounded" style="color:white;">terminal</span>
-            </div>
-            <div>
-                <div class="fw-700" style="font-size:16px;">Trade in App</div>
-                <div class="text-muted text-sm">Trade in app's web terminal</div>
-            </div>
-        </div>
-    `);
-}
-
-function openAccountSelect() {
-    openSheet(`
-        <div class="sheet-header" style="justify-content: center; position: relative;">
-            <h2>Select</h2>
-            <button class="header-btn transparent" onclick="closeSheet()" style="position: absolute; right: 0;"><span class="material-symbols-rounded">close</span></button>
-        </div>
-        
-        <div class="tabs" style="justify-content: center; gap: 40px; border: none; margin-bottom: 24px;">
-            <button class="active">MT4</button>
-            <button>MT5</button>
-            <button>Investor</button>
-        </div>
-        
-        <div class="card row space-between mb-2" style="background:#f8f9fc; padding: 16px;">
-            <div class="row">
-                <div class="icon-circle" style="width:32px;height:32px;background:#e2e8f0;margin-right:12px;"><span class="fw-700 text-muted">W</span></div>
-                <div>
-                    <div class="fw-700" style="font-size:16px;">Wallet</div>
-                    <div class="text-muted text-sm fw-600">Balance <span class="text-green fw-700">0.00 USD</span></div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card mb-2" style="border: 2px solid var(--primary); background:#f8f9fc; padding: 16px; position: relative;">
-            <div class="row mb-1">
-                <span class="fw-800" style="font-size:16px;">581022950</span>
-                <span class="badge purple" style="margin-left: 8px;">Booster</span>
-            </div>
-            <div class="text-muted text-sm fw-600">Balance <span class="text-green fw-700">0.00 USD</span> · Isaac</div>
-            <span class="material-symbols-rounded text-green" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%);">check_circle</span>
-        </div>
-        
-        <div class="card row space-between mb-2" style="background:#f8f9fc; padding: 16px;">
-            <div>
-                <div class="row mb-1">
-                    <span class="fw-800" style="font-size:16px;">501148369</span>
-                    <span class="badge green" style="margin-left: 8px;">Standard</span>
-                </div>
-                <div class="text-muted text-sm fw-600">Balance <span class="text-green fw-700">0.52 USD</span> · My Real Account</div>
-            </div>
-        </div>
-    `);
-}
-
-function openSTKSheet() {
-    openSheet(`
-        <div class="sheet-header" style="justify-content: center; position: relative; margin-bottom: 8px;">
-            <h2>STK Prompt Sent</h2>
-            <button class="header-btn transparent" onclick="closeSheet()" style="position: absolute; right: 0; background:#f1f3f7; width:32px; height:32px;"><span class="material-symbols-rounded" style="font-size:18px;">close</span></button>
-        </div>
-        <p class="text-center fw-600 text-muted mb-4" style="font-size: 15px; padding: 0 10px; line-height: 1.5;">We've sent an STK prompt to your mobile money wallet. Check your phone and enter your wallet PIN when prompted.</p>
-        
-        <button class="btn mb-3" style="background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe;">Resend STK prompt</button>
-        
-        <div class="row mb-4" style="justify-content: center; gap: 8px; color: var(--text-muted);">
-            <span class="material-symbols-rounded" style="font-size:18px;">info</span>
-            <span class="text-sm fw-600">Do not close this screen until the payment status is updated</span>
-        </div>
-        
-        <button class="btn dark mb-3" onclick="closeSheet(); toast('Processing...'); setTimeout(() => { toast('Deposit simulated'); go('funds'); }, 1500);">I have already entered my PIN</button>
-        <div class="text-center fw-700 text-muted" style="padding-bottom: 16px; cursor: pointer;" onclick="closeSheet()">Cancel Payment</div>
-    `);
-}
-
-// Initialize
+const A=[{id:'581022950',n:'Isaac',t:'BOOSTER',c:'',b:0},{id:'501148369',n:'My Real Account',t:'STANDARD',c:'g',b:.52}];
+const RATE=131.7,fm=n=>n.toFixed(2);
+const S={v:'home',prev:'home',tab:0,step:1,meth:'Mobile Money',amt:'',from:null,to:0,tamt:'',st:1,tx:[
+{d:'18 October, 2026',a:9.87,id:'45003435',s:'x',t:'18.10.2026 08:47'},{d:'14 October, 2026',a:9.87,id:'44447591',s:'ok',t:'14.10.2026 11:50'},{d:'23 September, 2026',a:9.87,id:'43120844',s:'ok',t:'23.09.2026 16:02'}]};
+const $=s=>document.querySelector(s),ic=(n,x='')=>`<span class="ms ${x}">${n}</span>`;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('o');setTimeout(()=>t.classList.remove('o'),2200)}
+function go(v){if(v=='accounts'&&S.v!='accounts'&&!S.keep)S.ai=1;S.keep=0;S.prev=S.v;S.v=v;S.tab=0;if(v=='deposit')S.step=1;render();scrollTo(0,0)}
+const back=()=>go(S.prev&&S.prev!='profile'?S.prev:'home');
+function sheet(h){$('#sh').innerHTML='<div class="hl"></div>'+h;$('#ov').classList.add('o')}
+function cs(){$('#ov').classList.remove('o')}
+const bell=()=>`<button class="ib" onclick="go('notifications')">${ic('notifications')}<span class="bg">32</span></button>`;
+const menu=()=>`<button class="ib" onclick="go('profile')">${ic('menu')}</button>`;
+const hdr=(t,b)=>`<div class="hd">${b?`<button class="ib" onclick="${b}">${ic('arrow_back_ios_new')}</button>`:menu()}<h1>${t}</h1>${b?'<span style="width:42px"></span>':bell()}</div>`;
+const tabs=(l,x='')=>`<div class="tabs ${x}">${l.map((t,i)=>`<button class="${S.tab==i?'on':''}" onclick="S.tab=${i};render()">${t}</button>`).join('')}</div>`;
+function dots(el){const w=el.firstElementChild.offsetWidth+10,i=Math.round(el.scrollLeft/w);[...el.nextElementSibling.children].forEach((d,k)=>d.classList.toggle('on',k==i));const c=el.parentElement.querySelector('[data-c]');}
+const dotsH=n=>`<div class="dots">${Array.from({length:n},(_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>`;
+function spark(seed,k,neg){let s=seed,r=()=>(s=(s*9301+49297)%233280)/233280,p=[],v=40;
+for(let i=0;i<30;i++){if(k=='crash')v+=i>28?-70:r()*.6;else if(k=='drop')v+=i<4?-16:(i==12?-4:r()*.2);else if(k=='step')v+=r()>.8?r()*14:r()*.8;else if(k=='spk')v+=(r()>.93?r()*40:r()*.6)*(r()>.7?-.5:1);else v+=r()*2.4;p.push([i*3.6,v])}
+const mx=Math.max(...p.map(a=>a[1])),mn=Math.min(...p.map(a=>a[1])),y=a=>50-(a-mn)/(mx-mn||1)*44,pts=p.map(a=>a[0].toFixed(1)+','+y(a[1]).toFixed(1)).join(' ');
+return`<svg class="sp" viewBox="0 0 108 52" preserveAspectRatio="none"><polygon points="0,52 ${pts} 108,52" fill="${neg?'#e5484d':'#21a56f'}" opacity=".12"/><polyline points="${pts}" fill="none" stroke="${neg?'#e5484d':'#21a56f'}" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>`}
+const card=a=>`<div class="card wc" style="margin:0"><div class="row sb"><span class="tag ${a.c}">${a.t} · MT5</span><b style="font-size:26px;font-weight:800">$ ${fm(a.b)}</b></div><div style="font-size:20px;font-weight:800;margin:10px 0 12px">${a.n}</div><div class="row sb"><span class="row g8" style="font-size:20px;font-weight:800">${a.id}<span class="ms" style="font-size:18px;color:#6b7482" onclick="navigator.clipboard&&navigator.clipboard.writeText('${a.id}');toast('Copied')">content_copy</span></span><span style="color:#6b7482;font-weight:700;cursor:pointer" onclick="go('accounts')">Details ${ic('chevron_right','')}</span></div></div>`;
+const act=(i,l,f,p)=>`<button class="act ${p?'pr':''}" onclick="${f}"><i>${ic(i)}</i>${l}</button>`;
+const BN=[['VXclusive','240.00','Collect coins and explore exclusive rewards at the Valetax Store','Open VXclusive','#cdeedf','savings',"toast('VXclusive')"],['Explore Analysis Centre','','Access expert insights, clear signals, and proven strategies','Go to analysis','#dbe3f7','laptop_mac',"toast('Analysis')"],['Join Contest','','Explore contests, compete with other traders, and win exclusive rewards','Open Contests','#cdeee0','emoji_events',"toast('Contests')"],['Copy Trading','','Follow expert traders, copy proven strategies, and trade with confidence','Copy Trading','#d6eedf','content_copy',"go('copy')"]];
+const V={
+home:()=>`<div class="hd" style="padding-bottom:6px">${menu().replace('class="ib"','class="ib w"')}<div style="text-align:center"><div style="font-size:30px;font-weight:800;line-height:1.1">$ 0<span class="mu" style="font-size:26px">.52</span> ${ic('expand_more')}</div><div class="mu sm" style="font-size:16px">Total Funds</div></div>${bell().replace('class="ib"','class="ib w"')}</div>
+<div class="row sb" style="padding:0 16px 12px"><button class="btn s wc" onclick="acctType()" style="background:#fff;color:#232b38">Real Accounts ${ic('expand_more')}</button><button class="btn s" onclick="toast('Add account')">${ic('add')} Add Account</button></div>
+<div class="car" onscroll="dots(this)">${A.map(card).join('')}</div>${dotsH(A.length)}
+<div class="acts">${act('download','Deposit',"go('deposit')",1)}${act('sync_alt','Transfer',"go('transfer')")}${act('stacked_line_chart','Trade','trade()')}${act('more_vert','More','more()')}</div>
+<div class="car" onscroll="dots(this)">${BN.map((b,i)=>`<div class="ban" style="background:${b[4]}"><h3>${b[1]?'● '+b[1]:b[0]}</h3><p>${b[2]}</p><button class="btn pl" onclick="${b[6]}">${b[3]}</button><div class="ico">${ic(b[5],'f')}</div><span class="cnt">${i+1} / 4</span></div>`).join('')}</div><div style="height:6px"></div>
+<div class="sec"><h2>Hot News</h2><a>See all</a></div><div class="sec"><h2>Market Companion</h2><a>See all</a></div>
+<div class="car" style="gap:10px">${[['Event: Housing Starts MoM (USAHSMOM)','linear-gradient(#0000,#000a),linear-gradient(135deg,#6f8f7a,#35503f)'],['Event: Building Permits MoM Prel for the United States','linear-gradient(#0000,#000a),linear-gradient(160deg,#b23a48 0 30%,#3c3b6e 30%,#2a2f55)']].map(m=>`<div class="mc" style="background:${m[1]}"><span class="fl"><i class="flag"></i>US</span><div style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${m[0]}</div><div class="r" style="font-weight:600"><span>Impact</span><b style="color:#f5a35c">Medium</b></div><div class="r" style="font-weight:600"><span>Event at</span><span>Oct 20</span></div></div>`).join('')}</div>`,
+funds:()=>`${hdr('Funds Summary')}<div class="row sb" style="padding:0 16px 14px"><div><div style="font-size:30px;font-weight:800">$ 0<span class="mu">.52</span></div><div style="font-size:19px;font-weight:700">Total Funds</div></div><button class="btn s" style="background:#1f9d6b" onclick="go('deposit')">${ic('download')} Deposit</button></div>
+${tabs(['Overview','Accounts','Transactions'],'gt')}${[()=>`<div class="card" style="padding:18px"><div class="row g8" style="gap:14px;padding-bottom:14px;border-bottom:1px solid var(--bd)"><i class="ci" style="background:#2250d0;width:52px;height:52px">${ic('wallet','f')}</i><div><b style="font-size:21px;font-weight:800">$ 0.00</b><div class="mu" style="font-size:19px;font-weight:700">Wallet Balance</div></div></div><div class="row" style="gap:14px;padding:14px 0;border-bottom:1px solid var(--bd)"><i class="ci" style="background:#1f9d6b;width:52px;height:52px">${ic('upload')}</i><div><b style="font-size:21px;font-weight:800">$ 0.52</b><div class="mu" style="font-size:19px;font-weight:700">Withdrawable Trading Balance</div></div></div><div class="row sb" style="padding-top:14px;font-size:19px;font-weight:700"><span class="mu">Total withdrawable balance</span><b style="font-size:21px;font-weight:800">$ 0.52</b></div></div>
+<div class="sec"><h2>Trading Accounts</h2><a onclick="S.tab=1;render()">See all</a></div><div class="car" onscroll="dots(this)">${A.map(a=>`<div class="card" style="margin:0" onclick="go('accounts')"><div class="row sb"><span class="tag ${a.c}">${a.t} · MT5</span>${ic('chevron_right','mu')}</div><div style="font-size:23px;font-weight:800;margin:10px 0 12px">${a.id} <span class="mu" style="font-weight:600;font-size:20px">| ${a.n}</span></div><div style="border-top:1px solid var(--bd);padding-top:10px;font-size:20px;font-weight:700"><div class="row sb mu"><span>Balance</span><b style="color:var(--t)">$ ${fm(a.b)}</b></div><div class="row sb mu"><span>Available for withdrawal</span><b style="color:var(--t)">$ ${fm(a.b)}</b></div></div></div>`).join('')}</div>${dotsH(2)}<div class="sec"><div class="row g8"><h2>Transactions</h2><span class="tag" style="background:none;border:1px solid var(--m);color:var(--m);font-size:14px;border-radius:5px;padding:2px 7px">RECENT</span></div><a onclick="S.tab=2;render()">See all</a></div>${txs(S.tx.slice(0,3))}`,
+()=>wcard()+A.map(a=>`<div class="card" onclick="go('accounts')"><div class="row sb"><span class="tag ${a.c}">${a.t} · MT5</span>${ic('chevron_right','mu')}</div><div style="font-size:22px;font-weight:800;margin:10px 0 4px">${a.id}</div><div class="mu">${a.n} · $ ${fm(a.b)}</div></div>`).join(''),()=>filt()+txs(S.tx)][S.tab]()}`,
+promos:()=>`${hdr('Promotions')}<div style="margin:0 16px;height:150px;border-radius:6px;background:radial-gradient(circle at 20% 40%,#cfeedd 0 8%,transparent 9%),radial-gradient(circle at 70% 60%,#b9e5cd 0 10%,transparent 11%),linear-gradient(120deg,#eceeea,#f8f8f6 50%,#e4ede7);display:grid;place-items:center;color:#1f9d6b">${ic('redeem','f').replace('class="ms','class="ms" style="font-size:88px;opacity:.85" data-x="')}</div>
+<div class="card" style="margin:16px;border:1px solid var(--bd);background:var(--bg)"><div class="row g8" style="margin-bottom:12px"><b style="font-size:21px;font-weight:800">Activate promo code or voucher</b><span class="tag" style="background:#25b07c;color:#fff;border-radius:20px">New</span></div><div class="row" style="border:1px solid var(--bd);border-radius:10px;padding:5px"><input class="inp" style="border:0;font-size:19px;padding:8px;flex:1;min-width:0" placeholder="Your promocode"><button class="btn dk s" onclick="toast('Enter a promo code')">Apply</button></div></div>
+<div class="tabs" style="margin-top:22px">${['Active','Archived'].map((t,i)=>`<button class="${S.tab==i?'on':''}" onclick="S.tab=${i};render()">${t}</button>`).join('')}</div><div style="text-align:center;margin-top:60px;color:var(--l)">${ic('redeem').replace('class="ms','class="ms" style="font-size:52px;display:block;margin:0 auto 8px" data-x="')}No ${S.tab?'archived':'active'} promotions</div>`,
+copy:()=>{const L=[['Multi bo…',5514,1,'+1654.81%','rise','#4a7ab5','✈'],['Kucing M…',3737,5,'+186.13%','step','#6a5a86','🏍'],['Go to mo…',3649,1,'+192.32%','step','#222','📈'],['Low Risk …',3502,1,'+743.06%','rise','#e2a31b','S'],['Trade 00X',3147,1,'+360.21%','rise','#111','◉'],['Apex Glo…',3048,25,'+418.3%','rise','#7b8a96','👤'],['ACM Gold',2679,5,'+246.74%','step','#f4d800','A'],['SAFE MO…',2056,25,'+667.98%','step','#1f6b3a','S'],['Big Dream',1619,1,'+1421.96%','spk','#5a2d14','🔥'],['Gold$1',1454,1,'+1627.13%','spk','#6d8fb0','⚓'],['HAZILION',1345,1,'+40.13%','rise','#1b1b1b','H'],['My Forex',1132,1,'+137.46%','rise','#2b2bd6','M'],['ANGEL T…',1127,1,'+1.21%','step','#a02a8f','A'],['RAIZEN',1125,1,'-99.95%','crash','#111b3a','R'],['STAR PR…',1091,1,'+104.24%','rise','#3fcf3a','S'],['MARKET …',1028,200,'+9.24%','spk','#9aa0a8','👤'],['FOREX EV…',1013,1,'+20.84%','step','#111','F'],['MAYA MU…',878,1,'+26.82%','step','#d89bb0','👩'],['Valetex P…',657,1,'-98.93%','drop','#2a1a05','G'],['Kucing M…',618,5,'+1389709.54%','step','#7a6a90','🏍']];
+return`${hdr('Copy Trading')}<div class="tabs gt" style="overflow-x:auto;scrollbar-width:none">${['Available strategies','Investment results','For more'].map((t,i)=>`<button style="flex:none;padding:12px 14px" class="${i?'':'on'}">${t}</button>`).join('')}</div>
+<div class="row g8" style="padding:0 16px 8px"><div class="row" style="flex:1;background:var(--c);border-radius:12px;padding:10px 12px;gap:8px">${ic('search','mu')}<input placeholder="Search" style="border:0;background:transparent;flex:1;font-size:19px;outline:0;color:var(--t);min-width:0"></div>${ic('tune','gn')}</div>
+<div class="row sb mu" style="padding:6px 16px;font-size:17px"><span>Strategy</span><span>Growth</span><span style="margin-right:20px">Chart</span></div>
+${L.map((s,i)=>`<div class="st" onclick="toast('${s[0].replace('…','')} strategy')"><span class="av" style="background:${s[5]};color:#fff;font-size:${s[6].length>1?'18px':'20px'}">${s[6]}</span><div><b>${s[0]}</b><span class="mu sm">${ic('group','').replace('class="ms','class="ms" style="font-size:16px" data-x="')} ${s[1]} &nbsp;$ Min. $ ${s[2]}</span></div><div class="gw" style="${s[3][0]=='-'?'color:#e5484d;':''}${s[3].length>10?'font-size:15px;':''}">${s[3]}</div>${spark(i*77+13,s[4],s[3][0]=='-')}</div>`).join('')}
+<div class="pg"><b>20 ${ic('expand_more')}</b><div class="row g8"><button>‹</button><button class="on">1</button><button>2</button><button>3</button><button style="background:none">…</button><button style="width:auto;padding:0 12px">238</button><button>›</button></div></div>`},
+profile:()=>`${hdr('Profile','back()')}<div style="text-align:center;margin:4px 0 18px"><div style="position:relative;display:inline-block"><div style="width:84px;height:84px;border-radius:50%;background:var(--c);display:grid;place-items:center;font-size:32px;font-weight:600">MK</div><span class="ci" style="position:absolute;right:-4px;bottom:0;width:28px;height:28px;background:#25b07c;border:3px solid var(--bg)">${ic('check').replace('class="ms','class="ms" style="font-size:16px" data-x="')}</span></div><h1 style="font-size:25px;font-weight:800;margin-top:10px;letter-spacing:.2px">MAXWEL KIPRONO YEGON</h1><div class="mu" style="font-size:20px;margin-top:4px">borrose607@gmail.com</div></div>
+<div class="ban" style="margin:0 16px 14px;background:linear-gradient(120deg,#dff5e9,#cdeedc);min-height:150px"><h3>Invite and earn</h3><p style="max-width:62%">Share Valetax with friends and get rewarded for every referral</p><button class="btn pl" onclick="toast('Invite link copied')">Invite now</button><div class="ico" style="width:110px;height:110px">${ic('redeem','f').replace('class="ms','class="ms" style="font-size:72px" data-x="')}</div></div>
+${[[['groups','Partnership Section']],[['monitoring','Analysis']],[['confirmation_number','VXclusive']],[['emoji_events','Contests']],[['person','My Manager'],['help','Support Chat'],['filter_none','Tickets']],[['settings','Profile Settings']],[['logout','Log Out']]].map(g=>`<div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">${g.map((r,i)=>`${i?'<div class="ln"></div>':''}<div class="li" style="padding:20px 16px" onclick="${r[1]=='Log Out'?"go('home')":`toast('${r[1]}')`}">${ic(r[0],'f')}<b>${r[1]}</b>${ic('chevron_right','ch')}</div>`).join('')}</div>`).join('')}`,
+notifications:()=>{const N=[['16 October 2026',['Join the 5 Day Wondervault Sprint…']],['15 October 2026',['Webinar: Master Moving Averages','Coins have been Credited']],['14 October 2026',['Coins have been Credited','Trading Account Created','Deposit will be Credited*']],['13 October 2026',['Live Webinar: Seeing Through the …*']],['09 October 2026',['⏳ 7 Days Left to Reach the Top!']],['06 October 2026',['Your Wondervault Trading League …','Coins have been Credited','Coins have been Credited*']]];
+return`${hdr('Notifications','back()')}${tabs(['Notifications','Voice messages'],'gt').replace('class="tabs gt"','class="tabs gt" style="margin-top:0"')}${N.map(n=>`<div class="nd">${n[0]}</div>${n[1].map(t=>`<div class="nr" onclick="this.classList.toggle('o')"><div class="row sb"><b>${t.replace('*','')}${t.endsWith('*')?'<i class="dt"></i>':''}</b>${ic('expand_more','mu')}</div><p>Open your Funds or Analysis tab for more details about this update.</p></div>`).join('')}`).join('')}`},
+accounts:()=>`<div style="background:linear-gradient(180deg,rgba(31,157,107,.28),transparent);padding-bottom:8px">${hdr('Accounts','back()')}<div class="car" onscroll="dots(this)">${A.map(a=>`<div class="card wc" style="margin:0;padding:18px"><span class="tag ${a.c}">${a.t} · MT5</span><div style="font-size:21px;font-weight:800;margin:10px 0 14px">${a.n}</div><div class="row sb" style="font-size:21px;font-weight:700"><span>${a.id}</span><b style="font-size:28px;font-weight:800">$ ${fm(a.b)}</b></div></div>`).join('')}</div>${dotsH(2)}<div class="acts" style="margin:0">${act('download','Deposit',"go('deposit')",1)}${act('upload','Withdrawal',"toast('Withdrawal')")}${act('sync_alt','Transfer',"go('transfer')")}${act('more_vert','More','more()')}</div></div>
+<div class="row sb" style="padding:14px 16px"><div><div style="font-size:27px;font-weight:800">581022950</div><div class="mu" style="font-size:19px">Isaac</div></div><button class="btn s" onclick="trade()">${ic('trending_up')} Trade</button></div>
+${[['database','#1f9d6b','$ 0.00','Balance','expand_more'],['description','#2250d0','Booster','Account type',''],['balance','#ef8a30','1:2000','Leverage','edit_square'],['monitor','#8a45d6','MT5','Trading platform','expand_more']].map(r=>`<div class="card row" style="gap:14px;padding:14px"><i class="ci" style="background:${r[1]}">${ic(r[0],'f')}</i><div style="flex:1"><b style="font-size:21px;font-weight:800">${r[2]}</b><div class="mu" style="font-size:19px;font-weight:700">${r[3]}</div></div>${r[4]?ic(r[4],'mu'):''}</div>`).join('')}`,
+transfer:()=>{const f=S.from!=null?A[S.from]:null,t=A[S.to],ok=f&&+S.tamt>0;return`${hdr('Internal Transfer','back()')}<div class="fld"><label>From</label><div class="sel" onclick="selA('from')"><i class="ci">${ic('upload')}</i>${f?`<div><b style="font-size:21px;font-weight:800">${f.id}</b><div class="mu">${f.n}</div></div>`:'<b style="font-size:21px;font-weight:800">Select</b>'}${ic('expand_more')}</div></div>
+<div style="text-align:center;margin:-4px 0 12px"><button class="ib" style="background:var(--c);width:40px;height:40px;border-radius:10px;display:inline-grid" onclick="if(S.from!=null){[S.from,S.to]=[S.to,S.from];render()}">${ic('swap_vert')}</button></div>
+<div class="fld" style="margin-bottom:8px"><label>To</label><div class="sel" onclick="selA('to')"><i class="ci">${ic('download')}</i><div><b style="font-size:21px;font-weight:800">${t.id}</b><div class="mu">${t.n}</div></div>${ic('expand_more')}</div></div>
+<div class="fld" style="font-size:19px;font-weight:700"><span class="mu">Balance</span> <span style="color:#25b07c;font-weight:800">${fm(t.b)} USD</span></div>
+<div class="fld"><label>Amount</label><div class="row"><input class="inp" type="number" inputmode="decimal" placeholder="0" value="${S.tamt}" oninput="S.tamt=this.value;$('#tb').className='btn '+(S.from!=null&&+this.value>0?'dk':'off')"><b class="mu" style="font-size:20px">USD</b></div></div>
+<div class="fix"><button id="tb" class="btn ${ok?'dk':'off'}" onclick="doT()">Transfer</button></div>`},
+deposit:()=>{const usd=(+S.amt||0)/RATE,M=[['Credit/Debit Cards',[['CCJenapay No_Fee','VISA','#fff','#1a3a9c']]],['Crypto',[['USDT TRC20','T','#fff','#1fa67a'],['USDT BEP20','₮','#fff','#1fa67a'],['Binance Pay','BINANCE','#f5c518','#232b38']]],['E-Wallet',[['Mobile Money MPESA and more','M-PESA','#fff','#2ba84a'],['Mobile Money','M-PESA','#fff','#2ba84a'],['Skrill EUR','Skrill','#fff','#8a1a6b']]]];let c='';
+if(S.step==1)c=`<div class="meth">${M.map(g=>`<h4>${g[0]}</h4>${g[1].map(m=>`<div class="mi ${S.meth==m[0]?'on':''}" onclick="S.meth='${m[0]}';render()"><span class="lg" style="background:${m[2]};color:${m[3]}">${m[1]}</span>${m[0]}${ic('expand_more')}</div>`).join('')}`).join('')}</div><div class="fix"><button class="btn dk" onclick="S.step=2;render()">Next</button></div>`;
+else if(S.step==2)c=`<div class="fld"><label>Deposit to</label><div class="sel"><i class="ci">${ic('download')}</i><div><b style="font-size:21px;font-weight:800">${A[0].id}</b><div class="mu">${A[0].n}</div></div>${ic('expand_more')}</div></div><div class="fld" style="font-size:19px;font-weight:700"><span class="mu">Balance</span> <span style="color:#25b07c;font-weight:800">0.00 USD</span></div>
+<div class="fld"><label>Amount to deposit</label><div class="row"><input class="inp" type="number" inputmode="numeric" placeholder="0" value="${S.amt}" oninput="S.amt=this.value;updD()"><b class="mu" style="font-size:20px">KES</b></div></div><div class="fld mu" style="font-size:19px;font-weight:700">In account currency <span style="color:#25b07c" id="u1">${fm(usd)} USD</span></div>
+<div class="fld"><label style="color:var(--t)">Phone number</label><input class="inp" style="font-size:19px;background:var(--c);border:1px solid var(--bd);border-radius:10px;padding:12px" value="254796681162" readonly><div style="font-size:15px;font-weight:700;margin-top:6px">Default phone number. To change it, contact support.</div></div>
+<div class="kv"><span>Payment method</span><b>${S.meth}</b></div><div class="kv"><span>Deposit fees</span><b>0.00 USD</b></div><div class="kv"><span>Will be deposited</span><b id="u2">${fm(usd)} USD</b></div><div class="fld"><a style="color:#25b07c;font-size:20px;font-weight:800;text-decoration:underline" onclick="toast('Promo codes: Promotions tab')">Have a promocode?</a></div>
+<div class="fix"><button id="sb" class="btn ${+S.amt>0?'dk':'off'}" onclick="S.step=3;render()">Summary</button></div>`;
+else c=`<div style="padding-top:4px">${[['Payment method',S.meth],['Deposit to','Isaac  ('+A[0].id+')'],['Amount to deposit',(+S.amt).toLocaleString('en',{minimumFractionDigits:2})+' KES'],['Deposit fees','0.00 USD'],['Phone number','254796681162']].map(r=>`<div class="kv"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}<div style="border-top:1px dashed var(--bd);margin:18px 16px"></div><div class="kv"><span>Will be deposited</span><b>${fm(usd)} USD</b></div><div class="card row" style="gap:10px;align-items:flex-start;font-size:19px;font-weight:700"><i class="ci" style="width:22px;height:22px;background:#1f9d6b;margin-top:3px">${ic('arrow_downward').replace('class="ms','class="ms" style="font-size:14px" data-x="')}</i><span>Please transfer <span style="color:#1f9d6b">the exact amount</span> as shown in the payment website. Incorrect amount may cause processing delay.</span></div></div><div class="fix"><button class="btn dk" onclick="stk()">Complete</button></div>`;
+const sp=['Deposit method','Specify the amount','Payment Summary'];
+return`${hdr('Deposit',"S.step>1?(S.step--,render()):back()")}<div class="step">${sp.map((t,i)=>`<div class="${S.step==i+1?'on':''}"><i class="ms" style="font-size:18px;line-height:30px">${i<S.step-1?'check':['','attach_money','check'][i]||(i?'':'layers')}</i>${t}</div>`).join('')}</div>${c}`}};
+function txs(l){let d='';return l.map(t=>{const h=t.d!=d?`<div class="dh">${t.d}</div>`:'';d=t.d;return h+`<div class="tx"><i class="ci">${ic('download')}</i><div class="d"><div class="row g8"><b>Deposit</b>${t.s=='x'?ic('cancel','f').replace('class="ms','class="ms" style="color:#e03131;font-size:19px" data-x="'):t.s=='p'?ic('schedule','f').replace('class="ms','class="ms" style="color:#ef8a30;font-size:19px" data-x="'):ic('check_circle','f').replace('class="ms','class="ms" style="color:#1f9d6b;font-size:19px" data-x="')}</div><div class="mu" style="font-weight:700;font-size:17px">ID: ${t.id}</div></div><div style="text-align:right"><b style="color:#1f9d6b;font-size:21px;font-weight:800">+ $${fm(t.a)}</b><div class="mu" style="font-weight:700;font-size:17px">${t.t}</div></div></div>`}).join('')}
+function updD(){const u=(+S.amt||0)/RATE;$('#u1').textContent=fm(u)+' USD';$('#u2').textContent=fm(u)+' USD';$('#sb').className='btn '+(+S.amt>0?'dk':'off')}
+function more(){sheet(`<h2>Your Account</h2><button class="x" onclick="cs()">${ic('close')}</button>${[['edit_square','Edit',''],['upload','Withdraw',''],['history','Payment History',''],['monitoring','Trades History',''],['lock','Change password',''],['delete','Delete account','r']].map(r=>`<div class="sr" ${r[2]?'style="color:#e03131"':''} onclick="cs();toast('${r[1]}')"><i class="ci" ${r[2]?'style="background:#fde1e1;color:#e03131"':''}>${ic(r[0])}</i>${r[1]}</div>`).join('')}`)}
+function trade(){sheet(`<button class="x" onclick="cs()" style="margin-top:-2px">${ic('close')}</button><h2>Trade</h2>${[['Trade in MT5','Trade in MT5 mobile app','#fff','candlestick_chart'],['Trade in App',"Trade in app's web terminal",'#232b38','trending_up']].map(r=>`<div class="pick" onclick="cs();toast('${r[0]}')" style="display:flex;gap:12px;align-items:center"><i class="ci" style="background:${r[2]};color:${r[2]=='#fff'?'#1f9d6b':'#fff'}">${ic(r[3])}</i><div><b>${r[0]}</b><div>${r[1]}</div></div></div>`).join('')}`)}
+function selA(w,i){S.sel=w;if(i!=null)S.st=i;const ac=S.st==1,t=['MT4','MT5','Investor'];sheet(`<button class="x" onclick="cs()">${ic('close')}</button><h2>Select</h2><div class="tabs gt" style="margin:0 0 16px;border:0">${t.map((x,k)=>`<button class="${S.st==k?'on':''}" onclick="selA('${w}',${k})">${x}</button>`).join('')}</div>
+${S.st<2?`<div class="pick" ${S.st==0?'':`onclick="pk('${w}',-1)"`}><b>${ic('wallet','f').replace('class="ms','class="ms" style="color:#1f9d6b;font-size:22px" data-x="')} Wallet</b><div>Balance <b style="color:#25b07c;font-size:inherit">0.00 USD</b></div>${S.st==0?'<div style="color:#ef8a30;font-weight:800;margin-top:4px">'+ic('error','f').replace('class="ms','class="ms" style="font-size:18px" data-x="')+' Not enough funds</div>':''}</div>`:''}
+${ac?A.map((a,i)=>`<div class="pick ${(w=='from'?S.from:S.to)==i?'on':''}" onclick="pk('${w}',${i})"><b>${a.id}</b> <span class="tag ${a.c}">${a.t[0]+a.t.slice(1).toLowerCase()}</span><div>Balance <b style="color:#25b07c;font-size:inherit">${fm(a.b)} USD</b> · ${a.n}</div>${(w=='from'?S.from:S.to)==i?ic('check_circle','f ck'):''}</div>`).join(''):''}${S.st==2?'<div class="mu" style="text-align:center;padding:30px">No investor accounts</div>':''}`)}
+function pk(w,i){if(i<0)return toast('Wallet has no funds');if(w=='from'&&i==S.to||w=='to'&&i==S.from)return toast('Choose different accounts');if(w=='from')S.from=i;else S.to=i;cs();render()}
+function doT(){const f=A[S.from];if(!f||!(+S.tamt>0))return;if(+S.tamt>f.b)return toast('Not enough funds');f.b-=+S.tamt;A[S.to].b+=+S.tamt;S.tamt='';S.from=null;toast('Transfer complete');go('home')}
+function stk(){sheet(`<button class="x" onclick="cs()">${ic('close')}</button><h2>STK Prompt Sent</h2><p class="mu" style="text-align:center;font-size:18px;margin-bottom:16px;padding:0 6px">We've sent an STK prompt to your mobile money wallet. Check your phone and enter your wallet PIN when prompted.</p><button class="btn" style="background:#eef5ff;color:#2447b5;border:1px solid #cfe0f5;margin-bottom:12px" onclick="toast('STK prompt resent')">Resend STK prompt</button><div class="mu row g8" style="font-size:16px;margin-bottom:14px;align-items:flex-start">${ic('info').replace('class="ms','class="ms" style="font-size:18px" data-x="')}Do not close this screen until the payment status is updated</div><button class="btn dk" onclick="paid()">I have already entered my PIN</button><div style="text-align:center;font-size:20px;font-weight:800;padding:18px 0 4px;cursor:pointer" onclick="cs();go('funds')">Cancel Payment</div>`)}
+function paid(){cs();toast('Processing…');const u=(+S.amt||0)/RATE;setTimeout(()=>{S.tx.unshift({d:'18 October, 2026',a:u,id:String(45000000+Math.floor(Math.random()*9e4)),s:'p',t:'18.10.2026 09:'+String(10+S.tx.length).slice(-2)});S.tx[1].d==='18 October, 2026'||0;S.amt='';go('funds')},1100)}
+function render(){const v=S.v,NV={home:['home','Home'],funds:['work','Funds'],promos:['percent','Promotions'],copy:['content_copy','CopyTrade']};
+$('#app').className=v=='home'?'gr':'';$('#app').innerHTML=V[v]();
+const show=NV[v]||['profile','notifications'].includes(v);$('#nav').style.display=show?'flex':'none';
+$('#nav').innerHTML=Object.entries(NV).map(([k,n])=>`<button class="${v==k||(!NV[v]&&k=='home')?'on':''}" onclick="go('${k}')">${k=='home'?'<svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 5l6.5 14L12 13.5M21 5l-6.5 14L12 13.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>':ic(n[0])}${n[1]}</button>`).join('')}
+S.ai=1;
+const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+S.tx=[['D','+',987.04,'x','45004185','18.10.2026 09:32'],['D','+',9.87,'x','45003435','18.10.2026 08:47'],['D','+',9.87,'ok','44447591','14.10.2026 11:50'],['D','+',9.9,'x','41491169','23.09.2026 18:58'],['D','+',3,'x','41459153','23.09.2026 16:20'],['T','',19.02,'ok','41109349','21.09.2026 15:39'],['D','+',19.02,'ok','41109167','21.09.2026 15:38'],['T','',19.01,'ok','41078113','21.09.2026 12:47'],['D','+',19.01,'ok','41077976','21.09.2026 12:46'],['T','',9.89,'ok','41076687','21.09.2026 12:38'],['D','+',9.89,'ok','41076417','21.09.2026 12:37'],['W','-','KSh3,701.80','ok','41061970','21.09.2026 10:52'],['T','',30.71,'ok','41060535','21.09.2026 10:44'],['T','',30.71,'ok','41059885','21.09.2026 10:41'],['T','',38.03,'ok','41055809','21.09.2026 10:13'],['D','+',38.03,'ok','41055452','21.09.2026 10:11'],['T','',22.82,'ok','41047418','21.09.2026 09:11'],['T','',22.82,'ok','41045743','21.09.2026 08:57'],['D','+',22.82,'ok','41044599','21.09.2026 08:50']];
+const W=[['T','-',30.71,'ok','41060535','21.09.2026 10:44'],['T','+',30.71,'ok','41059885','21.09.2026 10:41'],['T','-',22.82,'ok','41047418','21.09.2026 09:11'],['T','+',22.82,'ok','41045743','21.09.2026 08:57'],['T','-',9.88,'ok','41042477','21.09.2026 08:36'],['T','+',1,'ok','41042330','21.09.2026 08:36'],['T','+',8.88,'ok','40969249','20.09.2026 10:34'],['T','-',8.88,'ok','40969192','20.09.2026 10:31'],['T','+',9.88,'ok','40968953','20.09.2026 10:21']];
+const lb=dt=>{const[d,m,y]=dt.split(' ')[0].split('.');return +d+' '+MN[m-1]+', '+y};
+function txs(l){let out='',g=null;l.forEach(t=>{const[k,sg,a,s,id,dt]=t,L=lb(dt);if(L!=g){if(g!=null)out+='</div>';out+=`<div class="dh">${L}</div><div class="card" style="padding:0 12px">`;g=L}else out+='<div style="border-top:1px solid var(--bd)"></div>';
+const ni={D:'download',T:'swap_horiz',W:'upload'}[k],nm={D:'Deposit',T:'Transfer',W:'Withdrawal'}[k],st=s=='x'?['cancel','#e03131']:s=='p'?['schedule','#ef8a30']:['check_circle','#1f9d6b'],col=sg=='+'?'#1f9d6b':sg=='-'?'#e03131':'var(--t)',num=typeof a=='string'?a:'$'+a.toLocaleString('en',{minimumFractionDigits:2}),val=sg?sg+' '+num:'$ '+a;
+out+=`<div class="row" style="gap:12px;padding:12px 0"><i class="ci" style="background:var(--bg);color:var(--m)">${ic(ni)}</i><div style="flex:1"><div class="row g8"><b style="font-size:20px;font-weight:800">${nm}</b><span class="ms f" style="color:${st[1]};font-size:19px">${st[0]}</span></div><div class="mu" style="font-weight:700;font-size:17px">ID: ${id}</div></div><div style="text-align:right"><b style="color:${col};font-size:21px;font-weight:800">${sg?sg+' '+num:'$ '+(+a).toLocaleString('en',{minimumFractionDigits:2})}</b><div class="mu" style="font-weight:700;font-size:17px">${dt}</div></div></div>`});return out+(g!=null?'</div>':'')}
+const filt=()=>`<div class="row g8" style="padding:0 16px 4px"><span class="chip">All Peri… ${ic('expand_more').replace('class="ms','class="ms" style="font-size:18px" data-x="')}</span><span class="chip">All ${ic('expand_more').replace('class="ms','class="ms" style="font-size:18px" data-x="')}</span></div>`;
+const wcard=()=>`<div class="card" onclick="S.ai=0;S.keep=1;go('accounts')"><span class="tag g">VALETAX WALLET</span><div style="font-size:22px;font-weight:800;margin:10px 0 4px">Wallet</div><div class="mu">$ 0.00</div></div>`;
+function paid(){cs();toast('Processing…');const u=(+S.amt||0)/RATE;setTimeout(()=>{S.tx.unshift(['D','+',+u.toFixed(2),'p','450'+String(Math.floor(Math.random()*9e4)+1e4),'18.10.2026 10:'+String(10+Math.floor(Math.random()*49))]);S.amt='';go('funds')},1100)}
+function acctType(){sheet(`<button class="x" onclick="cs()">${ic('close')}</button><h2>Account Type</h2>${[['Real Accounts','Accounts trading real assets','#1f9d6b','trending_up'],['Demo Accounts','Valetax accounts with virtual balance','#232b38','candlestick_chart']].map(r=>`<div class="pick" onclick="cs();toast('${r[0]}')" style="display:flex;gap:12px;align-items:center"><i class="ci" style="background:${r[2]}">${ic(r[3])}</i><div><b>${r[0]}</b><div>${r[1]}</div></div></div>`).join('')}`)}
+const accA=()=>S.ai?act('download','Deposit',"go('deposit')",1)+act('upload','Withdrawal',"toast('Withdrawal')")+act('sync_alt','Transfer',"go('transfer')")+act('more_vert','More','more()'):act('upload','Withdrawal',"toast('Withdrawal')")+act('sync_alt','Transfer',"go('transfer')");
+function accD(){if(!S.ai)return filt()+txs(W);const a=A[S.ai-1]||A[0];return`<div class="row sb" style="padding:14px 16px"><div><div style="font-size:27px;font-weight:800">${a.id}</div><div class="mu" style="font-size:19px">${a.n}</div></div><button class="btn s" onclick="trade()">${ic('trending_up')} Trade</button></div>`+[['database','#1f9d6b','$ '+fm(a.b),'Balance','expand_more'],['description','#2250d0',a.t[0]+a.t.slice(1).toLowerCase(),'Account type',''],['balance','#ef8a30','1:2000','Leverage','edit_square'],['monitor','#8a45d6','MT5','Trading platform','expand_more']].map(r=>`<div class="card row" style="gap:14px;padding:14px"><i class="ci" style="background:${r[1]}">${ic(r[0],'f')}</i><div style="flex:1"><b style="font-size:21px;font-weight:800">${r[2]}</b><div class="mu" style="font-size:19px;font-weight:700">${r[3]}</div></div>${r[4]?ic(r[4],'mu'):''}</div>`).join('')}
+function accSc(el){dots(el);const i=Math.round(el.scrollLeft/(el.firstElementChild.offsetWidth+10));if(i!=S.ai){S.ai=i;$('#accA').innerHTML=accA();$('#accD').innerHTML=accD()}}
+V.accounts=()=>`<div style="background:linear-gradient(180deg,rgba(31,157,107,.28),transparent);padding-bottom:8px">${hdr('Accounts','back()')}<div class="car" onscroll="accSc(this)"><div class="card wc" style="margin:0;padding:18px;min-height:130px"><span class="tag g">VALETAX WALLET</span><div class="row g8" style="font-size:21px;font-weight:800;margin:10px 0">${ic('wallet','f')} Wallet</div><div style="text-align:right;font-size:28px;font-weight:800">$ 0.00</div></div>${A.map(a=>`<div class="card wc" style="margin:0;padding:18px"><span class="tag ${a.c}">${a.t} · MT5</span><div style="font-size:21px;font-weight:800;margin:10px 0 14px">${a.n}</div><div class="row sb" style="font-size:21px;font-weight:700"><span>${a.id}</span><b style="font-size:28px;font-weight:800">$ ${fm(a.b)}</b></div></div>`).join('')}</div>${dotsH(A.length+1)}<div class="acts" id="accA" style="margin:0">${accA()}</div></div><div id="accD">${accD()}</div>`;
+const illus=k=>`<div style="width:130px;height:130px;margin:0 auto 12px;position:relative"><div style="position:absolute;inset:0;border-radius:50%;background:var(--c)"></div>${[0,1].map(i=>`<div style="position:absolute;left:${i?20:34}px;top:${22+i*36}px;width:112px;height:34px;background:var(--bg);border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.1);display:flex;align-items:center;gap:6px;padding:0 6px"><i class="ci" style="width:22px;height:22px;background:#25b07c;font-style:normal;font-size:13px">${k?'▶':'$'}</i><div style="flex:1"><div style="height:4px;background:#bfe8d3;border-radius:2px;margin-bottom:4px"></div><div style="height:4px;width:70%;background:#d7f0e3;border-radius:2px"></div></div></div>`).join('')}</div>`;
+const srch=ph=>`<div class="row g8" style="padding:0 16px 10px"><div class="row" style="flex:1;background:var(--c);border-radius:12px;padding:10px 12px;gap:8px">${ic('search','mu')}<input placeholder="${ph}" style="border:0;background:transparent;flex:1;font-size:19px;outline:0;color:var(--t);min-width:0"></div>${ph=='Search inbox'?ic('filter_list','gn'):''}</div>`;
+const cp0=V.copy;
+V.copy=()=>{const tb=`<div class="tabs gt" style="overflow-x:auto;scrollbar-width:none">${['Available strategies','Investment results','For money manager','How does it work'].map((t,i)=>`<button style="flex:none;padding:12px 14px" class="${S.tab==i?'on':''}" onclick="S.tab=${i};render()">${t}</button>`).join('')}</div>`;
+if(!S.tab)return cp0().replace(/<div class="tabs gt" style="overflow-x:auto;scrollbar-width:none">[\s\S]*?<\/div>/,tb);
+const em=(t,s,b,f)=>`<div style="text-align:center;padding:40px 24px">${illus()}<div style="font-size:23px;font-weight:800">${t}</div><div class="mu" style="font-size:19px;margin:6px 0 14px">${s}</div><button class="btn dk s" onclick="${f}">${b}</button></div>`;
+return hdr('Copy Trading')+tb+(S.tab==1?srch('Search')+`<div class="row sb" style="padding:6px 16px"><h2 style="font-size:24px;font-weight:800">Investments</h2><span class="chip">Curren… ${ic('expand_more')}</span></div>`+em('No past investments','Discover available strategies, choose the one that suits you and track your results','Available strategies','S.tab=0;render()'):S.tab==2?em('For Money Manager','Create your own strategy and start earning','Create Strategy',"toast('Create Strategy')"):[['Choose a strategy','Browse managers, compare growth and minimum investment.'],['Invest and copy','Allocate funds and trades are copied automatically.'],['Track your results','Follow profit and stop copying at any time.']].map((c,i)=>`<div class="card row" style="gap:14px"><i class="ci" style="background:#1f9d6b">${i+1}</i><div><b style="font-size:20px;font-weight:800">${c[0]}</b><div class="mu">${c[1]}</div></div></div>`).join(''))};
+const n0=V.notifications;
+V.notifications=()=>S.tab==1?`${hdr('Notifications','back()')}${tabs(['Notifications','Voice messages'],'gt')}${srch('Search inbox')}<div style="text-align:center;margin-top:120px">${illus(1)}<div class="mu" style="font-size:21px;font-weight:800">No voice messages yet</div></div>`:n0();
+const p0=V.profile;
+V.profile=()=>p0().replace("toast('Profile Settings')","go('psettings')")+'<div class="mu" style="padding:6px 16px 0;font-size:17px;font-weight:700">App Version: 63.0(135)</div>';
+V.psettings=()=>`${hdr('Profile Settings',"go('profile')")}${[[['person','Profile Information'],['local_shipping','Shipping Address']],[['notifications','Notifications'],['shield_person','MA Password'],['password','Manage PIN'],['fingerprint','Biometric Authentication','t'],['database','Clear Cache']]].map(g=>`<div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">${g.map((r,i)=>`${i?'<div class="ln"></div>':''}<div class="li" onclick="toast('${r[1]}')">${ic(r[0],'f')}<b>${r[1]}</b>${r[2]?'<span class="tg on" onclick="event.stopPropagation();this.classList.toggle(\'on\')"><i></i></span>':ic('chevron_right','ch')}</div>`).join('')}</div>`).join('')}`;
+const r0=render;render=function(){r0();const a=document.querySelector('.tabs .on');if(a&&a.parentElement.style.overflowX)a.parentElement.scrollLeft=a.offsetLeft-60;if(S.v=='accounts'){const c=document.querySelector('.car');requestAnimationFrame(()=>{c.scrollLeft=S.ai*(c.firstElementChild.offsetWidth+10)})}};
+const HN=[['Gold','Gold holds near record highs as traders eye Fed signals','linear-gradient(135deg,#e8c25a,#8a6a1c)','2h ago'],['USD','Dollar steadies ahead of US housing data on Tuesday','linear-gradient(135deg,#6f8f7a,#2f4a3a)','3h ago'],['Oil','Crude slips as US inventories build more than expected','linear-gradient(135deg,#4a4f5c,#15181f)','5h ago'],['Crypto','Bitcoin steadies above key support after weekend volatility','linear-gradient(135deg,#f0a43c,#9a5a10)','6h ago'],['EUR','Euro edges higher after ECB officials flag a cautious stance','linear-gradient(135deg,#4a6fd0,#1d2f6b)','8h ago'],['Stocks','Nasdaq futures rise as big tech earnings approach','linear-gradient(135deg,#3aa37a,#145a3f)','9h ago']];
+const hot=()=>`<div class="car" data-auto="1" style="scroll-snap-type:none;margin-bottom:6px">${HN.map(n=>`<div style="flex:0 0 78%;background:var(--c);border-radius:16px;overflow:hidden" onclick="toast('Opening news')"><div style="height:100px;background:${n[2]};display:flex;align-items:flex-end;padding:10px"><span class="tag" style="background:#fff;color:#232b38;font-size:13px">${n[0]}</span></div><div style="padding:12px 14px"><b style="font-size:18px;font-weight:800;line-height:1.25;display:block">${n[1]}</b><div class="mu" style="font-size:15px;margin-top:6px">${n[3]} · Valetax News</div></div></div>`).join('')}</div>`;
+const EV=[['US','Event: Housing Starts MoM (USAHSMOM)','Oct 20','Medium','linear-gradient(#0000,#000a),linear-gradient(135deg,#6f8f7a,#35503f)'],['US','Event: Building Permits MoM Prel for the United States','Oct 20','Medium','linear-gradient(#0000,#000a),linear-gradient(160deg,#b23a48 0 30%,#3c3b6e 30%,#2a2f55)'],['US','Event: Crude Oil Inventories (USCOI)','Oct 21','High','linear-gradient(#0000,#000a),linear-gradient(135deg,#5a5f6c,#1b1e26)'],['EU','Event: ECB President Speech (EUECBP)','Oct 22','High','linear-gradient(#0000,#000a),linear-gradient(135deg,#4a6fd0,#1d2f6b)'],['US','Event: Initial Jobless Claims (USJC)','Oct 22','Medium','linear-gradient(#0000,#000a),linear-gradient(135deg,#8a7a5a,#3a3220)'],['US','Event: S&P Global Manufacturing PMI Flash','Oct 23','High','linear-gradient(#0000,#000a),linear-gradient(135deg,#3aa37a,#14483a)']];
+const mkt=()=>`<div class="car" data-auto="1" style="gap:10px;scroll-snap-type:none">${EV.map(m=>`<div class="mc" style="background:${m[4]}"><span class="fl"><i class="flag" ${m[0]=='EU'?'style="background:#2a4fb0"':''}></i>${m[0]}</span><div style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${m[1]}</div><div class="r" style="font-weight:600"><span>Impact</span><b style="color:${m[3]=='High'?'#ff8a7a':'#f5a35c'}">${m[3]}</b></div><div class="r" style="font-weight:600"><span>Event at</span><span>${m[2]}</span></div></div>`).join('')}</div>`;
+const h0=V.home;
+V.home=()=>{let n=0;return h0().replace(/<div class="car" onscroll="dots\(this\)">/g,m=>n++==1?'<div class="car" data-auto="1" onscroll="dots(this)">':m).replace('<div class="sec"><h2>Hot News</h2><a>See all</a></div>','<div class="sec"><h2>Hot News</h2><a>See all</a></div>'+hot()).replace(/<div class="car" style="gap:10px">[\s\S]*$/,mkt())};
+function startAuto(){clearInterval(window._ai);const els=[...document.querySelectorAll('.car[data-auto]')];els.forEach(c=>c.addEventListener('touchstart',()=>{c._hold=1;clearTimeout(c._t);c._t=setTimeout(()=>c._hold=0,6000)},{passive:true}));window._ai=setInterval(()=>els.forEach(c=>{if(!c.isConnected||c._hold)return;const w=c.firstElementChild.offsetWidth+10,max=c.scrollWidth-c.clientWidth;c.scrollTo({left:c.scrollLeft+w>max+4?0:c.scrollLeft+w,behavior:'smooth'})}),3000)}
+const r1=render;render=function(){r1();startAuto()};
+const t0=toast;
+toast=function(m){if(m=='Withdrawal'||m=='Withdraw')return go('withdraw');if(m=='Add account')return go('addacc');if(/ strategy$/.test(m))return sheet(`<button class="x" onclick="cs()">${ic('close')}</button><h2>${m.slice(0,-9)}</h2><p class="mu" style="text-align:center;margin-bottom:16px">Copy this strategy's trades automatically.</p><div class="fld" style="margin:0 0 16px"><label>Investment amount</label><div class="row"><input class="inp" type="number" placeholder="1"><b class="mu">USD</b></div></div><button class="btn dk" onclick="cs();t0('Copying started')">Start copying</button>`);t0(m)};
+function addA(t,c){A.push({id:'5'+String(Math.floor(Math.random()*9e8)+1e8),n:'My Real Account',t:t.toUpperCase(),c:c,b:0});toast('Account added');go('home')}
+V.addacc=()=>{const L=[['Ideal for Bonuses','#12cf8f','#fff','Bonus','Boost equity with available bonuses',8,'1:500','From 2 pips'],['Designed for Networkers','#0b5a3c','#fff','Booster','Gain the Highest Rebates from your networks and your trades',8,'1:2000','From 2 pips'],['Minimum risk','#3d86e6','#fff','Cent','Test strategies with minimal risks using micro lot trades',8,'1:1000','From 1.2 pips'],['Lowest Spreads','#e59a0a','#fff','ECN','Take advantage of trading with 0 spread',50,'1:2000','From 0 pips'],['PRO Account','#f3d400','#232b38','Pro','Ultra-low spreads and zero commissions, tailored for experienced traders',500,'1:2000','From 0.6 pips'],['Best Choice','#1f9d6b','#fff','Standard','Trade on the most popular account type',8,'1:2000','From 1.2 pips']];
+return`${hdr('Add account','back()')}<div class="row g8" style="padding:0 16px 14px"><span class="chip">MT5 ${ic('expand_more')}</span><span class="chip">Real Account ${ic('expand_more')}</span></div>${L.map(a=>`<div class="rc"><span class="tag" style="background:${a[1]};color:${a[2]};font-size:17px;padding:4px 12px;border-radius:14px">${a[0]}</span><div style="font-size:21px;font-weight:800;margin:8px 0 4px">${a[3]}</div><div class="mu" style="font-size:19px;padding-bottom:10px;border-bottom:1px solid var(--bd);margin-bottom:6px">${a[4]}</div>${[['download','Minimum Deposit','$ '+a[5].toFixed(2)],['scatter_plot','Leverage up to',a[6]],['swap_vert','Spread',a[7]],['candlestick_chart','Trading Platform','MT5']].map(r=>`<div class="r"><span class="row">${ic(r[0])}${r[1]}</span><b>${r[2]}</b></div>`).join('')}<button class="btn dk" style="margin-top:14px;padding:16px;border-radius:12px" onclick="addA('${a[3]}','${a[3]=='Standard'?'g':''}')">Add Account</button></div>`).join('')}`};
+V.withdraw=()=>{const C=[['Credit/Debit Cards','#f1f5fb',[['USDt Withdrawal for Cards TRC20','#26a17b','T'],['USDt Withdrawal for Cards BEP20','#f3ba2f','◆'],['USDt Withdrawal for Cards TRC20','#26a17b','T']]],['Crypto','#d4ebf6',[['USDt TRC20','#26a17b','T'],['USDt BEP20','#f3ba2f','◆']]],['E-Wallet','#e8f1d8',[['Mobile Money MPESA and more','#2ba84a','M'],['Mobile Money','#2ba84a','M'],['Skrill EUR','#8a1a6b','S']]]];
+return`${hdr('Withdrawal','back()')}<div class="step">${['Withdrawal method','Specify the amount','Payment Summary'].map((t,i)=>`<div class="${i?'':'on'}"><i class="ms" style="font-size:18px;line-height:30px">${['layers','attach_money','check'][i]}</i>${t}</div>`).join('')}</div><div class="fld"><label>Withdraw from</label><div class="sel"><i class="ci">${ic('upload')}</i><div><b style="font-size:21px;font-weight:800">${A[1].id}</b><div class="mu">${A[1].n}</div></div>${ic('expand_more')}</div></div><div class="fld mu" style="font-size:19px;font-weight:700;padding-bottom:16px;border-bottom:1px dashed var(--bd)">Available for withdrawal <span style="color:#25b07c;font-weight:800">0.00 USD</span> ${ic('help','f').replace('class="ms','class="ms" style="font-size:17px" data-x="')}</div><div class="fld" style="margin-top:16px"><a style="color:#25b07c;font-size:22px;font-weight:800;text-decoration:underline" onclick="toast('Payment channels breakdown')">Payment channels breakdown</a></div>${C.map(g=>`<div class="row g8" style="padding:6px 16px 10px"><b style="font-size:21px;font-weight:800">${g[0]}</b><span class="tag" style="background:${g[1]};color:#232b38;font-size:19px;padding:5px 14px;border-radius:20px">$ 0.00</span></div>${g[2].map(m=>`<div class="mi" style="opacity:.55" onclick="toast('Not enough funds')"><span class="lg" style="background:${m[1]};color:#fff;border-radius:50%;width:38px;height:38px">${m[2]}</span>${m[0]}${ic('expand_more')}</div>`).join('')}`).join('')}`};
 render();
-</script>
-</body>
-  </html>
+</script></body></html>
