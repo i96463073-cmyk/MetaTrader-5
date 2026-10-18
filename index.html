@@ -322,12 +322,8 @@ const CONFIG = {
   chatTitle: 'Messages',
   mqid: '00000000',
   account: {
-    name: 'MAXWEL KIPRONO YEGON', 
-    company: 'Valetax Global Limited', 
-    login: '501148369', 
-    server: 'ValetaxGlobal-Live3', 
-    host: 'valetax-mt5live3-ld2',
-    others: [{ name: 'Demo Account', login: '000000', server: 'Valetax-Demo', bal: 10000, isDemo: true }]
+    name: 'Demo Account', company: 'Broker Name', login: '000000', server: 'Server-Demo', host: 'host-demo',
+    others: [{ name: 'Practice account 2', login: '000001', server: 'Server-Demo', bal: 0 }]
   }
 };
 const $ = s => document.querySelector(s);
@@ -351,7 +347,7 @@ const newId = () => {
 function fixIds() { const seen = new Set(); POS.forEach(p => { if (seen.has(String(p.id))) p.id = newId(); seen.add(String(p.id)); }); }
 function gauss() { return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(6.2832 * Math.random()); }
 
-const BROKER_ICON = `<svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#1C1F24"/><path d="M25 30L45 70h10l20-40" fill="none" stroke="#00D26A" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M38 30l12 28 12-28" fill="none" stroke="#00D26A" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const BROKER_ICON = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="24" fill="#182024"/><path d="M26 68L44 42l12 12 20-26" fill="none" stroke="#22c55e" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ic = (p, w) => `<svg viewBox='0 0 24 24' width='${w || 22}' height='${w || 22}' fill='none' stroke='#fff' stroke-width='1.8'>${p}</svg>`;
 const IC = {
   sort: ic("<path d='M8 20V5M4 9l4-4 4 4M16 4v15M12 15l4 4 4-4'/>"),
@@ -409,7 +405,7 @@ const S = {
 };
 const SAVE = ['sym','tf','type','grid','ohlc','vol','bid','ask','last','note','dw','v','scheme','tfs','col','adv','osound','oct','vibm','ring','adl','lock','pin','lang','news','theme','tabl','sep','pos','ord','sltp','hist','ocPos','oc','ind','filter','lot','adapter','conf','slip','sound','vib','syms','endpoint','key','vis','noConf','acct','aod','vibm','adl'];
 
-let ACC = { bal: 0.52 }, POS = [], DL = [], ORD = [];
+let ACC = { bal: 10000 }, POS = [], DL = [], ORD = [];
 let P = {};            // live prices  {sym:{b,o,hi,lo,t}}
 let CD = {};           // candle store {"SYM|TF":[candles]}
 let cx = null, cy = null, ax = null, ay = null;   // crosshair / measure
@@ -667,11 +663,6 @@ function draw() {
   if (S.ord) ORD.filter(o => o.state === 'Placed' && o.sym === sy).forEach(o => {
     hline(o.price, '#2962FF', o.kind.toUpperCase() + ' ' + o.vol.toFixed(2));
     g.fillStyle = '#2962FF'; g.beginPath(); g.arc(PW - 15, y(o.price), 6, 0, 7); g.fill();
-  });
-  if (S.hist) DL.filter(x => x.sym === sy).forEach(x => {
-    for (let i = lo; i <= hi; i++) if (a[i].t <= x.ot && x.ot < a[i].t + m) {
-      g.fillStyle = x.type === 'BUY' ? C.bl : C.dn; g.beginPath(); g.arc(xi(i), y(x.open), 3, 0, 7); g.fill();
-    }
   });
   // bid / ask lines
   const b = P[sy].b, by = clamp(y(b), 8, PH - 8);
@@ -1144,23 +1135,16 @@ function rMsg() {
 }
 function rAcc() {
   const A = CONFIG.account;
-  const qr = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2zM19 14h2M14 19h2"/></svg>`;
-  const bell = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`;
-  const small = o => `<div class='ac' style="background:#1C1F24; margin:12px; padding:20px; border-radius:12px; position:relative; display:flex; align-items:center;">
-    ${o.isDemo ? '<span class="dpill" style="position:absolute; top:16px; right:16px; background:#122a1c; color:#00d26a; border-radius:12px; padding:2px 10px; font-size:12px; font-weight:600;">Demo</span>' : ''}
-    <span class="lgo" style="width:40px;height:40px;">${BROKER_ICON}</span>
-    <div style="flex:1;min-width:0; text-align:left; margin-left:16px;">
-      <b style="font-size:16px; color:#fff; font-weight:600;">${o.name}</b>
-      <div class='ad2' style="color:#8E9299; font-size:14px; margin-top:4px;">${o.login} ⓘ</div>
-    </div>
-    <span class="qri" style="margin-left:auto; margin-right:12px;">${qr}</span>
-  </div>`;
+  const qr = `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2zM19 14h2M14 19h2"/></svg>`;
+  const bell = `<svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`;
+  const small = o => `<div class='ac'><span class="lgo sm">${BROKER_ICON}</span><div style="flex:1;min-width:0"><b>${o.name}</b><div class='ad2'>${o.login} — ${o.server}<span class="ac-num-info">i</span></div><div class='ad2'>${f2(o.bal)} USD, Hedging</div></div><span class="qri">${qr}</span></div>`;
   $('#sc-acc').innerHTML = `
     <div class='ac big' style="position:relative">
+      <span class="dpill">Demo</span>
       <span class="lgo" style="margin:0 auto">${BROKER_ICON}</span>
       <div class='an'>${A.name}</div>
       <div class='bl2'>${A.company}</div>
-      <div class='ad'>${A.login} — ${A.server} <span class="ac-num-info" style="font-style:normal;">ⓘ</span></div>
+      <div class='ad'>${A.login} — ${A.server}<span class="ac-num-info">i</span></div>
       <div class='ad'>${A.host}, Hedge</div>
       <div class='ab'>${f2(ACC.bal)} <small>USD</small></div>
       <span class="ac-head-grid">${qr}</span>
@@ -1231,7 +1215,7 @@ function top_() {
     trade: `<button class="ib" data-a="sort">${IC.sort}</button><button class="ib" data-a="new">${IC.neww}</button>`,
     history: `<button class="ib" data-a="href">${IC.ref}</button><button class="ib" data-a="sort">${IC.sort}</button><button class="ib" data-a="date">${IC.cal}</button>`,
     msg: `<button class="ib">${IC.mq}</button><button class="ib">${IC.srch}</button><button class="ib" data-a="none">+</button><button class="ib" data-a="none">⋮</button>`,
-    acc: `<button class="ib" data-a="none">${svg("<rect x='3' y='3' width='7' height='7' rx='1'/><rect x='14' y='3' width='7' height='7' rx='1'/><rect x='3' y='14' width='7' height='7' rx='1'/><path d='M14 14h3v3h-3zM19 19h2v2h-2zM19 14h2M14 19h2'/>")}</button><button class="ib" data-a="none">+</button><button class="ib" data-a="none">⋮</button>`,
+    acc: `<button class="ib" data-a="none">${svg("<path d='M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4'/><circle cx='12' cy='12' r='3'/>", 22)}</button><button class="ib" data-a="none">+</button><button class="ib" data-a="none">⋮</button>`,
     settings: ''
   };
   $('#top').innerHTML = `<div class="L"><button class="ib" data-a="menu" style="font-size:24px">☰</button>${titleHTML()}</div><div>${R[S.tab]}</div>`;
@@ -1308,27 +1292,18 @@ function sideMenu() {
   const M = [
     ['trade', 'Trade', sv('<path d="M3 17l5-6 4 3 6-8"/><circle cx="19" cy="6" r="1.6"/>')],
     ['news', 'News', sv('<path d="M8 4h11a1 1 0 011 1v14H7a3 3 0 01-3-3V8h4z"/><path d="M11 8h6M11 12h6M11 16h4"/>')],
-    ['msg', 'Mailbox', sv('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'), '<span class="badge" style="background:#F6465D;color:#fff;border-radius:10px;padding:2px 6px;font-size:11px;font-weight:700;margin-left:auto;">67</span>'],
+    ['msg', 'Mailbox', sv('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'), '<span class="badge">67</span>'],
     ['journal', 'Journal', sv('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16M6 9h3M6 13h3M15 9h3M15 13h3"/>')],
     ['settings', 'Settings', sv("<circle cx='12' cy='12' r='3'/><path d='M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1'/>")],
-    ['calendar', 'Economic calendar', sv("<rect x='3' y='5' width='18' height='16' rx='2'/><path d='M8 3v4M16 3v4M3 10h18'/>"), '<span class="ads" style="margin-left:auto; font-size:12px; color:#4C8DF6; border:1px solid #4C8DF6; border-radius:12px; padding:2px 8px;">Ads</span>'],
+    ['calendar', 'Economic calendar', sv("<rect x='3' y='5' width='18' height='16' rx='2'/><path d='M8 3v4M16 3v4M3 10h18'/>"), '<span class="ads">Ads</span>'],
     ['community', 'Traders Community', sv('<circle cx="7" cy="6" r="1.6"/><circle cx="17" cy="6" r="1.6"/><path d="M4 12v4a3 3 0 006 0v-4zM14 12v4a3 3 0 006 0v-4z"/>')],
     ['algo', 'MQL5 Algo Trading', sv('<path d="M21 3L3 10l7 3 3 7z"/><path d="M10 13L21 3"/>')],
     ['guide', 'User guide', sv('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 115 0c0 1.6-2.5 2-2.5 4M12 17h.01"/>')],
     ['about', 'About', sv('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>')]
   ];
   const A = CONFIG.account;
-  const head = `<div class="sh2" data-g="acc" style="border-bottom:none; padding:22px 20px 12px; background:#000; margin-bottom:0;">
-    <div class="shr" style="display:flex; gap:16px; align-items:center;">
-      <span class="lgo" style="width:40px;height:40px;">${BROKER_ICON}</span>
-      <div class="shi" style="flex:1; min-width:0; text-align:left;">
-        <b style="display:block; color:#fff; font-size:17px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:0.3px;">${A.name}</b>
-        <small style="display:block; color:#8E9299; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:400; margin-top:2px;">${A.login} - ${A.server}</small>
-      </div>
-    </div>
-    <div class="mng" style="color:#4C8DF6; font-size:15px; font-weight:500; margin-top:14px; text-align:left;">Manage accounts</div>
-  </div>`;
-  o.innerHTML = '<div id="sb" style="background:#000; padding-top:0;">' + head + M.map(m => `<div class="it" data-g="${m[0]}">${m[2]}<span>${m[1]}</span>${m[3] || ''}</div>`).join('') + '</div>';
+  const head = `<div class="sh2" data-g="acc"><div class="ribbon"><span>Demo</span></div><div class="shr"><span class="lgo">${BROKER_ICON}</span><div class="shi"><b>${A.name}</b><small>${A.login} - ${A.server}</small></div></div><div class="mng">Manage accounts</div></div>`;
+  o.innerHTML = '<div id="sb">' + head + M.map(m => `<div class="it" data-g="${m[0]}">${m[2]}<span>${m[1]}</span>${m[3] || ''}</div>`).join('') + '</div>';
   $('#app').appendChild(o);
   const cl = () => { o.classList.remove('on'); setTimeout(() => o.remove(), 330); };
   o.onclick = e => {
@@ -1357,7 +1332,7 @@ function setTF(t) { S.tf = t; resetView(); save(); top_(); draw(); }
 function setSym(s) { S.sym = s; resetView(); save(); go('chart'); renderSymbolStrip(); $('#symstrip').classList.remove('on'); }
 
 function chartSettings() {
-  const toggles = [['ohlc','OHLC'],['dw','Show data window'],['vol','Show volumes'],['pos','Trade positions'],['ord','Trade orders'],['sltp','SL/TP levels'],['hist','Trade History'],['sep','Show period separators'],['ask','Ask Price Line'],['last','Last price line'],['note','Trade notifications'],['bid','Bid Price Line'],['grid','Grid']];
+  const toggles = [['ohlc','OHLC'],['dw','Show data window'],['vol','Show volumes'],['pos','Trade positions'],['ord','Trade orders'],['sltp','SL/TP levels'],['sep','Show period separators'],['ask','Ask Price Line'],['last','Last price line'],['note','Trade notifications'],['bid','Bid Price Line'],['grid','Grid']];
   sheet('<h3>Chart Settings</h3><div class="fld" data-c="type"><span>Chart view</span><span id="ctv">' + CHART_TYPES[S.type] + '</span></div>' +
     toggles.map(x => tgl(x[0], x[1])).join('') +
     '<div class="fld" data-c="col"><span>Colors</span><span>›</span></div><div class="fld" data-c="sch"><span>Colors – Scheme</span><span id="scv">' + S.scheme + '</span></div><div class="fld" data-c="ocp"><span>One Click panel at the bottom</span><span id="ocpv">' + S.ocPos + '</span></div>',
@@ -1519,7 +1494,7 @@ async function boot() {
     const hadLocal = !!local.ACC, localTs = local.ts || 0;
     if (local.ACC) { ACC = local.ACC; POS = local.POS || []; DL = local.DL || []; ORD = local.ORD || []; }
     fixIds();
-    if (!ACC || !ACC.bal) ACC = { bal: 0.52 };
+    if (!ACC || !ACC.bal) ACC = { bal: 10000 };
     resetView();
     if (!SY[S.sym]) S.sym = 'XAUUSD.vx';
 
