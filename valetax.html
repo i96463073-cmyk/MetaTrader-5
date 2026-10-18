@@ -241,27 +241,47 @@ function sheet(h) {
 function cs() { $('#ov').classList.remove('o'); }
 
 // ==========================================
-// 🔗 API INTEGRATION LOGIC
+// 🔗 API INTEGRATION LOGIC (WITH DEBUGGING)
 // ==========================================
 
 async function syncData() {
     try {
+        console.log(`[Sync] Fetching balance for account ${A[0].id}...`);
         const response = await fetch(`${API_BASE_URL}/api/sync?account=${A[0].id}`);
+        
         if(response.ok) {
             const data = await response.json();
-            A[0].b = data.balance !== undefined ? data.balance : A[0].b;
-            totalFunds = A[0].b + A[1].b;
+            console.log(`[Sync] Received data from backend:`, data);
+            
+            // If the backend returns a string instead of a number, parse it
+            const newBalance = Number(data.balance);
+            
+            if (!isNaN(newBalance)) {
+                A[0].b = newBalance;
+                totalFunds = A[0].b + A[1].b;
+                console.log(`[Sync] Updated local balance to: $${A[0].b}`);
+            } else {
+                console.warn(`[Sync] Backend did not return a valid balance number.`, data);
+            }
+            
             if (data.transactions && data.transactions.length > 0) {
                 globalTx = data.transactions;
             }
+            
             if(S.v === 'home' || S.v === 'funds') { render(); }
+        } else {
+            console.error(`[Sync] Backend returned error status: ${response.status}`);
         }
-    } catch(e) { console.warn("Backend offline."); }
+    } catch(e) { 
+        console.error("[Sync] Network error connecting to backend:", e); 
+    }
 }
 
 async function sendDepositToMT5(amountUSD) {
     try {
         toast('Contacting MT5 Server...');
+        console.log(`[Deposit] Sending request to ${API_BASE_URL}/api/deposit...`);
+        
         const response = await fetch(`${API_BASE_URL}/api/deposit`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -269,13 +289,22 @@ async function sendDepositToMT5(amountUSD) {
         });
 
         if (response.ok) {
+            const result = await response.json().catch(() => ({}));
+            console.log(`[Deposit] Server responded with success:`, result);
             toast('Deposit successful!');
-            await syncData();
+            
+            // Wait 1 second for the MT5 bridge to process, then sync
+            setTimeout(syncData, 1000); 
             go('funds');
         } else {
-            toast('Deposit failed. Check backend logs.');
+            const errText = await response.text();
+            console.error(`[Deposit] Server returned error ${response.status}:`, errText);
+            toast('Deposit failed. See console.');
         }
-    } catch (e) { toast('Network error during deposit'); }
+    } catch (e) { 
+        console.error("[Deposit] Network error:", e);
+        toast('Network error during deposit'); 
+    }
 }
 
 syncData();
@@ -815,7 +844,6 @@ function render() {
     setTimeout(setupAutoScroll, 100);
 }
 
-// ✅ FIXED AUTO SCROLL LOGIC
 function setupAutoScroll() {
     document.querySelectorAll('.car[data-auto]').forEach(car => {
         if (car.dataset.hasInterval) return;
