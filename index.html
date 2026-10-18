@@ -286,6 +286,27 @@ body.lt #ocv{color:#000}
 body.lt #ocv span{color:#666}
 body.lt #ocv input{color:#000}
 #live{display:none!important}
+
+/* --- New Account Card Exact Match --- */
+.ac.big.exact { background: #232528; padding: 24px 20px 32px; text-align: center; border-radius: 12px; position: relative; margin: 12px 14px; box-shadow: none; }
+body.lt .ac.big.exact { background: #f7f7f7; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.exact .ac-title { color: #fff; font-size: 18px; font-weight: 700; margin-top: 16px; letter-spacing: 0.5px; }
+.exact .ac-broker { color: #6c9cff; font-size: 16px; font-weight: 600; margin-top: 8px; }
+.exact .ac-line { color: #8e9299; font-size: 15px; margin-top: 8px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.exact .ac-line.host { margin-top: 4px; }
+.exact .ac-bal { color: #fff; font-size: 24px; font-weight: 700; margin-top: 20px; display: flex; align-items: baseline; justify-content: center; gap: 4px; }
+.exact .ac-bal small { font-size: 14px; color: #8e9299; font-weight: 500; }
+.exact .ac-qr { position: absolute; left: 16px; bottom: 16px; width: 18px; height: 18px; stroke: #8e9299; fill: none; stroke-width: 1.8; }
+.exact .ac-bell { position: absolute; right: 16px; bottom: 16px; width: 18px; height: 18px; stroke: #8e9299; fill: none; stroke-width: 1.8; }
+.exact .ac-num-info { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #8e9299; color: #8e9299; font-size: 9px; font-weight: 700; font-style: italic; margin-left: 2px; }
+body.lt .exact .ac-title, body.lt .exact .ac-bal { color: #111; }
+body.lt .exact .ac-line { color: #777; }
+body.lt .exact .ac-qr, body.lt .exact .ac-bell, body.lt .exact .ac-num-info { stroke: #777; color: #777; }
+body.lt .exact .ac-broker { color: #2f6fed; }
+body.lt .exact .ac-bal small { color: #777; }
+/* Broker Icon SVG sizing */
+.lgo.btc { width: 52px; height: 52px; background: #141517; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; box-shadow: none; }
+body.lt .lgo.btc { background: #e8e8e8; }
 </style></head><body><div id="app">
 <div id="loading">Loading...</div>
 <div id="top"></div>
@@ -328,8 +349,8 @@ const CONFIG = {
   chatTitle: 'Messages',
   mqid: '00000000',
   account: {
-    name: 'Demo Account', company: 'Broker Name', login: '000000', server: 'Server-Demo', host: 'host-demo',
-    others: [{ name: 'Practice account 2', login: '000001', server: 'Server-Demo', bal: 0 }]
+    name: 'MAXWEL KIPRONO YEGON', company: 'Valetax Global Limited', login: '501148369', server: 'ValetaxGlobalLive3',
+    host: 'valetax-mt5live3-ld2, Hedge', others: []
   }
 };
 const $ = s => document.querySelector(s);
@@ -353,7 +374,14 @@ const newId = () => {
 function fixIds() { const seen = new Set(); POS.forEach(p => { if (seen.has(String(p.id))) p.id = newId(); seen.add(String(p.id)); }); }
 function gauss() { return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(6.2832 * Math.random()); }
 
-const BROKER_ICON = `<svg viewBox="0 0 100 100" width="36" height="36" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="24" fill="#182024"/><path d="M26 68L44 42l12 12 20-26" fill="none" stroke="#22c55e" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const BROKER_ICON = `<svg viewBox="0 0 40 40" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 9L20 24 L24 18 L14 4 Z" fill="#22c55e" />
+    <path d="M10 9 L20 24 L24 18 L14 4 Z" fill="none" stroke="#22c55e" stroke-width="1.5"/>
+    <path d="M30 31L20 16 L16 22 L26 36 Z" fill="#ffffff" />
+    <path d="M30 31 L20 16 L16 22 L26 36 Z" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+  </g>
+</svg>`;
 const ic = (p, w) => `<svg viewBox='0 0 24 24' width='${w || 22}' height='${w || 22}' fill='none' stroke='#fff' stroke-width='1.8'>${p}</svg>`;
 const IC = {
   sort: ic("<path d='M8 20V5M4 9l4-4 4 4M16 4v15M12 15l4 4 4-4'/>"),
@@ -411,7 +439,7 @@ const S = {
 };
 const SAVE = ['sym','tf','type','grid','ohlc','vol','bid','ask','last','note','dw','v','scheme','tfs','col','adv','osound','oct','vibm','ring','adl','lock','pin','lang','news','theme','tabl','sep','pos','ord','sltp','hist','ocPos','oc','ind','filter','lot','adapter','conf','slip','sound','vib','syms','endpoint','key','vis','noConf','acct','aod','vibm','adl'];
 
-let ACC = { bal: 10000 }, POS = [], DL = [], ORD = [];
+let ACC = { bal: 0.52 }, POS = [], DL = [], ORD = [];
 let P = {};            // live prices  {sym:{b,o,hi,lo,t}}
 let CD = {};           // candle store {"SYM|TF":[candles]}
 let cx = null, cy = null, ax = null, ay = null;   // crosshair / measure
@@ -1138,21 +1166,20 @@ function rMsg() {
 }
 function rAcc() {
   const A = CONFIG.account;
-  const qr = `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2zM19 14h2M14 19h2"/></svg>`;
-  const bell = `<svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`;
-  const small = o => `<div class='ac'><span class="lgo sm">${BROKER_ICON}</span><div style="flex:1;min-width:0"><b>${o.name}</b><div class='ad2'>${o.login} — ${o.server}<span class="ac-num-info">i</span></div><div class='ad2'>${f2(o.bal)} USD, Hedging</div></div><span class="qri">${qr}</span></div>`;
+  const qr = `<svg class="ac-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2zM19 14h2M14 19h2"/></svg>`;
+  const bell = `<svg class="ac-bell" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`;
+  
   $('#sc-acc').innerHTML = `
-    <div class='ac big' style="position:relative">
-      <span class="dpill">Demo</span>
-      <span class="lgo" style="margin:0 auto">${BROKER_ICON}</span>
-      <div class='an'>${A.name}</div>
-      <div class='bl2'>${A.company}</div>
-      <div class='ad'>${A.login} — ${A.server}<span class="ac-num-info">i</span></div>
-      <div class='ad'>${A.host}, Hedge</div>
-      <div class='ab'>${f2(ACC.bal)} <small>USD</small></div>
-      <span class="ac-head-grid">${qr}</span>
-      <span class="ac-head-bell">${bell}</span>
-    </div>` + (A.others || []).map(small).join('');
+    <div class="ac big exact">
+      <div style="margin: 0 auto 4px; display: inline-flex;" class="lgo btc">${BROKER_ICON}</div>
+      <div class="ac-title">${A.name}</div>
+      <div class="ac-broker">${A.company}</div>
+      <div class="ac-line">${A.login} — ${A.server} <span class="ac-num-info">i</span></div>
+      <div class="ac-line host">${A.host}</div>
+      <div class="ac-bal">${f2(ACC.bal)} <small>USD</small></div>
+      ${qr}
+      ${bell}
+    </div>`;
 }
 function rSet() {
   const cb = (k, t, d) => `<div class="si" data-k="${k}"><div class="st"><b>${t}</b><small>${d}</small></div><div class="cbx ${S[k] ? 'on' : ''}"></div></div>`;
@@ -1497,7 +1524,7 @@ async function boot() {
     const hadLocal = !!local.ACC, localTs = local.ts || 0;
     if (local.ACC) { ACC = local.ACC; POS = local.POS || []; DL = local.DL || []; ORD = local.ORD || []; }
     fixIds();
-    if (!ACC || !ACC.bal) ACC = { bal: 10000 };
+    if (!ACC || !ACC.bal) ACC = { bal: 0.52 };
     resetView();
     if (!SY[S.sym]) S.sym = 'XAUUSD.vx';
 
