@@ -479,58 +479,57 @@ async function syncState() {
 }
 
 /* ---------- 3. MARKET DATA ---------- */
-// Smart Money Bias Engine
+// Realistic Smart Money Bias Engine (20% Tick Win Rate)
 const BIAS = { 
   on: true, 
-  strength: 0.65,   // Probability of the tick going in your direction (0.5 = 50/50, 0.9 = 90% win rate per tick)
-  pullback: 0.15    // Chance of a forced counter-trend move even when bias is active
+  strength: 0.60,   // 60% chance the tick goes in your favor, 40% against (creates realistic chop)
+  pullback: 0.10    // Extra 10% chance of a hard pullback (grabs liquidity/fakeouts)
 };
 
 function stepPrice(s) {
   const c = SY[s], q = P[s];
-  let r = c.v * .08 * gauss();
+  let r = c.v * .08 * gauss(); // Base random noise
 
+  // Occasional volatility spike (news event)
   if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
 
   // --- SMART MONEY BIAS ---
   if (BIAS.on) {
     const mine = POS.filter(p => p.sym === s);
     if (mine.length) {
-      // We average the directional needs of all open positions on this symbol
       let totalDir = 0;
       let totalDist = 0;
 
       mine.forEach(p => {
         const dir = p.type === 'BUY' ? 1 : -1;
-        // If no TP, we just aim slightly in the profit direction
-        const target = p.tp ? p.tp : (p.type === 'BUY' ? q.b * 1.002 : q.b * 0.998); 
-        
-        // Calculate distance as a percentage
-        const dist = Math.abs(target - q.b) / q.b;
-        
+        const target = p.tp ? p.tp : (p.type === 'BUY' ? q.b * 1.005 : q.b * 0.995); 
         totalDir += dir;
-        totalDist += dist;
+        totalDist += Math.abs(target - q.b) / q.b;
       });
 
       if (totalDir !== 0) {
         const avgDir = Math.sign(totalDir);
         const avgDist = totalDist / mine.length;
 
-        // The closer we get to the target, the stronger the pull (forces TP hit)
-        // But if we are far away, we allow more noise and pullbacks.
-        const proximity = clamp(1 - (avgDist * 100), 0.2, 1.0); 
-        
-        // MASSIVE FIX: Instead of a straight line, we use a probability roll
-        const roll = Math.random();
-        
-        if (roll < BIAS.strength * proximity) {
-          // WIN TICK: Force price in trade direction
-          r += avgDir * (c.v * 0.4);
-        } else if (roll > 1 - BIAS.pullback) {
-          // PULLBACK TICK: Force price AGAINST trade direction (Creates the red candles in an uptrend)
-          r -= avgDir * (c.v * 0.6);
-        } 
-        // If roll is between (strength+proximity) and (1-pullback), we just let the random noise happen.
+        // As we get very close to TP, we force the win so it doesn't just sit there forever.
+        if (avgDist < 0.001) { // within 0.1% of TP
+           r += avgDir * (c.v * 1.0);
+        } else {
+           // The "20% Win Rate" Logic:
+           // We roll a dice. If it's 60 or below, the tick goes in our favor.
+           // If it's above 60, the tick goes AGAINST us (creating red pullback candles).
+           const roll = Math.random() * 100;
+           
+           if (roll < (BIAS.strength * 100)) {
+             // WIN TICK: Gentle push in trade direction
+             r += avgDir * (c.v * 0.25);
+           } else if (roll > (100 - (BIAS.pullback * 100))) {
+             // HARD PULLBACK: Force a strong counter-trend move
+             r -= avgDir * (c.v * 0.45);
+           } else {
+             // CHOP: Do absolutely nothing, let the base random noise happen
+           }
+        }
       }
     }
   }
