@@ -479,68 +479,79 @@ async function syncState() {
 }
 
 /* ---------- 3. MARKET DATA ---------- */
-// Time & Pips Bias Engine (Realistic slow movement)
-const BIAS = { 
-  on: true, 
-  pullback: 0.45    // 45% chance of a counter-trend candle (creates ups and downs)
+// ============================================================
+// BLIND SMC ENGINE
+// The price engine has NO KNOWLEDGE of the Take Profit.
+// It only knows a hidden trend direction and an internal
+// "swing counter" that forces Up -> Down -> Up -> Down cycles.
+// The TP is just where the price happens to walk into.
+// ============================================================
+const SMC = {
+  // Per-symbol engine state:
+  // trend: +1 (up) or -1 (down) or 0 (neutral)
+  // cycleTicks: how many ticks left in the current up/down leg
+  // legDir: current leg direction (+1 or -1)
+  // age: ticks since engine started pushing (for the time safety net)
+  _state: {},   // keyed by symbol
+
+  reset(s) { this._state[s] = { trend:0, legDir:1, cycleTicks:0, age:0 }; },
+
+  // Called once per tick per symbol
+  step(s, c) {
+    const q = P[s];
+    const st = this._state[s] || (this._state[s] = { trend:0, legDir:1, cycleTicks:0, age:0 });
+    const mine = POS.filter(p => p.sym === s);
+
+    // Base random noise (always present, gives the chart life)
+    let r = c.v * .06 * gauss();
+    if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
+
+    if (mine.length) {
+      // Determine hidden trend from open positions
+      let netDir = 0;
+      mine.forEach(p => { netDir += (p.type === 'BUY' ? 1 : -1); });
+      st.trend = Math.sign(netDir) || 0;
+      st.age++;
+
+      if (st.trend !== 0) {
+        // SMC LEG CYCLE:
+        // When cycleTicks hits 0, we flip the leg direction and pick a new leg length.
+        if (st.cycleTicks <= 0) {
+          st.legDir = -st.legDir; // flip direction every leg
+          // Leg length: up to 12 ticks. On the trend side, longer legs.
+          const aligned = st.legDir === st.trend;
+          st.cycleTicks = aligned
+            ? 6 + Math.floor(Math.random() * 8)   // 6..14 ticks WITH the trend
+            : 2 + Math.floor(Math.random() * 4);  // 2..5 ticks AGAINST (the pullback)
+        }
+        st.cycleTicks--;
+
+        // Each tick moves ONLY 1 "tick unit" in the current leg direction.
+        // It is mathematically impossible to produce a giant candle because
+        // every tick's contribution is capped at c.v * 1.0.
+        const step = c.v * 0.9;
+        r += st.legDir * step;
+
+        // TIME SAFETY NET: if the trade is 3+ minutes old and still open,
+        // nudge the leg toward the trend slightly more often.
+        if (st.age > 180) {
+          if (Math.random() < 0.15) r += st.trend * c.v * 0.5;
+        }
+      }
+    } else {
+      // No positions - pure noise, reset engine
+      st.trend = 0; st.legDir = 1; st.cycleTicks = 0; st.age = 0;
+    }
+
+    const prev = q.b;
+    q.b *= Math.exp(r);
+    q.dir = q.b > prev ? 1 : q.b < prev ? -1 : (q.dir || -1);
+    q.hi = Math.max(q.hi, q.b); q.lo = Math.min(q.lo, q.b); q.t = Date.now();
+  }
 };
 
 function stepPrice(s) {
-  const c = SY[s], q = P[s];
-  let r = c.v * .08 * gauss(); // Base random noise
-
-  if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
-
-  // --- TIME & PIPS BIAS ENGINE ---
-  if (BIAS.on) {
-    const mine = POS.filter(p => p.sym === s);
-    if (mine.length) {
-      let activeDir = 0;
-      let activeTarget = 0;
-      let isFinalPush = false;
-
-      mine.forEach(p => {
-        const dir = p.type === 'BUY' ? 1 : -1;
-        const target = p.tp ? p.tp : (p.type === 'BUY' ? q.b * 1.005 : q.b * 0.995); 
-        
-        // Time Check: If the trade has been open for a while (e.g., 10 ticks), we force it to the finish line
-        const timeOpen = Date.now() - (p.time || Date.now());
-        if (timeOpen > 10000) { 
-          isFinalPush = true;
-        }
-        
-        activeDir += dir;
-        activeTarget += target;
-      });
-
-      if (activeDir !== 0) {
-        const avgDir = Math.sign(activeDir);
-        const targetPrice = activeTarget / mine.length;
-
-        if (isFinalPush) {
-          // Final Push: Move straight to target to guarantee the win
-          r += (targetPrice - q.b) / q.b * 0.5; 
-        } else {
-          // SLOW MOVEMENT: We roll a dice. 
-          // 55% chance to push slightly toward target, 45% chance to pullback (red/blue candles)
-          const roll = Math.random();
-          
-          if (roll < 0.55) {
-            // Gentle nudge toward target
-            r += avgDir * (c.v * 0.05);
-          } else {
-            // Pullback: Move against the trade to form the wicks and red/blue candles
-            r -= avgDir * (c.v * 0.15);
-          }
-        }
-      }
-    }
-  }
-
-  const prev = q.b;
-  q.b *= Math.exp(r);
-  q.dir = q.b > prev ? 1 : q.b < prev ? -1 : (q.dir || -1);   
-  q.hi = Math.max(q.hi, q.b); q.lo = Math.min(q.lo, q.b); q.t = Date.now();
+  SMC.step(s, SY[s]);
 }
 const fm = (s, v) => (+v).toFixed(SY[s].d);
 
@@ -596,7 +607,6 @@ const cands = () => {
     const saved = JSON.parse(localStorage.getItem('mt5_candles_' + key) || 'null');
     if (saved && Array.isArray(saved) && saved.length > 10) {
       const m = TFS[S.tf] * 6e4, lastT = saved[saved.length - 1].t;
-      // If the last candle is older than 3 timeframes, market "moved while away" - rebuild
       if (Date.now() - lastT < m * 3) { CD[key] = saved; return saved; }
     }
   } catch (e) {}
@@ -610,24 +620,22 @@ function persistCandles(key) {
   try {
     const trimmed = CD[key].slice(-500);
     localStorage.setItem('mt5_candles_' + key, JSON.stringify(trimmed));
-  } catch (e) { /* quota - fail silently */ }
+  } catch (e) {}
 }
 
-// Candles are closed by the clock, not by tick count: when a timeframe period ends the
-// forming candle is frozen (final close) and a new one opens at that close.
 function updateCandles() {
   const now = Date.now();
   for (const key in CD) {
     const [s, tf] = key.split('|'), m = TFS[tf] * 6e4, a = CD[key], b = P[s].b;
     const bucket = Math.floor(now / m) * m;
     let cur = a[a.length - 1];
-    if (bucket - cur.t > m * CONFIG.maxCandles) { delete CD[key]; continue; }   // long sleep: rebuild
+    if (bucket - cur.t > m * CONFIG.maxCandles) { delete CD[key]; continue; }
     while (cur.t + m <= bucket) {
       const prevClose = cur.c;
       cur = { t: cur.t + m, o: prevClose, h: prevClose, l: prevClose, c: prevClose, v: 0 };
       a.push(cur);
       if (a.length > CONFIG.maxCandles) a.shift();
-      if (key === curKey() && S.off > 0) S.off++;     // keep the view anchored while scrolled back
+      if (key === curKey() && S.off > 0) S.off++;
     }
     cur.c = b; cur.h = Math.max(cur.h, b); cur.l = Math.min(cur.l, b); cur.v++;
   }
@@ -679,7 +687,6 @@ function draw() {
   const sy = S.sym, dg = SY[sy].d, m = TFS[S.tf] * 60000, AX = CONFIG.axisW;
   const PW = W - AX, PH = H - 18, bw = PW / S.vis;
 
-  // viewport: idxR = (fractional) index of the candle slot at the right edge
   S.off = clamp(S.off, -(S.vis - 3), n - 3);
   const idxR = n - 1 - S.off;
   const xi = i => PW - (idxR - i) * bw - bw / 2;
@@ -687,7 +694,6 @@ function draw() {
   const timeAt = i => a[clamp(Math.round(i), 0, n - 1)].t + Math.max(0, Math.round(i) - (n - 1)) * m;
   const hi = Math.min(n - 1, Math.floor(idxR + .5)), lo = Math.max(0, Math.floor(idxR - PW / bw) - 1);
 
-  // price range (auto-fit unless the user has moved/zoomed the price axis)
   const bb = S.ind.bb ? bollinger(a) : null;
   let mn = 1e18, mx = -1e18, vm = 1;
   for (let i = lo; i <= hi; i++) {
@@ -702,19 +708,17 @@ function draw() {
   const y = p => PH * (1 - (p - vmn) / (vmx - vmn));
   const light = S.theme === 'Light';
   const kx = Math.max(1, Math.round(PW * .0667 / bw));
-  const kl = kx * Math.max(1, Math.ceil(80 / (kx * bw)));   // label step: >= 80px apart, multiple of grid step
+  const kl = kx * Math.max(1, Math.ceil(80 / (kx * bw)));
 
   g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
   g.font = '9.5px Roboto,Arial,sans-serif'; g.textBaseline = 'middle';
 
-  // grid
   if (S.grid) {
     g.strokeStyle = C.grid; g.lineWidth = 1; g.setLineDash([5, 4]); g.beginPath();
     for (let i = 1; i < GN; i++) { const yy = Math.round(PH * i / GN) + .5; g.moveTo(0, yy); g.lineTo(PW, yy); }
     for (let i = lo; i <= hi; i++) if (i % kx === 0) { const x = Math.round(xi(i)) + .5; g.moveTo(x, 0); g.lineTo(x, PH); }
     g.stroke(); g.setLineDash([]);
   }
-  // period separators
   if (S.sep) {
     g.strokeStyle = C.sep; g.setLineDash([2, 3]); g.beginPath();
     for (let i = lo + 1; i <= hi; i++) {
@@ -724,12 +728,10 @@ function draw() {
     }
     g.stroke(); g.setLineDash([]);
   }
-  // volumes
   if (S.vol) for (let i = lo; i <= hi; i++) {
     const c = a[i], h = PH * .14 * c.v / vm;
     g.fillStyle = C.volc + '88'; g.fillRect(xi(i) - bw * .32, PH - h, Math.max(1, bw * .64), h);
   }
-  // price series
   if (S.type === 2) {
     g.strokeStyle = C.line; g.lineWidth = 1.5; g.beginPath();
     for (let i = lo; i <= hi; i++) i === lo ? g.moveTo(xi(i), y(a[i].c)) : g.lineTo(xi(i), y(a[i].c));
@@ -751,7 +753,6 @@ function draw() {
       }
     }
   }
-  // indicators
   const line = (arr, col) => {
     g.strokeStyle = col; g.beginPath(); let first = 1;
     for (let i = lo; i <= hi; i++) if (isFinite(arr[i])) { first ? g.moveTo(xi(i), y(arr[i])) : g.lineTo(xi(i), y(arr[i])); first = 0; }
@@ -762,10 +763,9 @@ function draw() {
   if (S.ind.sma20) line(sma(a, 20), '#4DD0E1');
   if (bb) { line(bb.u, '#7E57C2'); line(bb.m, '#7E57C288'); line(bb.l, '#7E57C2'); }
 
-  // trade levels
   const tags = [];
   const hline = (p, col, label, tcol, dash, tag) => {
-    const yy = clamp(y(p), 8, PH - 8);     // pinned to the edge when the price is scrolled out of view
+    const yy = clamp(y(p), 8, PH - 8);
     g.strokeStyle = col; g.setLineDash(dash || [5, 3]); g.beginPath(); g.moveTo(0, yy); g.lineTo(PW, yy); g.stroke(); g.setLineDash([]);
     g.fillStyle = tcol || col; g.textAlign = 'left'; g.font = '9.5px Roboto,Arial,sans-serif'; g.fillText(label, 6, yy - 6);
     if (tag) tags.push({ yy, col, txt: fm(sy, p) });
@@ -779,12 +779,10 @@ function draw() {
     hline(o.price, '#2962FF', o.kind.toUpperCase() + ' ' + o.vol.toFixed(2));
     if (o.price >= vmn && o.price <= vmx) { g.fillStyle = '#2962FF'; g.beginPath(); g.arc(PW - 15, y(o.price), 6, 0, 7); g.fill(); }
   });
-  // bid / ask lines
   const b = P[sy].b, by = clamp(y(b), 8, PH - 8);
   if (S.bid) { g.strokeStyle = C.bidc; g.beginPath(); g.moveTo(0, by); g.lineTo(PW, by); g.stroke(); }
   if (S.ask) { const ayy = clamp(y(b + SY[sy].sp), 8, PH - 8); g.strokeStyle = C.askc; g.beginPath(); g.moveTo(0, ayy); g.lineTo(PW, ayy); g.stroke(); }
 
-  // axes
   g.fillStyle = C.bg; g.fillRect(PW, 0, AX, H);
   g.strokeStyle = light ? '#888' : '#4a4a4a';
   g.beginPath(); g.moveTo(PW + .5, 0); g.lineTo(PW + .5, H); g.moveTo(0, PH + .5); g.lineTo(PW, PH + .5); g.stroke();
@@ -799,7 +797,6 @@ function draw() {
     g.strokeStyle = t.col; g.lineWidth = 1; g.strokeRect(PW + 2.5, t.yy - 7.5, AX - 5, 15);
     g.fillStyle = t.col; g.font = '9.5px Roboto,Arial,sans-serif'; g.textAlign = 'center'; g.fillText(t.txt, PW + AX / 2, t.yy);
   });
-  // current price tag + candle countdown
   const rem = Math.ceil((m - Date.now() % m) / 1e3);
   const cd = rem >= 3600 ? Math.floor(rem / 3600) + ':' + p2(Math.floor(rem % 3600 / 60)) + ':' + p2(rem % 60) : p2(Math.floor(rem / 60)) + ':' + p2(rem % 60);
   if (S.ask) {
@@ -812,7 +809,6 @@ function draw() {
   g.fillStyle = '#fff'; g.font = 'bold 9.5px Roboto,Arial,sans-serif';
   g.fillText(fm(sy, b), PW + AX / 2, by - 5.5); g.fillText(cd, PW + AX / 2, by + 5.5);
 
-  // header
   g.textAlign = 'left'; g.font = 'bold 11px Roboto,Arial,sans-serif'; g.fillStyle = '#4D9DFF';
   g.fillText(sy + ' ▾', 6, 11);
   const sw = g.measureText(sy + ' ▾').width;
@@ -825,7 +821,6 @@ function draw() {
     g.fillText('O ' + fm(sy, c.o) + '  H ' + fm(sy, c.h) + '  L ' + fm(sy, c.l) + '  C ' + fm(sy, c.c), 6, 35);
   }
 
-  // measuring tool
   if (S.cross && cx != null && ax != null && (Math.abs(cx - ax) > 2 || Math.abs(cy - ay) > 2)) {
     const pa = vmn + (vmx - vmn) * (1 - ay / PH), pb = vmn + (vmx - vmn) * (1 - cy / PH), df = pb - pa;
     const nb = Math.abs(Math.round(idxAt(cx)) - Math.round(idxAt(ax))), mi = nb * TFS[S.tf];
@@ -840,7 +835,6 @@ function draw() {
     g.fillStyle = '#222'; g.textAlign = 'left'; g.font = 'bold 9.5px Roboto,Arial,sans-serif';
     g.fillText(t1, tx + 5, ty + 9); g.fillText(t2, tx + 5, ty + 23);
   }
-  // crosshair
   if (S.cross && cx != null) {
     g.strokeStyle = C.tx; g.setLineDash([3, 3]); g.beginPath();
     g.moveTo(cx, 0); g.lineTo(cx, PH); g.moveTo(0, cy); g.lineTo(PW, cy); g.stroke(); g.setLineDash([]);
@@ -862,7 +856,6 @@ cv.onpointerdown = e => {
   ptr.set(e.pointerId, e);
   const r = cv.getBoundingClientRect(), x = e.clientX - r.left, yy = e.clientY - r.top;
 
-  // grab a pending-order handle
   let hit = null;
   ORD.filter(o => o.state === 'Placed' && o.sym === S.sym).forEach(o => {
     const oy = (H - 18) * (1 - (o.price - VM.mn) / (VM.mx - VM.mn));
@@ -890,7 +883,6 @@ cv.onpointermove = e => {
   const r = cv.getBoundingClientRect(), PW = W - CONFIG.axisW, PH = H - 18, bw = PW / S.vis;
   if (!drag) return;
 
-  // drag on the price scale = stretch/shrink price range
   if (drag.ax) {
     e.preventDefault();
     S.manualPr = true;
@@ -898,7 +890,6 @@ cv.onpointermove = e => {
     S.pm = drag.pm + (e.clientX - drag.x) * (S.pr / PW);
     draw(); return;
   }
-  // two fingers = zoom time (or price if on the axis)
   if (ptr.size === 2 && drag.v) {
     const [p, q] = [...ptr.values()], d = Math.hypot(p.clientX - q.clientX, p.clientY - q.clientY) || 1;
     if ((p.clientX - r.left) > W - 100 || (q.clientX - r.left) > W - 100) { S.pr = Math.max(1e-9, drag.pr0 * (pd0 / d)); S.manualPr = true; }
@@ -907,17 +898,15 @@ cv.onpointermove = e => {
   }
   if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) drag.mv = 1;
 
-  // moving a pending order
   if (drag.order) {
     drag.order.price = drag.startPr - (e.clientY - drag.startY) * (S.pr / PH);
     draw(); return;
   }
   if (S.cross) { cx = e.clientX - r.left; cy = e.clientY - r.top; draw(); return; }
 
-  // FREE PAN: any direction. Horizontal = time, vertical = price (locks auto-fit once you drag vertically).
   if (drag.mv) {
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-    S.off = drag.off + dx / bw;                         // smooth, not snapped to whole candles
+    S.off = drag.off + dx / bw;
     if (S.manualPr || Math.abs(dy) > 8) {
       S.manualPr = true;
       S.pr = drag.pr > 0 ? drag.pr : (VM.mx - VM.mn);
@@ -983,6 +972,8 @@ async function openMarket({ s, sd, v, pr, sl = 0, tp = 0 }) {
   const p = await broker.placeOrder({ sym: s, type: sd, vol: v, open: pr, sl, tp, comm: v * 3 });
   POS.push(p);
   ORD.push({ id: p.id, sym: s, type: sd, vol: v, price: pr, time: p.time, state: 'Filled' });
+  // Reset the SMC engine so it re-evaluates trend from the fresh position set
+  SMC.reset(s);
   return p;
 }
 
@@ -1069,6 +1060,7 @@ function checkPending() {
     if ((k === 'Buy Limit' && a <= o.price) || (k === 'Buy Stop' && a >= o.price) || (k === 'Sell Limit' && b >= o.price) || (k === 'Sell Stop' && b <= o.price)) {
       o.state = 'Filled'; o.time = Date.now();
       POS.push({ id: o.id, sym: o.sym, type: o.type, vol: o.vol, open: o.price, sl: o.sl, tp: o.tp, comm: o.vol * 3, time: o.time });
+      SMC.reset(o.sym);
       beep(); showTradeNotif(o.sym, o.type, o.vol, 'filled', false);
       if (S.note) toast(k + ' filled @ ' + fm(o.sym, o.price));
       if (S.tab === 'trade') rTrade();
@@ -1082,6 +1074,7 @@ function closeP(id, reason, quiet) {
   const pl = pnl(p);
   DL.push({ id: p.id, sym: p.sym, type: p.type, vol: p.vol, open: p.open, close: cp, ot: p.time, ct: Date.now(), pnl: pl });
   POS = POS.filter(x => x !== p); ACC.bal += pl;
+  SMC.reset(p.sym);
   if (quiet) return;
   beep(); showTradeNotif(p.sym, p.type === 'BUY' ? 'Sell' : 'Buy', p.vol, reason || 'closed', false);
   if (S.tab === 'trade') rTrade(); if (S.tab === 'history') rHist();
@@ -1130,7 +1123,6 @@ function uQuotes() {
     r.querySelector('.qt').textContent = new Date(q.t).toTimeString().slice(0, 8) + ' ⊨ ' + Math.round(SY[s].sp * 10 ** d);
     const bd = r.querySelector('.qb'), ak = r.querySelector('.qa');
     bd.innerHTML = priceHTML(s, q.b); ak.innerHTML = priceHTML(s, q.b + SY[s].sp);
-    // same behaviour as the SELL/BUY buttons: colours flip with the last tick direction
     const up = (q.dir || -1) > 0, BLUE = S.theme === 'Light' ? '#1a73e8' : '#4C8DF6', RED = S.theme === 'Light' ? '#d93025' : '#EF5350';
     bd.style.color = up ? BLUE : RED; ak.style.color = up ? RED : BLUE;
     r.querySelector('.qh').innerHTML = '<span>L: ' + nsp(fm(s, q.lo)) + '</span><span>H: ' + nsp(fm(s, q.hi)) + '</span>';
