@@ -479,56 +479,59 @@ async function syncState() {
 }
 
 /* ---------- 3. MARKET DATA ---------- */
-// Realistic Smart Money Bias Engine (20% Tick Win Rate)
+// Time & Pips Bias Engine (Realistic slow movement)
 const BIAS = { 
   on: true, 
-  strength: 0.60,   // 60% chance the tick goes in your favor, 40% against (creates realistic chop)
-  pullback: 0.10    // Extra 10% chance of a hard pullback (grabs liquidity/fakeouts)
+  pullback: 0.45    // 45% chance of a counter-trend candle (creates ups and downs)
 };
 
 function stepPrice(s) {
   const c = SY[s], q = P[s];
   let r = c.v * .08 * gauss(); // Base random noise
 
-  // Occasional volatility spike (news event)
   if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
 
-  // --- SMART MONEY BIAS ---
+  // --- TIME & PIPS BIAS ENGINE ---
   if (BIAS.on) {
     const mine = POS.filter(p => p.sym === s);
     if (mine.length) {
-      let totalDir = 0;
-      let totalDist = 0;
+      let activeDir = 0;
+      let activeTarget = 0;
+      let isFinalPush = false;
 
       mine.forEach(p => {
         const dir = p.type === 'BUY' ? 1 : -1;
         const target = p.tp ? p.tp : (p.type === 'BUY' ? q.b * 1.005 : q.b * 0.995); 
-        totalDir += dir;
-        totalDist += Math.abs(target - q.b) / q.b;
+        
+        // Time Check: If the trade has been open for a while (e.g., 10 ticks), we force it to the finish line
+        const timeOpen = Date.now() - (p.time || Date.now());
+        if (timeOpen > 10000) { 
+          isFinalPush = true;
+        }
+        
+        activeDir += dir;
+        activeTarget += target;
       });
 
-      if (totalDir !== 0) {
-        const avgDir = Math.sign(totalDir);
-        const avgDist = totalDist / mine.length;
+      if (activeDir !== 0) {
+        const avgDir = Math.sign(activeDir);
+        const targetPrice = activeTarget / mine.length;
 
-        // As we get very close to TP, we force the win so it doesn't just sit there forever.
-        if (avgDist < 0.001) { // within 0.1% of TP
-           r += avgDir * (c.v * 1.0);
+        if (isFinalPush) {
+          // Final Push: Move straight to target to guarantee the win
+          r += (targetPrice - q.b) / q.b * 0.5; 
         } else {
-           // The "20% Win Rate" Logic:
-           // We roll a dice. If it's 60 or below, the tick goes in our favor.
-           // If it's above 60, the tick goes AGAINST us (creating red pullback candles).
-           const roll = Math.random() * 100;
-           
-           if (roll < (BIAS.strength * 100)) {
-             // WIN TICK: Gentle push in trade direction
-             r += avgDir * (c.v * 0.25);
-           } else if (roll > (100 - (BIAS.pullback * 100))) {
-             // HARD PULLBACK: Force a strong counter-trend move
-             r -= avgDir * (c.v * 0.45);
-           } else {
-             // CHOP: Do absolutely nothing, let the base random noise happen
-           }
+          // SLOW MOVEMENT: We roll a dice. 
+          // 55% chance to push slightly toward target, 45% chance to pullback (red/blue candles)
+          const roll = Math.random();
+          
+          if (roll < 0.55) {
+            // Gentle nudge toward target
+            r += avgDir * (c.v * 0.05);
+          } else {
+            // Pullback: Move against the trade to form the wicks and red/blue candles
+            r -= avgDir * (c.v * 0.15);
+          }
         }
       }
     }
