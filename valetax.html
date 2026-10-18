@@ -130,7 +130,10 @@ html, body {
 .sec h2 { font-size: 18px; font-weight: 800; color: var(--t); }
 .sec a { color: var(--m); font-weight: 700; cursor: pointer; font-size: 14px; }
 
-/* Market & News Cards */
+/* News and Market Cards */
+.news-card { width: 260px; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.news-img { height: 130px; width: 100%; display: flex; align-items: flex-end; padding: 12px; }
+.news-content { padding: 14px; }
 .mc { width: 240px; height: 200px; border-radius: 16px; padding: 14px; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; font-weight: 700; font-size: 15px; line-height: 1.3; }
 .mc .fl { align-self: flex-start; background: #fff; color: #232b38; border-radius: 20px; padding: 4px 10px 4px 6px; font-size: 12px; display: flex; align-items: center; gap: 6px; margin-bottom: auto; font-weight: 800; }
 .mc .r { display: flex; justify-content: space-between; font-size: 13px; margin-top: 6px; font-weight: 600; color: rgba(255,255,255,0.8); }
@@ -138,9 +141,15 @@ html, body {
 .flag { width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(#b22234 0 14%, #fff 14% 28%, #b22234 28% 42%, #fff 42% 56%, #b22234 56% 70%, #fff 70% 84%, #b22234 84%); position: relative; }
 .flag::after { content: ""; position: absolute; left: 0; top: 0; width: 55%; height: 55%; background: #3c3b6e; border-radius: 10px 0 0 0; }
 
-.news-card { width: 280px; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-.news-img { height: 140px; width: 100%; display: flex; align-items: flex-end; padding: 12px; }
-.news-content { padding: 14px; }
+/* Copy Trading */
+.st { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--bd); }
+.av { width: 42px; height: 42px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 18px; color: #fff; overflow: hidden; border: 1px solid var(--bd); }
+.av img { width: 100%; height: 100%; object-fit: cover; }
+.st b { display: block; font-size: 16px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; color: var(--t); }
+.st .gw { flex: 1; text-align: center; font-size: 16px; font-weight: 700; color: #21a56f; }
+.pg { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; }
+.pg button { width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--c); color: var(--t); font-weight: 800; font-size: 15px; }
+.pg .on { background: var(--bd); }
 
 /* Tabs */
 .tabs { display: flex; border-bottom: 1px solid var(--bd); margin: 0 16px 14px; overflow-x: auto; scrollbar-width: none; }
@@ -148,14 +157,7 @@ html, body {
 .tabs button.on { color: var(--t); border-color: var(--t); }
 .tabs.gt button.on { border-color: var(--p); }
 
-/* Transactions */
-.tx { background: var(--c); border-radius: 16px; padding: 14px 16px; margin: 0 16px 10px; display: flex; align-items: center; gap: 12px; }
-.tx .ci { width: 40px; height: 40px; border-radius: 50%; background: var(--bg); color: var(--m); display: grid; place-items: center; }
-.tx .d { flex: 1; }
-.tx .d b { font-size: 17px; font-weight: 800; }
-.dh { margin: 16px 16px 10px; font-size: 16px; font-weight: 800; color: var(--m); }
-
-/* Forms */
+/* Forms & Other Modules */
 .fld { margin: 0 16px 14px; }
 .fld label { display: block; color: var(--m); font-size: 15px; margin-bottom: 8px; font-weight: 700; }
 .inp { width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--bd); font-size: 24px; font-weight: 600; color: var(--t); outline: 0; padding: 4px 0; }
@@ -289,7 +291,6 @@ const hdr = (t, b) => `<div class="hd">${b ? `<button class="ib" onclick="${b}">
 const tabs = (l, x = '') => `<div class="tabs ${x}">${l.map((t, i) => `<button class="${S.tab == i ? 'on' : ''}" onclick="S.tab=${i};render()">${t}</button>`).join('')}</div>`;
 const dotsH = n => `<div class="dots">${Array.from({ length: n }, (_, i) => `<i class="${i == 0 ? 'on' : ''}"></i>`).join('')}</div>`;
 
-// ✅ EXACT MATCH ACCOUNT CARD
 const card = a => `
     <div class="acc-card" onclick="go('accounts')">
         <div class="acc-header">
@@ -321,7 +322,6 @@ function spark(seed, k, neg) {
     return `<svg class="sp" viewBox="0 0 108 52" preserveAspectRatio="none"><polygon points="0,52 ${pts} 108,52" fill="${neg ? '#e5484d' : '#21a56f'}" opacity=".12"/><polyline points="${pts}" fill="none" stroke="${neg ? '#e5484d' : '#21a56f'}" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>`;
 }
 
-// ✅ EXACT MATCH BANNERS
 const BN = [
     ['VXclusive','240.00','Collect coins and explore exclusive rewards at the Valetax Store','Open VXclusive','#e0f2ec','savings',"toast('VXclusive')"],
     ['Explore Analysis Centre','','Access expert insights, clear signals, and proven strategies','Go to analysis','#e2e8f0','laptop_mac',"toast('Analysis')"],
@@ -344,7 +344,6 @@ const V = {
             <button class="btn s" onclick="go('addacc')" style="padding:10px 16px;">${ic('add')} Add Account</button>
         </div>
         
-        <!-- Auto-scroll Accounts -->
         <div class="car" data-auto="1" onscroll="dots(this)">${A.map(card).join('')}</div>
         ${dotsH(A.length)}
         
@@ -355,7 +354,6 @@ const V = {
             ${act('more_vert','More','more()')}
         </div>
         
-        <!-- Auto-scroll Banners -->
         <div class="car" data-auto="1" onscroll="dots(this)">
             ${BN.map((b, i) => `<div class="ban" style="background:${b[4]}"><h3>${b[0]}</h3><p>${b[2]}</p><button class="btn pl" onclick="${b[6]}">${b[3]}</button><div class="ico">${ic(b[5],'f')}</div><span class="cnt">${i+1} / 4</span></div>`).join('')}
         </div>
@@ -426,12 +424,26 @@ const V = {
     `,
     copy: () => {
         const L = [
-            ['Multi bo…',5514,1,'+1654.81%','rise','#4a7ab5','✈'],
-            ['Kucing M…',3737,5,'+186.13%','step','#6a5a86','🏍'],
-            ['Go to mo…',3649,1,'+192.32%','step','#222','📈'],
-            ['Low Risk …',3502,1,'+743.06%','rise','#e2a31b','S'],
-            ['Trade 00X',3147,1,'+360.21%','rise','#111','◉'],
-            ['Apex Glo…',3048,25,'+418.3%','rise','#7b8a96','👤']
+            { name: 'Multi bo…', followers: 5514, min: 1, growth: '+1654.81%', trend: 'rise', color: '#4a7ab5', avatar: 'https://i.pravatar.cc/150?img=11' },
+            { name: 'Kucing M…', followers: 3736, min: 5, growth: '+186.13%', trend: 'step', color: '#6a5a86', avatar: 'https://i.pravatar.cc/150?img=12' },
+            { name: 'Go to mo…', followers: 3650, min: 1, growth: '+192.32%', trend: 'step', color: '#222', avatar: 'https://i.pravatar.cc/150?img=13' },
+            { name: 'Low Risk …', followers: 3502, min: 1, growth: '+743.06%', trend: 'rise', color: '#e2a31b', avatar: 'https://i.pravatar.cc/150?img=14' },
+            { name: 'Trade 00X', followers: 3147, min: 1, growth: '+360.21%', trend: 'rise', color: '#111', avatar: 'https://i.pravatar.cc/150?img=15' },
+            { name: 'Apex Glo…', followers: 3047, min: 25, growth: '+418.3%', trend: 'rise', color: '#7b8a96', avatar: 'https://i.pravatar.cc/150?img=16' },
+            { name: 'ACM Gold', followers: 2679, min: 5, growth: '+246.74%', trend: 'step', color: '#f4d800', avatar: 'https://i.pravatar.cc/150?img=17' },
+            { name: 'SAFE MO…', followers: 2056, min: 25, growth: '+667.98%', trend: 'step', color: '#1f6b3a', avatar: 'https://i.pravatar.cc/150?img=18' },
+            { name: 'Big Dream', followers: 1618, min: 1, growth: '+1421.96%', trend: 'spk', color: '#5a2d14', avatar: 'https://i.pravatar.cc/150?img=19' },
+            { name: 'Gold$1', followers: 1454, min: 1, growth: '+1627.13%', trend: 'spk', color: '#6d8fb0', avatar: 'https://i.pravatar.cc/150?img=20' },
+            { name: 'HAZILION', followers: 1346, min: 1, growth: '+40.13%', trend: 'rise', color: '#1b1b1b', avatar: 'https://i.pravatar.cc/150?img=21' },
+            { name: 'My Forex', followers: 1132, min: 1, growth: '+137.46%', trend: 'rise', color: '#2b2bd6', avatar: 'https://i.pravatar.cc/150?img=22' },
+            { name: 'ANGEL T…', followers: 1127, min: 1, growth: '+1.21%', trend: 'step', color: '#a02a8f', avatar: 'https://i.pravatar.cc/150?img=23' },
+            { name: 'RAIZEN', followers: 1125, min: 1, growth: '-99.95%', trend: 'crash', color: '#111b3a', avatar: 'https://i.pravatar.cc/150?img=24' },
+            { name: 'STAR PR…', followers: 1091, min: 1, growth: '+104.24%', trend: 'rise', color: '#3fcf3a', avatar: 'https://i.pravatar.cc/150?img=25' },
+            { name: 'MARKET …', followers: 1026, min: 200, growth: '+9.24%', trend: 'spk', color: '#9aa0a8', avatar: 'https://i.pravatar.cc/150?img=26' },
+            { name: 'FOREX EV…', followers: 1013, min: 1, growth: '+20.84%', trend: 'step', color: '#111', avatar: 'https://i.pravatar.cc/150?img=27' },
+            { name: 'MAYA MU…', followers: 880, min: 1, growth: '+26.82%', trend: 'step', color: '#d89bb0', avatar: 'https://i.pravatar.cc/150?img=28' },
+            { name: 'Valetex P…', followers: 657, min: 1, growth: '-98.93%', trend: 'drop', color: '#2a1a05', avatar: 'https://i.pravatar.cc/150?img=29' },
+            { name: 'Kucing M…', followers: 619, min: 5, growth: '+1389709.54%', trend: 'step', color: '#7a6a90', avatar: 'https://i.pravatar.cc/150?img=30' }
         ];
         return `
             ${hdr('Copy Trading')}
@@ -445,8 +457,33 @@ const V = {
                 ${ic('tune','gn')}
             </div>
             <div class="row sb mu" style="padding:6px 16px;font-size:14px"><span>Strategy</span><span>Growth</span><span style="margin-right:20px">Chart</span></div>
-            ${L.map((s,i) => `<div class="st" onclick="toast('${s[0].replace('…','')} strategy')" style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--bd);"><span class="av" style="background:${s[5]};font-size:${s[6].length>1?'16px':'18px'};width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff;">${s[6]}</span><div style="flex:1; min-width:0;"><b style="font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">${s[0]}</b><span class="mu" style="font-size:12px">${ic('group','').replace('class="ms','class="ms" style="font-size:14px" data-x="')} ${s[1]} &nbsp;$ Min. $ ${s[2]}</span></div><div class="gw" style="text-align:center;font-size:16px;font-weight:700;color:#21a56f;${s[3][0]=='-'?'color:#e5484d;':''}${s[3].length>10?'font-size:13px;':''}">${s[3]}</div>${spark(i*77+13,s[4],s[3][0]=='-')}</div>`).join('')}
-            <div class="pg" style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px;"><b>20 ${ic('expand_more')}</b><div class="row g8"><button>‹</button><button class="on">1</button><button>2</button><button>3</button><button style="background:none">…</button><button style="width:auto;padding:0 12px">238</button><button>›</button></div></div>
+            
+            ${L.map((s,i) => `
+                <div class="st" onclick="toast('${s.name} strategy')">
+                    <div class="av" style="background:${s.color};border:none;">
+                        <img src="${s.avatar}" alt="${s.name}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                    </div>
+                    <div style="flex:1; min-width:0;">
+                        <b>${s.name}</b>
+                        <span class="mu" style="font-size:12px">${ic('group','').replace('class="ms','class="ms" style="font-size:14px" data-x="')} ${s.followers} &nbsp;$ Min. $ ${s.min}</span>
+                    </div>
+                    <div class="gw" style="${s.growth[0]=='-'?'color:#e5484d;':''}${s.growth.length>10?'font-size:13px;':''}">${s.growth}</div>
+                    ${spark(i*77+13,s.trend,s.growth[0]=='-')}
+                </div>
+            `).join('')}
+            
+            <div class="pg">
+                <b>20 ${ic('expand_more')}</b>
+                <div class="row g8">
+                    <button style="background:none;">‹</button>
+                    <button class="on">1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <button style="background:none">…</button>
+                    <button style="width:auto;padding:0 12px">238</button>
+                    <button>›</button>
+                </div>
+            </div>
         `;
     },
     profile: () => `
@@ -620,11 +657,11 @@ function txs(l) {
         const h = t.d != d ? `<div class="dh">${t.d}</div>` : '';
         d = t.d;
         return h + `
-            <div class="tx">
-                <i class="ci">${ic(t.ty=='D'?'download':t.ty=='W'?'upload':'sync_alt')}</i>
-                <div class="d">
+            <div class="tx" style="margin: 0 16px 10px; background: var(--c); border-radius: 16px; padding: 14px 16px; display: flex; align-items: center; gap: 12px;">
+                <i class="ci" style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg); color: var(--m); display: grid; place-items: center;">${ic(t.ty=='D'?'download':t.ty=='W'?'upload':'sync_alt')}</i>
+                <div class="d" style="flex:1;">
                     <div class="row g8">
-                        <b>${t.ty=='D'?'Deposit':t.ty=='W'?'Withdrawal':'Transfer'}</b>
+                        <b style="font-size:17px;font-weight:800;">${t.ty=='D'?'Deposit':t.ty=='W'?'Withdrawal':'Transfer'}</b>
                         ${t.s=='x'?ic('cancel','f').replace('class="ms','class="ms" style="color:#e03131;font-size:18px" data-x="'):t.s=='p'?ic('schedule','f').replace('class="ms','class="ms" style="color:#ef8a30;font-size:18px" data-x="'):ic('check_circle','f').replace('class="ms','class="ms" style="color:#1f9d6b;font-size:18px" data-x="')}
                     </div>
                     <div class="mu" style="font-weight:700;font-size:13px">ID: ${t.id}</div>
@@ -649,6 +686,7 @@ const filt = () => `<div class="row g8" style="padding:0 16px 4px"><span class="
 const wcard = () => `<div class="card" onclick="S.ai=0;S.keep=1;go('accounts')"><span class="tag g">VALETAX WALLET</span><div style="font-size:20px;font-weight:800;margin:10px 0 4px">Wallet</div><div class="mu">$ 0.00</div></div>`;
 
 function dots(el) {
+    if(!el.nextElementSibling) return;
     const w = el.firstElementChild.offsetWidth + 12;
     const i = Math.round(el.scrollLeft / w);
     [...el.nextElementSibling.children].forEach((d, k) => d.classList.toggle('on', k == i));
@@ -774,19 +812,17 @@ function render() {
         </button>
     `).join('');
 
-    // ✅ Setup Auto-Scroll on render
     setTimeout(setupAutoScroll, 100);
 }
 
+// ✅ FIXED AUTO SCROLL LOGIC
 function setupAutoScroll() {
     document.querySelectorAll('.car[data-auto]').forEach(car => {
-        // Prevent multiple intervals on the same element if it re-renders
-        if(car.dataset.hasInterval) return;
+        if (car.dataset.hasInterval) return;
         car.dataset.hasInterval = 'true';
         
         let isPaused = false;
         
-        // Pause on user interaction
         car.addEventListener('touchstart', () => isPaused = true, {passive: true});
         car.addEventListener('touchend', () => setTimeout(() => isPaused = false, 3000), {passive: true});
         car.addEventListener('mousedown', () => isPaused = true);
@@ -807,7 +843,7 @@ function setupAutoScroll() {
             } else {
                 car.scrollTo({ left: car.scrollLeft + scrollAmount, behavior: 'smooth' });
             }
-        }, 3500); // Scroll every 3.5 seconds
+        }, 3500); 
     });
 }
 
