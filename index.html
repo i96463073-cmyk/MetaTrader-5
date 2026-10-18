@@ -480,67 +480,73 @@ async function syncState() {
 
 /* ---------- 3. MARKET DATA ---------- */
 // ============================================================
-// BLIND SMC ENGINE
-// The price engine has NO KNOWLEDGE of the Take Profit.
-// It only knows a hidden trend direction and an internal
-// "swing counter" that forces Up -> Down -> Up -> Down cycles.
-// The TP is just where the price happens to walk into.
+// BLIND SMC ENGINE  —  5% WIN-RATE VARIANT
+// The engine has NO knowledge of the Take Profit. It only knows
+// a hidden trend (the direction of the open positions) and an
+// internal swing counter that produces slow Up/Down legs, so the
+// chart always looks like real market structure (red & green
+// candles, wicks, pullbacks). The TP is just where the price
+// happens to walk into, and the SMC leg is biased toward the
+// trend at 5% per tick (very slow) so that:
+//   • The price still hits the TP eventually
+//   • The chart looks organic, not a magnet/spike
+//   • The safety net forces the closing push if the trade lingers
 // ============================================================
 const SMC = {
-  // Per-symbol engine state:
-  // trend: +1 (up) or -1 (down) or 0 (neutral)
-  // cycleTicks: how many ticks left in the current up/down leg
-  // legDir: current leg direction (+1 or -1)
-  // age: ticks since engine started pushing (for the time safety net)
-  _state: {},   // keyed by symbol
+  _state: {},
 
-  reset(s) { this._state[s] = { trend:0, legDir:1, cycleTicks:0, age:0 }; },
+  // Probability per tick that the leg is aligned with the trade.
+  // 0.05 = 5% win rate  ->  very slow, very organic trend.
+  TREND_PROB: 0.05,
+  // Number of ticks the final safety push is allowed to run before it
+  // will drag the price the remaining distance to TP.
+  SAFETY_AGE: 240,
+  // The maximum single-tick movement, as a multiplier of SY.v.
+  MAX_TICK: 1.0,
 
-  // Called once per tick per symbol
+  reset(s) { this._state[s] = { trend: 0, legDir: 1, legLen: 0, age: 0 }; },
+
   step(s, c) {
     const q = P[s];
-    const st = this._state[s] || (this._state[s] = { trend:0, legDir:1, cycleTicks:0, age:0 });
-    const mine = POS.filter(p => p.sym === s);
+    const st = this._state[s] || (this._state[s] = { trend: 0, legDir: 1, legLen: 0, age: 0 });
 
-    // Base random noise (always present, gives the chart life)
+    // Base random noise (the market's heartbeat)
     let r = c.v * .06 * gauss();
     if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
 
+    const mine = POS.filter(p => p.sym === s);
     if (mine.length) {
-      // Determine hidden trend from open positions
       let netDir = 0;
       mine.forEach(p => { netDir += (p.type === 'BUY' ? 1 : -1); });
       st.trend = Math.sign(netDir) || 0;
       st.age++;
 
       if (st.trend !== 0) {
-        // SMC LEG CYCLE:
-        // When cycleTicks hits 0, we flip the leg direction and pick a new leg length.
-        if (st.cycleTicks <= 0) {
-          st.legDir = -st.legDir; // flip direction every leg
-          // Leg length: up to 12 ticks. On the trend side, longer legs.
-          const aligned = st.legDir === st.trend;
-          st.cycleTicks = aligned
-            ? 6 + Math.floor(Math.random() * 8)   // 6..14 ticks WITH the trend
-            : 2 + Math.floor(Math.random() * 4);  // 2..5 ticks AGAINST (the pullback)
+        // Start a new leg?
+        if (st.legLen <= 0) {
+          // Pick the leg direction with a 5% trend-alignment bias.
+          const withTrend = Math.random() < this.TREND_PROB;
+          st.legDir = withTrend ? st.trend : -st.trend;
+          // Counter legs are short (pullback), trend legs are longer
+          st.legLen = withTrend
+            ? 4 + Math.floor(Math.random() * 6)   // 4..9 ticks with trend
+            : 2 + Math.floor(Math.random() * 3);  // 2..4 ticks against
         }
-        st.cycleTicks--;
+        st.legLen--;
 
-        // Each tick moves ONLY 1 "tick unit" in the current leg direction.
-        // It is mathematically impossible to produce a giant candle because
-        // every tick's contribution is capped at c.v * 1.0.
-        const step = c.v * 0.9;
+        // One tick of the leg - hard-capped so a spike can never happen.
+        const step = c.v * Math.min(this.MAX_TICK, 0.9);
         r += st.legDir * step;
 
-        // TIME SAFETY NET: if the trade is 3+ minutes old and still open,
-        // nudge the leg toward the trend slightly more often.
-        if (st.age > 180) {
-          if (Math.random() < 0.15) r += st.trend * c.v * 0.5;
+        // SAFETY: if the trade hasn't closed after SAFETY_AGE ticks,
+        // add a small extra nudge toward the trend each tick. This
+        // still moves one small unit at a time, so no spike either.
+        if (st.age > this.SAFETY_AGE) {
+          if (Math.random() < 0.4) r += st.trend * c.v * 0.7;
         }
       }
     } else {
-      // No positions - pure noise, reset engine
-      st.trend = 0; st.legDir = 1; st.cycleTicks = 0; st.age = 0;
+      st.trend = 0; st.legDir = 1; st.legLen = 0; st.age = 0;
     }
 
     const prev = q.b;
@@ -550,9 +556,7 @@ const SMC = {
   }
 };
 
-function stepPrice(s) {
-  SMC.step(s, SY[s]);
-}
+function stepPrice(s) { SMC.step(s, SY[s]); }
 const fm = (s, v) => (+v).toFixed(SY[s].d);
 
 /* ---------- 4. BROKER ADAPTERS ---------- */
@@ -584,7 +588,6 @@ function reconnect() {
 /* ---------- 5. CANDLE ENGINE ---------- */
 const curKey = () => S.sym + '|' + S.tf;
 
-// Build history ending in the CURRENT time bucket (last candle = candle still forming).
 function genCandles(s, tf) {
   const c = SY[s], n = 2000, out = [], m = TFS[tf] * 6e4;
   const sg = c.v * .35 * Math.sqrt(TF_VOL[tf]) / Math.sqrt(8);
@@ -972,7 +975,6 @@ async function openMarket({ s, sd, v, pr, sl = 0, tp = 0 }) {
   const p = await broker.placeOrder({ sym: s, type: sd, vol: v, open: pr, sl, tp, comm: v * 3 });
   POS.push(p);
   ORD.push({ id: p.id, sym: s, type: sd, vol: v, price: pr, time: p.time, state: 'Filled' });
-  // Reset the SMC engine so it re-evaluates trend from the fresh position set
   SMC.reset(s);
   return p;
 }
