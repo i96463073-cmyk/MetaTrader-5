@@ -480,15 +480,20 @@ async function syncState() {
 
 /* ---------- 3. MARKET DATA ---------- */
 // Pure, unbiased random walk. No win-rate, no magnetic pull, no fake trends.
-// The market moves exactly as a real chart would, based purely on volatility
-// and the Gaussian random noise.
+// A volatility cap is applied so a single tick can never produce a long
+// vertical candle — the largest one-tick move is limited to 1.5 × SY.v,
+// which is roughly one normal candle body at the smallest timeframe.
 function stepPrice(s) {
   const c = SY[s], q = P[s];
-  
+
   let r = c.v * .08 * gauss();
-  
-  // Occasional volatility spike (news event / liquidity grab)
   if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
+
+  // HARD CAP: no single tick may exceed ±1.5 × SY.v in log-return space.
+  // This is what removes the long "resend" vertical candles.
+  const cap = c.v * 1.5;
+  if (r >  cap) r =  cap;
+  if (r < -cap) r = -cap;
 
   const prev = q.b;
   q.b *= Math.exp(r);
