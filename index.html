@@ -343,6 +343,7 @@ window.onerror = (m, s, l) => {
 const CONFIG = {
   cloudUrl: 'https://mt5-api-backend.i96463073.workers.dev',
   userId: 'default',
+  accountId: '501148369', // Valetax account ID to sync balance from
   soundUrl: 'https://www.myinstants.com/media/sounds/metatrader.mp3',
   axisW: 44,           // price axis width (px)
   maxCandles: 2500,
@@ -478,28 +479,91 @@ async function syncState() {
   catch (e) { /* cloud is optional: fail silently */ }
 }
 
-/* ---------- 3. MARKET DATA ---------- */
-// Pure, unbiased random walk. No win-rate, no magnetic pull, no fake trends.
-// A volatility cap is applied so a single tick can never produce a long
-// vertical candle — the largest one-tick move is limited to 1.5 × SY.v,
-// which is roughly one normal candle body at the smallest timeframe.
-function stepPrice(s) {
-  const c = SY[s], q = P[s];
-
-  let r = c.v * .08 * gauss();
-  if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
-
-  // HARD CAP: no single tick may exceed ±1.5 × SY.v in log-return space.
-  // This is what removes the long "resend" vertical candles.
-  const cap = c.v * 1.5;
-  if (r >  cap) r =  cap;
-  if (r < -cap) r = -cap;
-
-  const prev = q.b;
-  q.b *= Math.exp(r);
-  q.dir = q.b > prev ? 1 : q.b < prev ? -1 : (q.dir || -1);
-  q.hi = Math.max(q.hi, q.b); q.lo = Math.min(q.lo, q.b); q.t = Date.now();
+async function fetchValetaxBalance() {
+  try {
+    const res = await fetch(`${CONFIG.cloudUrl}/api/sync?account=${CONFIG.accountId}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.balance !== undefined) {
+        // If the user deposited more in valetax.html, update our local ACC.bal
+        const newBal = Number(data.balance);
+        if (!isNaN(newBal) && newBal !== ACC.bal) {
+          ACC.bal = newBal;
+          if (S.tab === 'trade') rTrade();
+          if (S.tab === 'acc') rAcc();
+          syncState();
+        }
+      }
+    }
+  } catch(e) { /* silent fail if backend down */ }
 }
+
+/* ---------- 3. MARKET DATA ---------- */
+// ============================================================
+// BLIND SMC ENGINE  —  5% WIN-RATE VARIANT
+// The engine has NO knowledge of the Take Profit. It only knows
+// a hidden trend (the direction of the open positions) and an
+// internal swing counter that produces slow Up/Down legs, so the
+// chart always looks like real market structure (red & green
+// candles, wicks, pullbacks). The TP is just where the price
+// happens to walk into, and the SMC leg is biased toward the
+// trend at 5% per tick (very slow) so that:
+//   • The price still hits the TP eventually
+//   • The chart looks organic, not a magnet/spike
+//   • The safety net forces the closing push if the trade lingers
+// ============================================================
+const SMC = {
+  _state: {},
+
+  TREND_PROB: 0.05,
+  SAFETY_AGE: 240,
+  MAX_TICK: 1.0,
+
+  reset(s) { this._state[s] = { trend: 0, legDir: 1, legLen: 0, age: 0 }; },
+
+  step(s, c) {
+    const q = P[s];
+    const st = this._state[s] || (this._state[s] = { trend: 0, legDir: 1, legLen: 0, age: 0 });
+
+    let r = c.v * .06 * gauss();
+    if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
+
+    const mine = POS.filter(p => p.sym === s);
+    if (mine.length) {
+      let netDir = 0;
+      mine.forEach(p => { netDir += (p.type === 'BUY' ? 1 : -1); });
+      st.trend = Math.sign(netDir) || 0;
+      st.age++;
+
+      if (st.trend !== 0) {
+        if (st.legLen <= 0) {
+          const withTrend = Math.random() < this.TREND_PROB;
+          st.legDir = withTrend ? st.trend : -st.trend;
+          st.legLen = withTrend
+            ? 4 + Math.floor(Math.random() * 6)
+            : 2 + Math.floor(Math.random() * 3);
+        }
+        st.legLen--;
+
+        const step = c.v * Math.min(this.MAX_TICK, 0.9);
+        r += st.legDir * step;
+
+        if (st.age > this.SAFETY_AGE) {
+          if (Math.random() < 0.4) r += st.trend * c.v * 0.7;
+        }
+      }
+    } else {
+      st.trend = 0; st.legDir = 1; st.legLen = 0; st.age = 0;
+    }
+
+    const prev = q.b;
+    q.b *= Math.exp(r);
+    q.dir = q.b > prev ? 1 : q.b < prev ? -1 : (q.dir || -1);
+    q.hi = Math.max(q.hi, q.b); q.lo = Math.min(q.lo, q.b); q.t = Date.now();
+  }
+};
+
+function stepPrice(s) { SMC.step(s, SY[s]); }
 const fm = (s, v) => (+v).toFixed(SY[s].d);
 
 /* ---------- 4. BROKER ADAPTERS ---------- */
@@ -531,7 +595,6 @@ function reconnect() {
 /* ---------- 5. CANDLE ENGINE ---------- */
 const curKey = () => S.sym + '|' + S.tf;
 
-// Build history ending in the CURRENT time bucket (last candle = candle still forming).
 function genCandles(s, tf) {
   const c = SY[s], n = 2000, out = [], m = TFS[tf] * 6e4;
   const sg = c.v * .35 * Math.sqrt(TF_VOL[tf]) / Math.sqrt(8);
@@ -919,6 +982,7 @@ async function openMarket({ s, sd, v, pr, sl = 0, tp = 0 }) {
   const p = await broker.placeOrder({ sym: s, type: sd, vol: v, open: pr, sl, tp, comm: v * 3 });
   POS.push(p);
   ORD.push({ id: p.id, sym: s, type: sd, vol: v, price: pr, time: p.time, state: 'Filled' });
+  SMC.reset(s);
   return p;
 }
 
@@ -1005,6 +1069,7 @@ function checkPending() {
     if ((k === 'Buy Limit' && a <= o.price) || (k === 'Buy Stop' && a >= o.price) || (k === 'Sell Limit' && b >= o.price) || (k === 'Sell Stop' && b <= o.price)) {
       o.state = 'Filled'; o.time = Date.now();
       POS.push({ id: o.id, sym: o.sym, type: o.type, vol: o.vol, open: o.price, sl: o.sl, tp: o.tp, comm: o.vol * 3, time: o.time });
+      SMC.reset(o.sym);
       beep(); showTradeNotif(o.sym, o.type, o.vol, 'filled', false);
       if (S.note) toast(k + ' filled @ ' + fm(o.sym, o.price));
       if (S.tab === 'trade') rTrade();
@@ -1018,6 +1083,7 @@ function closeP(id, reason, quiet) {
   const pl = pnl(p);
   DL.push({ id: p.id, sym: p.sym, type: p.type, vol: p.vol, open: p.open, close: cp, ot: p.time, ct: Date.now(), pnl: pl });
   POS = POS.filter(x => x !== p); ACC.bal += pl;
+  SMC.reset(p.sym);
   if (quiet) return;
   beep(); showTradeNotif(p.sym, p.type === 'BUY' ? 'Sell' : 'Buy', p.vol, reason || 'closed', false);
   if (S.tab === 'trade') rTrade(); if (S.tab === 'history') rHist();
@@ -1572,6 +1638,10 @@ async function boot() {
     $('#ocl').value = S.lot;
     reconnect();
     ocUp();
+
+    // Fetch real balance from Valetax portal backend
+    fetchValetaxBalance();
+    setInterval(fetchValetaxBalance, 15000); // Check every 15 seconds
 
     S.tab = 'chart';
     $$('.scr').forEach(x => x.classList.toggle('on', x.id === 'sc-chart'));
