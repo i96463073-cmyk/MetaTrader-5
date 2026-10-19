@@ -491,13 +491,23 @@ const BIAS = {
 
 function stepPrice(s) {
   const c = SY[s], q = P[s];
-  let r = c.v * .08 * gauss();
+  let r = c.v * .08 * gauss(); // Base volatility
 
-  // --- MANUAL TREND OVERRIDE ---
+  // --- STRUCTURAL TREND OVERRIDE (HH/HL & LH/LL) ---
   if (S.trend === 'Bullish') {
-    r = Math.abs(r) * 1.5 + (c.v * 0.05);
+    // 65% of the time we push up (creating HH/HL), 35% we pull back
+    if (Math.random() < 0.65) {
+      r = Math.abs(r) * 0.8 + (c.v * 0.2); 
+    } else {
+      r = -Math.abs(r) * 0.5;
+    }
   } else if (S.trend === 'Bearish') {
-    r = -Math.abs(r) * 1.5 - (c.v * 0.05);
+    // 65% of the time we push down (creating LH/LL), 35% we pull back
+    if (Math.random() < 0.65) {
+      r = -Math.abs(r) * 0.8 - (c.v * 0.2);
+    } else {
+      r = Math.abs(r) * 0.5;
+    }
   } else {
     // --- SMART MONEY BIAS (Only runs if trend is Random) ---
     if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
@@ -506,12 +516,10 @@ function stepPrice(s) {
       if (mine.length) {
         let totalDir = 0;
         let totalDist = 0;
-
         mine.forEach(p => {
           const dir = p.type === 'BUY' ? 1 : -1;
           const target = p.tp ? p.tp : (p.type === 'BUY' ? q.b * 1.002 : q.b * 0.998); 
           const dist = Math.abs(target - q.b) / q.b;
-          
           totalDir += dir;
           totalDist += dist;
         });
@@ -1272,8 +1280,9 @@ function rSet() {
     '<div class="sh">Branding</div>' +
     `<div class="si" data-c="upload"><div class="st"><b>Upload Broker Logo</b><small>Change the icon shown in the accounts section</small></div><span class="sv">Select</span><input type="file" id="logoUpload" accept="image/*" style="display:none"></div>` +
     '<div class="sh">Simulation Tools</div>' +
-    `<div class="si" data-c="trend"><div class="st"><b>Market Direction</b><small>Force the simulated price to trend</small></div><span class="sv">${S.trend}</span></div>` +
-    `<div class="si" data-c="deposit"><div class="st"><b>Deposit Funds</b><small>Add money to simulated account</small></div><span class="sv">Add</span></div>`;
+    `<div class="si" data-c="trend"><div class="st"><b>Market Direction</b><small>Force simulated market structure</small></div><span class="sv">${S.trend}</span></div>` +
+    `<div class="si" data-c="deposit"><div class="st"><b>Deposit Funds</b><small>Add money to simulated account</small></div><span class="sv">Add</span></div>` +
+    `<div class="si" data-c="reset_bal"><div class="st"><b>Reset Balance</b><small>Set account balance to 0.00</small></div><span class="sv">Reset</span></div>`;
 }
 let wakeLock = null;
 function applyWake() {
@@ -1590,6 +1599,12 @@ $('#sc-settings').onclick = e => {
         if (S.tab === 'history') rHist(); if (S.tab === 'trade') rTrade(); if (S.tab === 'acc') rAcc();
       };
     });
+  }
+  else if (c === 'reset_bal') {
+    if (confirm('Are you sure you want to reset the balance to 0.00? This will wipe current balance but keep history.')) {
+      ACC.bal = 0; save(); syncState(); toast('Balance reset');
+      if (S.tab === 'trade') rTrade(); if (S.tab === 'history') rHist(); if (S.tab === 'acc') rAcc();
+    }
   }
   else if (c === 'otp') toast('OTP is not available');
   else if (c === 'upload') { $('#logoUpload').click(); }
