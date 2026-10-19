@@ -440,9 +440,11 @@ const S = {
   lot:.01, adapter:'Simulated', conf:1, noConf:0, acct:1, aod:1, slip:10, sound:1, vib:1,
   syms:Object.keys(SY).slice(0, 11), endpoint:'', key:'',
   // chart viewport: vis = bars across the screen, off = bars scrolled back (negative = empty space on the right)
-  vis:60, off:0, pm:0, pr:0, manualPr:false, v:4
+  vis:60, off:0, pm:0, pr:0, manualPr:false, v:4,
+  trend: 'Random', // 'Random', 'Bullish', 'Bearish'
+  deposits: [] // Track deposits
 };
-const SAVE = ['sym','tf','type','grid','ohlc','vol','bid','ask','last','note','dw','v','scheme','tfs','col','adv','osound','oct','vibm','ring','adl','lock','pin','lang','news','theme','tabl','sep','pos','ord','sltp','hist','ocPos','oc','ind','filter','lot','adapter','conf','slip','sound','vib','syms','endpoint','key','vis','noConf','acct','aod','vibm','adl'];
+const SAVE = ['sym','tf','type','grid','ohlc','vol','bid','ask','last','note','dw','v','scheme','tfs','col','adv','osound','oct','vibm','ring','adl','lock','pin','lang','news','theme','tabl','sep','pos','ord','sltp','hist','ocPos','oc','ind','filter','lot','adapter','conf','slip','sound','vib','syms','endpoint','key','vis','noConf','acct','aod','vibm','adl','trend','deposits'];
 
 let ACC = { bal: 0.52 }, POS = [], DL = [], ORD = [];
 let P = {};            // live prices  {sym:{b,o,hi,lo,t}}
@@ -467,6 +469,7 @@ function save() {
     S.syms = S.syms.filter(s => SY[s]);
     if (!Array.isArray(S.tfs) || !S.tfs.length) S.tfs = [...DEFAULT_TFS];
     if (!TFS[S.tf]) S.tf = 'H1';
+    if (!Array.isArray(S.deposits)) S.deposits = [];
   } catch (e) {}
 })();
 
@@ -479,7 +482,7 @@ async function syncState() {
 }
 
 /* ---------- 3. MARKET DATA ---------- */
-// Smart Money Bias Engine
+// Smart Money Bias Engine (Overridden by trend setting)
 const BIAS = { 
   on: true, 
   strength: 0.65,   // Probability of the tick going in your direction (0.5 = 50/50, 0.9 = 90% win rate per tick)
@@ -490,47 +493,41 @@ function stepPrice(s) {
   const c = SY[s], q = P[s];
   let r = c.v * .08 * gauss();
 
-  if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
+  // --- MANUAL TREND OVERRIDE ---
+  if (S.trend === 'Bullish') {
+    r = Math.abs(r) * 1.5 + (c.v * 0.05);
+  } else if (S.trend === 'Bearish') {
+    r = -Math.abs(r) * 1.5 - (c.v * 0.05);
+  } else {
+    // --- SMART MONEY BIAS (Only runs if trend is Random) ---
+    if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
+    if (BIAS.on) {
+      const mine = POS.filter(p => p.sym === s);
+      if (mine.length) {
+        let totalDir = 0;
+        let totalDist = 0;
 
-  // --- SMART MONEY BIAS ---
-  if (BIAS.on) {
-    const mine = POS.filter(p => p.sym === s);
-    if (mine.length) {
-      // We average the directional needs of all open positions on this symbol
-      let totalDir = 0;
-      let totalDist = 0;
+        mine.forEach(p => {
+          const dir = p.type === 'BUY' ? 1 : -1;
+          const target = p.tp ? p.tp : (p.type === 'BUY' ? q.b * 1.002 : q.b * 0.998); 
+          const dist = Math.abs(target - q.b) / q.b;
+          
+          totalDir += dir;
+          totalDist += dist;
+        });
 
-      mine.forEach(p => {
-        const dir = p.type === 'BUY' ? 1 : -1;
-        // If no TP, we just aim slightly in the profit direction
-        const target = p.tp ? p.tp : (p.type === 'BUY' ? q.b * 1.002 : q.b * 0.998); 
-        
-        // Calculate distance as a percentage
-        const dist = Math.abs(target - q.b) / q.b;
-        
-        totalDir += dir;
-        totalDist += dist;
-      });
-
-      if (totalDir !== 0) {
-        const avgDir = Math.sign(totalDir);
-        const avgDist = totalDist / mine.length;
-
-        // The closer we get to the target, the stronger the pull (forces TP hit)
-        // But if we are far away, we allow more noise and pullbacks.
-        const proximity = clamp(1 - (avgDist * 100), 0.2, 1.0); 
-        
-        // MASSIVE FIX: Instead of a straight line, we use a probability roll
-        const roll = Math.random();
-        
-        if (roll < BIAS.strength * proximity) {
-          // WIN TICK: Force price in trade direction
-          r += avgDir * (c.v * 0.4);
-        } else if (roll > 1 - BIAS.pullback) {
-          // PULLBACK TICK: Force price AGAINST trade direction (Creates the red candles in an uptrend)
-          r -= avgDir * (c.v * 0.6);
-        } 
-        // If roll is between (strength+proximity) and (1-pullback), we just let the random noise happen.
+        if (totalDir !== 0) {
+          const avgDir = Math.sign(totalDir);
+          const avgDist = totalDist / mine.length;
+          const proximity = clamp(1 - (avgDist * 100), 0.2, 1.0); 
+          const roll = Math.random();
+          
+          if (roll < BIAS.strength * proximity) {
+            r += avgDir * (c.v * 0.4);
+          } else if (roll > 1 - BIAS.pullback) {
+            r -= avgDir * (c.v * 0.6);
+          } 
+        }
       }
     }
   }
@@ -594,7 +591,6 @@ const cands = () => {
     const saved = JSON.parse(localStorage.getItem('mt5_candles_' + key) || 'null');
     if (saved && Array.isArray(saved) && saved.length > 10) {
       const m = TFS[S.tf] * 6e4, lastT = saved[saved.length - 1].t;
-      // If the last candle is older than 3 timeframes, market "moved while away" - rebuild
       if (Date.now() - lastT < m * 3) { CD[key] = saved; return saved; }
     }
   } catch (e) {}
@@ -611,21 +607,19 @@ function persistCandles(key) {
   } catch (e) { /* quota - fail silently */ }
 }
 
-// Candles are closed by the clock, not by tick count: when a timeframe period ends the
-// forming candle is frozen (final close) and a new one opens at that close.
 function updateCandles() {
   const now = Date.now();
   for (const key in CD) {
     const [s, tf] = key.split('|'), m = TFS[tf] * 6e4, a = CD[key], b = P[s].b;
     const bucket = Math.floor(now / m) * m;
     let cur = a[a.length - 1];
-    if (bucket - cur.t > m * CONFIG.maxCandles) { delete CD[key]; continue; }   // long sleep: rebuild
+    if (bucket - cur.t > m * CONFIG.maxCandles) { delete CD[key]; continue; }
     while (cur.t + m <= bucket) {
       const prevClose = cur.c;
       cur = { t: cur.t + m, o: prevClose, h: prevClose, l: prevClose, c: prevClose, v: 0 };
       a.push(cur);
       if (a.length > CONFIG.maxCandles) a.shift();
-      if (key === curKey() && S.off > 0) S.off++;     // keep the view anchored while scrolled back
+      if (key === curKey() && S.off > 0) S.off++;
     }
     cur.c = b; cur.h = Math.max(cur.h, b); cur.l = Math.min(cur.l, b); cur.v++;
   }
@@ -677,7 +671,6 @@ function draw() {
   const sy = S.sym, dg = SY[sy].d, m = TFS[S.tf] * 60000, AX = CONFIG.axisW;
   const PW = W - AX, PH = H - 18, bw = PW / S.vis;
 
-  // viewport: idxR = (fractional) index of the candle slot at the right edge
   S.off = clamp(S.off, -(S.vis - 3), n - 3);
   const idxR = n - 1 - S.off;
   const xi = i => PW - (idxR - i) * bw - bw / 2;
@@ -685,7 +678,6 @@ function draw() {
   const timeAt = i => a[clamp(Math.round(i), 0, n - 1)].t + Math.max(0, Math.round(i) - (n - 1)) * m;
   const hi = Math.min(n - 1, Math.floor(idxR + .5)), lo = Math.max(0, Math.floor(idxR - PW / bw) - 1);
 
-  // price range (auto-fit unless the user has moved/zoomed the price axis)
   const bb = S.ind.bb ? bollinger(a) : null;
   let mn = 1e18, mx = -1e18, vm = 1;
   for (let i = lo; i <= hi; i++) {
@@ -700,19 +692,17 @@ function draw() {
   const y = p => PH * (1 - (p - vmn) / (vmx - vmn));
   const light = S.theme === 'Light';
   const kx = Math.max(1, Math.round(PW * .0667 / bw));
-  const kl = kx * Math.max(1, Math.ceil(80 / (kx * bw)));   // label step: >= 80px apart, multiple of grid step
+  const kl = kx * Math.max(1, Math.ceil(80 / (kx * bw)));
 
   g.fillStyle = C.bg; g.fillRect(0, 0, W, H);
   g.font = '9.5px Roboto,Arial,sans-serif'; g.textBaseline = 'middle';
 
-  // grid
   if (S.grid) {
     g.strokeStyle = C.grid; g.lineWidth = 1; g.setLineDash([5, 4]); g.beginPath();
     for (let i = 1; i < GN; i++) { const yy = Math.round(PH * i / GN) + .5; g.moveTo(0, yy); g.lineTo(PW, yy); }
     for (let i = lo; i <= hi; i++) if (i % kx === 0) { const x = Math.round(xi(i)) + .5; g.moveTo(x, 0); g.lineTo(x, PH); }
     g.stroke(); g.setLineDash([]);
   }
-  // period separators
   if (S.sep) {
     g.strokeStyle = C.sep; g.setLineDash([2, 3]); g.beginPath();
     for (let i = lo + 1; i <= hi; i++) {
@@ -722,12 +712,10 @@ function draw() {
     }
     g.stroke(); g.setLineDash([]);
   }
-  // volumes
   if (S.vol) for (let i = lo; i <= hi; i++) {
     const c = a[i], h = PH * .14 * c.v / vm;
     g.fillStyle = C.volc + '88'; g.fillRect(xi(i) - bw * .32, PH - h, Math.max(1, bw * .64), h);
   }
-  // price series
   if (S.type === 2) {
     g.strokeStyle = C.line; g.lineWidth = 1.5; g.beginPath();
     for (let i = lo; i <= hi; i++) i === lo ? g.moveTo(xi(i), y(a[i].c)) : g.lineTo(xi(i), y(a[i].c));
@@ -749,7 +737,6 @@ function draw() {
       }
     }
   }
-  // indicators
   const line = (arr, col) => {
     g.strokeStyle = col; g.beginPath(); let first = 1;
     for (let i = lo; i <= hi; i++) if (isFinite(arr[i])) { first ? g.moveTo(xi(i), y(arr[i])) : g.lineTo(xi(i), y(arr[i])); first = 0; }
@@ -760,10 +747,9 @@ function draw() {
   if (S.ind.sma20) line(sma(a, 20), '#4DD0E1');
   if (bb) { line(bb.u, '#7E57C2'); line(bb.m, '#7E57C288'); line(bb.l, '#7E57C2'); }
 
-  // trade levels
   const tags = [];
   const hline = (p, col, label, tcol, dash, tag) => {
-    const yy = clamp(y(p), 8, PH - 8);     // pinned to the edge when the price is scrolled out of view
+    const yy = clamp(y(p), 8, PH - 8);
     g.strokeStyle = col; g.setLineDash(dash || [5, 3]); g.beginPath(); g.moveTo(0, yy); g.lineTo(PW, yy); g.stroke(); g.setLineDash([]);
     g.fillStyle = tcol || col; g.textAlign = 'left'; g.font = '9.5px Roboto,Arial,sans-serif'; g.fillText(label, 6, yy - 6);
     if (tag) tags.push({ yy, col, txt: fm(sy, p) });
@@ -777,12 +763,10 @@ function draw() {
     hline(o.price, '#2962FF', o.kind.toUpperCase() + ' ' + o.vol.toFixed(2));
     if (o.price >= vmn && o.price <= vmx) { g.fillStyle = '#2962FF'; g.beginPath(); g.arc(PW - 15, y(o.price), 6, 0, 7); g.fill(); }
   });
-  // bid / ask lines
   const b = P[sy].b, by = clamp(y(b), 8, PH - 8);
   if (S.bid) { g.strokeStyle = C.bidc; g.beginPath(); g.moveTo(0, by); g.lineTo(PW, by); g.stroke(); }
   if (S.ask) { const ayy = clamp(y(b + SY[sy].sp), 8, PH - 8); g.strokeStyle = C.askc; g.beginPath(); g.moveTo(0, ayy); g.lineTo(PW, ayy); g.stroke(); }
 
-  // axes
   g.fillStyle = C.bg; g.fillRect(PW, 0, AX, H);
   g.strokeStyle = light ? '#888' : '#4a4a4a';
   g.beginPath(); g.moveTo(PW + .5, 0); g.lineTo(PW + .5, H); g.moveTo(0, PH + .5); g.lineTo(PW, PH + .5); g.stroke();
@@ -797,7 +781,6 @@ function draw() {
     g.strokeStyle = t.col; g.lineWidth = 1; g.strokeRect(PW + 2.5, t.yy - 7.5, AX - 5, 15);
     g.fillStyle = t.col; g.font = '9.5px Roboto,Arial,sans-serif'; g.textAlign = 'center'; g.fillText(t.txt, PW + AX / 2, t.yy);
   });
-  // current price tag + candle countdown
   const rem = Math.ceil((m - Date.now() % m) / 1e3);
   const cd = rem >= 3600 ? Math.floor(rem / 3600) + ':' + p2(Math.floor(rem % 3600 / 60)) + ':' + p2(rem % 60) : p2(Math.floor(rem / 60)) + ':' + p2(rem % 60);
   if (S.ask) {
@@ -810,7 +793,6 @@ function draw() {
   g.fillStyle = '#fff'; g.font = 'bold 9.5px Roboto,Arial,sans-serif';
   g.fillText(fm(sy, b), PW + AX / 2, by - 5.5); g.fillText(cd, PW + AX / 2, by + 5.5);
 
-  // header
   g.textAlign = 'left'; g.font = 'bold 11px Roboto,Arial,sans-serif'; g.fillStyle = '#4D9DFF';
   g.fillText(sy + ' ▾', 6, 11);
   const sw = g.measureText(sy + ' ▾').width;
@@ -823,7 +805,6 @@ function draw() {
     g.fillText('O ' + fm(sy, c.o) + '  H ' + fm(sy, c.h) + '  L ' + fm(sy, c.l) + '  C ' + fm(sy, c.c), 6, 35);
   }
 
-  // measuring tool
   if (S.cross && cx != null && ax != null && (Math.abs(cx - ax) > 2 || Math.abs(cy - ay) > 2)) {
     const pa = vmn + (vmx - vmn) * (1 - ay / PH), pb = vmn + (vmx - vmn) * (1 - cy / PH), df = pb - pa;
     const nb = Math.abs(Math.round(idxAt(cx)) - Math.round(idxAt(ax))), mi = nb * TFS[S.tf];
@@ -838,7 +819,6 @@ function draw() {
     g.fillStyle = '#222'; g.textAlign = 'left'; g.font = 'bold 9.5px Roboto,Arial,sans-serif';
     g.fillText(t1, tx + 5, ty + 9); g.fillText(t2, tx + 5, ty + 23);
   }
-  // crosshair
   if (S.cross && cx != null) {
     g.strokeStyle = C.tx; g.setLineDash([3, 3]); g.beginPath();
     g.moveTo(cx, 0); g.lineTo(cx, PH); g.moveTo(0, cy); g.lineTo(PW, cy); g.stroke(); g.setLineDash([]);
@@ -860,7 +840,6 @@ cv.onpointerdown = e => {
   ptr.set(e.pointerId, e);
   const r = cv.getBoundingClientRect(), x = e.clientX - r.left, yy = e.clientY - r.top;
 
-  // grab a pending-order handle
   let hit = null;
   ORD.filter(o => o.state === 'Placed' && o.sym === S.sym).forEach(o => {
     const oy = (H - 18) * (1 - (o.price - VM.mn) / (VM.mx - VM.mn));
@@ -888,7 +867,6 @@ cv.onpointermove = e => {
   const r = cv.getBoundingClientRect(), PW = W - CONFIG.axisW, PH = H - 18, bw = PW / S.vis;
   if (!drag) return;
 
-  // drag on the price scale = stretch/shrink price range
   if (drag.ax) {
     e.preventDefault();
     S.manualPr = true;
@@ -896,7 +874,6 @@ cv.onpointermove = e => {
     S.pm = drag.pm + (e.clientX - drag.x) * (S.pr / PW);
     draw(); return;
   }
-  // two fingers = zoom time (or price if on the axis)
   if (ptr.size === 2 && drag.v) {
     const [p, q] = [...ptr.values()], d = Math.hypot(p.clientX - q.clientX, p.clientY - q.clientY) || 1;
     if ((p.clientX - r.left) > W - 100 || (q.clientX - r.left) > W - 100) { S.pr = Math.max(1e-9, drag.pr0 * (pd0 / d)); S.manualPr = true; }
@@ -905,17 +882,15 @@ cv.onpointermove = e => {
   }
   if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) drag.mv = 1;
 
-  // moving a pending order
   if (drag.order) {
     drag.order.price = drag.startPr - (e.clientY - drag.startY) * (S.pr / PH);
     draw(); return;
   }
   if (S.cross) { cx = e.clientX - r.left; cy = e.clientY - r.top; draw(); return; }
 
-  // FREE PAN: any direction. Horizontal = time, vertical = price (locks auto-fit once you drag vertically).
   if (drag.mv) {
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-    S.off = drag.off + dx / bw;                         // smooth, not snapped to whole candles
+    S.off = drag.off + dx / bw;
     if (S.manualPr || Math.abs(dy) > 8) {
       S.manualPr = true;
       S.pr = drag.pr > 0 ? drag.pr : (VM.mx - VM.mn);
@@ -1128,7 +1103,6 @@ function uQuotes() {
     r.querySelector('.qt').textContent = new Date(q.t).toTimeString().slice(0, 8) + ' ⊨ ' + Math.round(SY[s].sp * 10 ** d);
     const bd = r.querySelector('.qb'), ak = r.querySelector('.qa');
     bd.innerHTML = priceHTML(s, q.b); ak.innerHTML = priceHTML(s, q.b + SY[s].sp);
-    // same behaviour as the SELL/BUY buttons: colours flip with the last tick direction
     const up = (q.dir || -1) > 0, BLUE = S.theme === 'Light' ? '#1a73e8' : '#4C8DF6', RED = S.theme === 'Light' ? '#d93025' : '#EF5350';
     bd.style.color = up ? BLUE : RED; ak.style.color = up ? RED : BLUE;
     r.querySelector('.qh').innerHTML = '<span>L: ' + nsp(fm(s, q.lo)) + '</span><span>H: ' + nsp(fm(s, q.hi)) + '</span>';
@@ -1213,7 +1187,8 @@ function rHist() {
   if (hv === 'POSITIONS') {
     const L = sortBy(DL.filter(d => inRange(d.ct) && symOk(d)), { Symbol: o => o.sym, Deal: o => o.id, Type: o => o.type, Volume: o => o.vol, Time: o => o.ct, Profit: o => o.pnl });
     const tp = L.reduce((a, d) => a + d.pnl, 0);
-    sum = kd('Profit:', f2(tp), pc(tp)) + kd('Deposit:', '0.00') + kd('Swap:', '0.00') + kd('Commission:', '0.00') + kd('Balance:', f2(tp), pc(tp));
+    const totalDep = S.deposits.filter(d => inRange(d.time)).reduce((a, d) => a + d.amount, 0);
+    sum = kd('Profit:', f2(tp), pc(tp)) + kd('Deposit:', f2(totalDep)) + kd('Swap:', '0.00') + kd('Commission:', '0.00') + kd('Balance:', f2(tp + totalDep), pc(tp + totalDep));
     h = L.map(d => `<div class='tr'><div><div class='t1'><b>${d.sym}</b>, <span class='${tc(d.type)}'>${d.type.toLowerCase()} ${d.vol.toFixed(2)}</span></div><div class='t2'>${nsp(fm(d.sym, d.open))} → ${nsp(fm(d.sym, d.close))}</div></div><div class='r2'>${fdt(d.ct)}<b class='${pc(d.pnl)}'>${f2(d.pnl)}</b></div></div>`).join('');
   } else if (hv === 'ORDERS') {
     const L = sortBy(ORD.filter(o => inRange(o.time) && symOk(o)), { Symbol: o => o.sym, Deal: o => o.id, Type: o => o.type, Volume: o => o.vol, Time: o => o.time, Profit: () => 0 });
@@ -1226,10 +1201,16 @@ function rHist() {
       D.push({ id: d.id, sym: d.sym, type: d.type, vol: d.vol, price: d.open, t: d.ot, dir: 'in', pl: 0 });
       D.push({ id: d.id + .5, sym: d.sym, type: d.type === 'BUY' ? 'SELL' : 'BUY', vol: d.vol, price: d.close, t: d.ct, dir: 'out', pl: d.pnl });
     });
+    // Add Deposits to Deals list
+    S.deposits.forEach(d => {
+       D.push({ id: 'dep'+d.time, sym: 'Balance', type: 'DEPOSIT', vol: 0, price: d.amount, t: d.time, dir: 'in', pl: 0, isDep: true });
+    });
+
     const L = sortBy(D.filter(d => inRange(d.t) && symOk(d)), { Symbol: o => o.sym, Deal: o => o.id, Type: o => o.type, Volume: o => o.vol, Time: o => o.t, Profit: o => o.pl });
     const pf = L.reduce((a, d) => a + d.pl, 0);
-    sum = kd('Profit:', f2(pf), pc(pf)) + kd('Deposit:', '0.00') + kd('Swap:', '0.00') + kd('Commission:', '0.00');
-    h = L.map(d => `<div class='tr'><div><div class='t1'><b>${d.sym}</b>, <span class='${tc(d.type)}'>${d.type.toLowerCase()}, ${d.dir}</span></div><div class='t2'>${d.vol.toFixed(2)} at ${nsp(fm(d.sym, d.price))}</div></div><div class='r2'>${fdt(d.t)}${d.dir === 'out' ? `<b class='${pc(d.pl)}'>${f2(d.pl)}</b>` : ''}</div></div>`).join('');
+    const totalDep = S.deposits.filter(d => inRange(d.time)).reduce((a, d) => a + d.amount, 0);
+    sum = kd('Profit:', f2(pf), pc(pf)) + kd('Deposit:', f2(totalDep)) + kd('Swap:', '0.00') + kd('Commission:', '0.00');
+    h = L.map(d => `<div class='tr'><div><div class='t1'><b>${d.sym}</b>, <span class='${d.isDep ? 'bl' : tc(d.type)}'>${d.type.toLowerCase()}, ${d.dir}</span></div><div class='t2'>${d.isDep ? d.price.toFixed(2) + ' USD' : d.vol.toFixed(2) + ' at ' + nsp(fm(d.sym, d.price))}</div></div><div class='r2'>${fdt(d.t)}${d.dir === 'out' && !d.isDep ? `<b class='${pc(d.pl)}'>${f2(d.pl)}</b>` : ''}</div></div>`).join('');
   }
   $('#sc-history').innerHTML = '<div class="tabs">' + ['POSITIONS', 'ORDERS', 'DEALS'].map(t => `<div class="${t === hv ? 'on' : ''}">${t}</div>`).join('') + '</div><div class="sumb">' + sum + '</div><div style="border-top:1px solid #333">' + (h || EMPTY) + '</div>';
 }
@@ -1277,7 +1258,7 @@ function rSet() {
     tx('ring', 'Notification ringtone', 'Cosmic Radio') +
     tx('adl', 'Content auto-download', S.adl) +
     '<div class="sh">Security</div>' +
-    tx('otp', 'OTP', 'One-time Password Generator') +
+    tx('otp', 'OTP', 'One-Time Password Generator') +
     cb('lock', 'Lock Screen', 'Lock screen when the app is hidden and request pin or biometrics on start') +
     '<div class="sh">News</div>' +
     cb('news', 'Enable News', 'Receive news updates') +
@@ -1289,7 +1270,10 @@ function rSet() {
     '<div class="sh">Data</div>' +
     tx('reset', 'Reset local data', 'Delete saved settings, positions and history on this device') +
     '<div class="sh">Branding</div>' +
-    `<div class="si" data-c="upload"><div class="st"><b>Upload Broker Logo</b><small>Change the icon shown in the accounts section</small></div><span class="sv">Select</span><input type="file" id="logoUpload" accept="image/*" style="display:none"></div>`;
+    `<div class="si" data-c="upload"><div class="st"><b>Upload Broker Logo</b><small>Change the icon shown in the accounts section</small></div><span class="sv">Select</span><input type="file" id="logoUpload" accept="image/*" style="display:none"></div>` +
+    '<div class="sh">Simulation Tools</div>' +
+    `<div class="si" data-c="trend"><div class="st"><b>Market Direction</b><small>Force the simulated price to trend</small></div><span class="sv">${S.trend}</span></div>` +
+    `<div class="si" data-c="deposit"><div class="st"><b>Deposit Funds</b><small>Add money to simulated account</small></div><span class="sv">Add</span></div>`;
 }
 let wakeLock = null;
 function applyWake() {
@@ -1593,6 +1577,20 @@ $('#sc-settings').onclick = e => {
   } else if (c === 'theme') { S.theme = S.theme === 'Dark' ? 'Light' : 'Dark'; save(); applyScheme(); rSet(); }
   else if (c === 'vib') { S.vibm = cyc(['Always', 'Silent mode only', 'Never'], S.vibm); S.vib = S.vibm === 'Never' ? 0 : 1; save(); rSet(); }
   else if (c === 'adl') { S.adl = cyc(['Always', 'Wi-Fi only', 'Never'], S.adl); save(); rSet(); }
+  else if (c === 'trend') { S.trend = cyc(['Random', 'Bullish', 'Bearish'], S.trend); save(); rSet(); }
+  else if (c === 'deposit') {
+    sheet(`<h3>Add Funds</h3><div class="fld"><span>Amount (USD)</span><input id="depAmt" type="number" step="10" min="1" placeholder="1000"></div><button class="go" id="depBtn" style="background:var(--bl)">Deposit</button>`, (sh, cl) => {
+      sh.querySelector('#depBtn').onclick = () => {
+        const amt = parseFloat($('#depAmt').value);
+        if (!(amt > 0)) return toast('Invalid amount');
+        ACC.bal += amt;
+        if (!S.deposits) S.deposits = [];
+        S.deposits.push({ amount: amt, time: Date.now() });
+        save(); syncState(); cl(); toast('Deposited ' + f2(amt) + ' USD');
+        if (S.tab === 'history') rHist(); if (S.tab === 'trade') rTrade(); if (S.tab === 'acc') rAcc();
+      };
+    });
+  }
   else if (c === 'otp') toast('OTP is not available');
   else if (c === 'upload') { $('#logoUpload').click(); }
   else if (c === 'reset' && confirm('Delete all local data?')) { localStorage.clear(); location.reload(); }
@@ -1624,6 +1622,7 @@ async function boot() {
     if (local.ACC) { ACC = local.ACC; POS = local.POS || []; DL = local.DL || []; ORD = local.ORD || []; }
     fixIds();
     if (!ACC || !ACC.bal) ACC = { bal: 0.52 };
+    if (!Array.isArray(S.deposits)) S.deposits = [];
     resetView();
     if (!SY[S.sym]) S.sym = 'XAUUSD.vx';
 
@@ -1676,7 +1675,6 @@ async function boot() {
       if (!CONFIG.cloudUrl) throw 0;
       const res = await fetch(`${CONFIG.cloudUrl}?user=${CONFIG.userId}`);
       const cloud = await res.json();
-      // only take the cloud copy if it is NEWER than this device's copy (stale cloud data used to bring closed trades back)
       if (cloud && cloud.ACC && ((cloud.ts || 0) > localTs || !hadLocal)) {
         ACC = cloud.ACC; POS = cloud.POS || []; DL = cloud.DL || []; ORD = cloud.ORD || [];
         fixIds();
