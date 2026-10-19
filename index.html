@@ -349,7 +349,7 @@ const CONFIG = {
   chatTitle: 'Messages',
   mqid: '00000000',
   account: {
-    name: 'MAXWEL KIPRONO YEGON', company: 'Valetax Global Limited', login: '501148369', server: 'ValetaxGlobalLive3',
+    name: 'ISAAC KIBET', company: 'Valetax Global Limited', login: '501148369', server: 'ValetaxGlobalLive3',
     host: 'valetax-mt5live3-ld2, Hedge', others: []
   }
 };
@@ -482,13 +482,6 @@ async function syncState() {
 }
 
 /* ---------- 3. MARKET DATA ---------- */
-// Smart Money Bias Engine (Overridden by trend setting)
-const BIAS = { 
-  on: true, 
-  strength: 0.65,   
-  pullback: 0.15    
-};
-
 function stepPrice(s) {
   const c = SY[s], q = P[s];
   
@@ -498,46 +491,14 @@ function stepPrice(s) {
   // --- STRUCTURAL TREND OVERRIDE ---
   if (S.trend === 'Bullish') {
     // A smooth, constant upward drift combined with normal volatility.
-    // This creates natural swings where the lows are higher than the previous lows (HL),
-    // and the highs are higher than the previous highs (HH).
     const drift = c.v * 0.06; 
     r = (Math.abs(r) * (Math.random() > 0.35 ? 1 : -0.6)) + drift; 
   } else if (S.trend === 'Bearish') {
     // A smooth, constant downward drift combined with normal volatility.
-    // Creates LH and LL naturally without being aggressive.
     const drift = -c.v * 0.06;
     r = (Math.abs(r) * (Math.random() > 0.35 ? 1 : -0.6)) + drift;
-  } else {
-    // --- SMART MONEY BIAS (Only runs if trend is Random) ---
-    if (Math.random() < .01) r += c.v * (Math.random() - .5) * 1.2;
-    if (BIAS.on) {
-      const mine = POS.filter(p => p.sym === s);
-      if (mine.length) {
-        let totalDir = 0;
-        let totalDist = 0;
-        mine.forEach(p => {
-          const dir = p.type === 'BUY' ? 1 : -1;
-          const target = p.tp ? p.tp : (p.type === 'BUY' ? q.b * 1.002 : q.b * 0.998); 
-          const dist = Math.abs(target - q.b) / q.b;
-          totalDir += dir;
-          totalDist += dist;
-        });
-
-        if (totalDir !== 0) {
-          const avgDir = Math.sign(totalDir);
-          const avgDist = totalDist / mine.length;
-          const proximity = clamp(1 - (avgDist * 100), 0.2, 1.0); 
-          const roll = Math.random();
-          
-          if (roll < BIAS.strength * proximity) {
-            r += avgDir * (c.v * 0.4);
-          } else if (roll > 1 - BIAS.pullback) {
-            r -= avgDir * (c.v * 0.6);
-          } 
-        }
-      }
-    }
   }
+  // (Smart Money Bias has been completely removed so open trades do not affect price)
 
   const prev = q.b;
   q.b *= Math.exp(r);
