@@ -482,6 +482,19 @@ async function syncState() {
 }
 
 /* ---------- 3. MARKET DATA ---------- */
+let realPriceCache = {};
+
+async function fetchRealPrice(s) {
+  // Use biquote for real-world prices (Gold, Forex, etc.)
+  try {
+    const res = await fetch(`https://biquote.io/api/v1/tick?symbol=${s.replace('.vx','')}`);
+    const data = await res.json();
+    // biquote uses `mid` for the price
+    if (data && data.mid) return parseFloat(data.mid);
+  } catch (e) { console.log('Price fetch failed, using simulated'); }
+  return null;
+}
+
 function stepPrice(s) {
   const c = SY[s], q = P[s];
   
@@ -490,15 +503,12 @@ function stepPrice(s) {
 
   // --- STRUCTURAL TREND OVERRIDE ---
   if (S.trend === 'Bullish') {
-    // A smooth, constant upward drift combined with normal volatility.
     const drift = c.v * 0.06; 
     r = (Math.abs(r) * (Math.random() > 0.35 ? 1 : -0.6)) + drift; 
   } else if (S.trend === 'Bearish') {
-    // A smooth, constant downward drift combined with normal volatility.
     const drift = -c.v * 0.06;
     r = (Math.abs(r) * (Math.random() > 0.35 ? 1 : -0.6)) + drift;
   }
-  // (Smart Money Bias has been completely removed so open trades do not affect price)
 
   const prev = q.b;
   q.b *= Math.exp(r);
