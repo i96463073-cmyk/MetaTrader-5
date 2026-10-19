@@ -482,19 +482,6 @@ async function syncState() {
 }
 
 /* ---------- 3. MARKET DATA ---------- */
-let realPriceCache = {};
-
-async function fetchRealPrice(s) {
-  // Use biquote for real-world prices (Gold, Forex, etc.)
-  try {
-    const res = await fetch(`https://biquote.io/api/v1/tick?symbol=${s.replace('.vx','')}`);
-    const data = await res.json();
-    // biquote uses `mid` for the price
-    if (data && data.mid) return parseFloat(data.mid);
-  } catch (e) { console.log('Price fetch failed, using simulated'); }
-  return null;
-}
-
 function stepPrice(s) {
   const c = SY[s], q = P[s];
   
