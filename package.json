@@ -1,14 +1,16 @@
+
 {
-  "name": "valetax-multi-app",
+  "name": "valetax-simulator",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "build:all": "npx cap add android || true && node build.js"
+    "build": "mkdir -p www && cp valetax.html www/index.html"
   },
   "dependencies": {
-    "@capacitor/android": "^5.0.0",
-    "@capacitor/core": "^5.0.0"
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^5.0.0"
+    "@capacitor/cli": "^7.4.3"
   }
 }
