@@ -1,0 +1,39 @@
+name: Build 3 Android APKs
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # Allows you to click a button to run it manually
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build All 3 Apps
+        run: npm run build:all
+
+      - name: Upload All 3 APKs
+        uses: actions/upload-artifact@v3
+        with:
+          name: Valetax-Multi-APKs
+          path: android/app/build/outputs/apk/debug/*.apk
