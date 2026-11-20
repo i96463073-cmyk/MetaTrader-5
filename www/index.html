@@ -246,66 +246,73 @@ function cs() { $('#ov').classList.remove('o'); }
 
 async function syncData() {
     try {
-        console.log(`[Sync] Fetching balance for account ${A[0].id}...`);
-        const response = await fetch(`${API_BASE_URL}/api/sync?account=${A[0].id}`);
-        
-        if(response.ok) {
-            const data = await response.json();
-            console.log(`[Sync] Received data from backend:`, data);
-            
-            // If the backend returns a string instead of a number, parse it
-            const newBalance = Number(data.balance);
-            
-            if (!isNaN(newBalance)) {
-                A[0].b = newBalance;
-                totalFunds = A[0].b + A[1].b;
-                console.log(`[Sync] Updated local balance to: $${A[0].b}`);
-            } else {
-                console.warn(`[Sync] Backend did not return a valid balance number.`, data);
-            }
-            
-            if (data.transactions && data.transactions.length > 0) {
-                globalTx = data.transactions;
-            }
-            
-            if(S.v === 'home' || S.v === 'funds') { render(); }
-        } else {
-            console.error(`[Sync] Backend returned error status: ${response.status}`);
-        }
-    } catch(e) { 
-        console.error("[Sync] Network error connecting to backend:", e); 
-    }
-}
+        console.log('[Sync] Fetching both accounts from shared backend...');
 
-async function sendDepositToMT5(amountUSD) {
-    try {
-        toast('Contacting MT5 Server...');
-        console.log(`[Deposit] Sending request to ${API_BASE_URL}/api/deposit...`);
-        
-        const response = await fetch(`${API_BASE_URL}/api/deposit`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ accountId: A[0].id, amount: amountUSD, currency: 'USD' })
+        const results = await Promise.all(
+            A.map(async account => {
+                const response = await fetch(
+                    `${API_BASE_URL}/api/sync?account=${encodeURIComponent(account.id)}`
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        `Account ${account.id}: server error ${response.status}`
+                    );
+                }
+
+                return {
+                    accountId: account.id,
+                    data: await response.json()
+                };
+            })
+        );
+
+        // Update each account using the backend balance
+        results.forEach(result => {
+            const account = A.find(
+                a => a.id === result.accountId
+            );
+
+            if (account && result.data.balance !== undefined) {
+                const balance = Number(result.data.balance);
+
+                if (Number.isFinite(balance)) {
+                    account.b = balance;
+                }
+            }
         });
 
-        if (response.ok) {
-            const result = await response.json().catch(() => ({}));
-            console.log(`[Deposit] Server responded with success:`, result);
-            toast('Deposit successful!');
-            
-            // Wait 1 second for the MT5 bridge to process, then sync
-            setTimeout(syncData, 1000); 
-            go('funds');
-        } else {
-            const errText = await response.text();
-            console.error(`[Deposit] Server returned error ${response.status}:`, errText);
-            toast('Deposit failed. See console.');
+        // Recalculate total funds
+        totalFunds = A.reduce(
+            (sum, account) => sum + account.b,
+            0
+        );
+
+        // Display transactions from the first account
+        const firstAccount = results.find(
+            result => result.accountId === A[0].id
+        );
+
+        if (
+            firstAccount &&
+            Array.isArray(firstAccount.data.transactions)
+        ) {
+            globalTx = firstAccount.data.transactions;
         }
-    } catch (e) { 
-        console.error("[Deposit] Network error:", e);
-        toast('Network error during deposit'); 
+
+        console.log('[Sync] Both accounts updated:', A);
+        console.log('[Sync] Total funds:', totalFunds);
+
+        if (
+            ['home', 'funds', 'accounts', 'transfer'].includes(S.v)
+        ) {
+            render();
+        }
+
+    } catch (error) {
+        console.error('[Sync] Shared balance error:', error);
     }
-}
+            }
 
 syncData();
 setInterval(syncData, 15000);
